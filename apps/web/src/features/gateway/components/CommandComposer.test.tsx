@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from 'shadow-dom-testing-library';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { NextIntlClientProvider } from 'next-intl';
@@ -45,33 +46,36 @@ describe('CommandComposer', () => {
     );
     render(wrap(<CommandComposer />));
 
-    const box = screen.getByLabelText('Command JSON');
+    const box = await screen.findByShadowLabelText('Command JSON');
     await userEvent.type(box, '{{"action":"ping"}');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.click(screen.getByShadowRole('button', { name: 'Send' }));
 
     expect(fetchSpy).toHaveBeenCalled();
-    expect(await screen.findByLabelText('Command JSON')).toHaveValue('');
+    expect(await screen.findByShadowLabelText('Command JSON')).toHaveValue('');
   });
 
   it('rejects invalid JSON without calling the API (invalid)', async () => {
     const fetchSpy = vi.spyOn(global, 'fetch');
     render(wrap(<CommandComposer />));
 
-    await userEvent.type(screen.getByLabelText('Command JSON'), '{{not json');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.type(await screen.findByShadowLabelText('Command JSON'), '{{not json');
+    await userEvent.click(screen.getByShadowRole('button', { name: 'Send' }));
 
-    expect(await screen.findByText('Not valid JSON.')).toBeInTheDocument();
+    expect(await screen.findByShadowText('Not valid JSON.')).toBeInTheDocument();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('rejects an envelope without action (invalid)', async () => {
     render(wrap(<CommandComposer />));
 
-    await userEvent.type(screen.getByLabelText('Command JSON'), '{{"callsign":"ABC1234"}');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.type(
+      await screen.findByShadowLabelText('Command JSON'),
+      '{{"callsign":"ABC1234"}',
+    );
+    await userEvent.click(screen.getByShadowRole('button', { name: 'Send' }));
 
     expect(
-      await screen.findByText('The envelope needs at least an "action" string.'),
+      await screen.findByShadowText('The envelope needs at least an "action" string.'),
     ).toBeInTheDocument();
   });
 
@@ -79,9 +83,9 @@ describe('CommandComposer', () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(new Response('boom', { status: 500 }));
     render(wrap(<CommandComposer />));
 
-    await userEvent.type(screen.getByLabelText('Command JSON'), '{{"action":"ping"}');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.type(await screen.findByShadowLabelText('Command JSON'), '{{"action":"ping"}');
+    await userEvent.click(screen.getByShadowRole('button', { name: 'Send' }));
 
-    expect(await screen.findByText('Sending failed — try again.')).toBeInTheDocument();
+    expect(await screen.findByShadowText('Sending failed — try again.')).toBeInTheDocument();
   });
 });
