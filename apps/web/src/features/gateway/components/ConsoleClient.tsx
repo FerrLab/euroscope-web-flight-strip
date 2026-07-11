@@ -1,14 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card } from '@eurostrip/ui';
+import { Button, Card } from '@eurostrip/ui';
 import { useGatewayPoll } from '../useGatewayPoll';
 import { CommandComposer } from './CommandComposer';
+import { StructuredComposer } from './StructuredComposer';
 import { ConsoleStatusHeader } from './ConsoleStatusHeader';
 import { MessageFeed } from './MessageFeed';
 
+type ComposerMode = 'structured' | 'raw';
+
 export function ConsoleClient() {
   const t = useTranslations('gateway.console');
+  const [mode, setMode] = useState<ComposerMode>('structured');
   useGatewayPoll();
 
   return (
@@ -21,7 +26,20 @@ export function ConsoleClient() {
         <MessageFeed />
       </Card>
       <Card>
-        <CommandComposer />
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-end">
+            {mode === 'structured' ? (
+              <Button type="button" onClick={() => setMode('raw')}>
+                {t('toggle.raw')}
+              </Button>
+            ) : (
+              <Button type="button" onClick={() => setMode('structured')}>
+                {t('toggle.structured')}
+              </Button>
+            )}
+          </div>
+          {mode === 'structured' ? <StructuredComposer /> : <CommandComposer />}
+        </div>
       </Card>
     </main>
   );

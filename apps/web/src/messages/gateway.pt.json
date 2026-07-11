@@ -18,6 +18,42 @@
         "invalidJson": "JSON inválido.",
         "invalidEnvelope": "O envelope precisa de ao menos uma string \"action\".",
         "sendFailed": "Falha no envio — tente novamente."
+      },
+      "structured": {
+        "actionLabel": "Ação",
+        "callsignLabel": "Indicativo",
+        "selectPlaceholder": "Selecionar…",
+        "send": "Enviar",
+        "sendFailed": "Falha no envio — tente novamente.",
+        "altitudeMode": {
+          "feet": "Modo pés",
+          "special": "Modo especial"
+        },
+        "fields": {
+          "filter": "Filtro",
+          "altitude": "Altitude",
+          "feet": "Pés",
+          "special": "Especial",
+          "degrees": "Graus",
+          "knots": "Nós",
+          "mach": "Mach",
+          "feetPerMinute": "Pés por minuto",
+          "code": "Código do transponder",
+          "point": "Ponto direto",
+          "text": "Texto do scratchpad",
+          "state": "Estado no solo",
+          "sid": "SID",
+          "star": "STAR",
+          "message": "Mensagem"
+        },
+        "errors": {
+          "required": "{field} é obrigatório.",
+          "invalidNumber": "{field} precisa ser um número."
+        }
+      },
+      "toggle": {
+        "structured": "Estruturado",
+        "raw": "JSON bruto"
       }
     },
     "token": {

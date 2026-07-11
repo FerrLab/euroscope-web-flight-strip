@@ -48,7 +48,9 @@ test('login → create token → plugin event in console → command reaches plu
   await expect(page.getByText('flight_updated').first()).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText(callsign).first()).toBeVisible();
 
-  // 5. Send a set_squawk command from the composer.
+  // 5. Send a set_squawk command from the composer. Structured mode is the
+  // default view now, so switch to raw JSON mode first.
+  await page.getByRole('button', { name: 'Raw JSON' }).click();
   await page
     .getByLabel('Command JSON')
     .fill(JSON.stringify({ action: 'set_squawk', callsign, payload: { code: '2354' } }));
