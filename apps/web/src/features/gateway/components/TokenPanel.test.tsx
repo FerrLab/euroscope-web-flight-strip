@@ -18,7 +18,7 @@ const messages = {
       confirm: 'Rotating disconnects the currently connected plugin. Continue?',
       confirmYes: 'Yes, rotate',
       confirmNo: 'Cancel',
-      revealHint: 'Copy these now — the secret is shown only once.',
+      revealHint: 'Copy this now — the secret is shown only once.',
       error: 'Token operation failed.',
     },
   },
@@ -69,8 +69,9 @@ describe('TokenPanel', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Generate token' }));
 
     expect(await screen.findByTestId('gateway-token-secret')).toHaveTextContent('secret-abc');
-    expect(screen.getByText(/\.wsc gateway token secret-abc/)).toBeInTheDocument();
-    expect(screen.getByText(/\.wsc gateway url /)).toBeInTheDocument();
+    const configLine = screen.getByText(/\.wsc gateway config /).textContent ?? '';
+    const encoded = configLine.replace('.wsc gateway config ', '');
+    expect(atob(encoded)).toMatch(/^https?:\/\/.+:secret-abc$/);
   });
 
   it('requires confirmation before rotating an existing token (happy)', async () => {

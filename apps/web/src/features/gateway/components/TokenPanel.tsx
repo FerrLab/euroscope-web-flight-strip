@@ -8,10 +8,11 @@ import { useRotateTokenMutation, useTokenStatusQuery } from '../api';
 const GATEWAY_BASE =
   process.env.NEXT_PUBLIC_GATEWAY_BASE_URL ?? 'http://127.0.0.1:8000/api/euroscope';
 
-// `.wsc` config-file directives, not translatable copy — see
+// EuroScope's `.wsc` command line does not accept `/` or `:` in arguments,
+// so the URL and token are packed into one base64 blob instead of the raw
+// `.wsc gateway url`/`.wsc gateway token` pair. Not translatable copy — see
 // docs/conventions/i18n.md "What NOT to translate".
-const wscUrlLine = `.wsc gateway url ${GATEWAY_BASE}`;
-const wscTokenLine = (token: string) => `.wsc gateway token ${token}`;
+const wscConfigLine = (token: string) => `.wsc gateway config ${btoa(`${GATEWAY_BASE}:${token}`)}`;
 
 export function TokenPanel() {
   const t = useTranslations('gateway.token');
@@ -80,8 +81,7 @@ export function TokenPanel() {
           <code data-testid="gateway-token-secret" className="break-all font-mono text-xs">
             {secret}
           </code>
-          <code className="break-all font-mono text-xs">{wscUrlLine}</code>
-          <code className="break-all font-mono text-xs">{wscTokenLine(secret)}</code>
+          <code className="break-all font-mono text-xs">{wscConfigLine(secret)}</code>
         </div>
       )}
     </div>

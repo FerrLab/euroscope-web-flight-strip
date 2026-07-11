@@ -30,7 +30,7 @@
       "confirm": "Rotating disconnects the currently connected plugin. Continue?",
       "confirmYes": "Yes, rotate",
       "confirmNo": "Cancel",
-      "revealHint": "Copy these now — the secret is shown only once.",
+      "revealHint": "Copy this now — the secret is shown only once.",
       "error": "Token operation failed."
     }
   }
