@@ -7,6 +7,7 @@ import { cookies } from 'next/headers';
 import { ReduxProvider } from '@/shared/store/ReduxProvider';
 import { ThemeProvider } from '@/shared/theme/ThemeProvider';
 import { setThemePrePaint } from '@/shared/theme/set-theme-pre-paint';
+import { notoSans } from '@/app/layout';
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -30,7 +31,7 @@ export default async function LocaleLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: setThemePrePaint() }} />
       </head>
-      <body className="bg-bg-primary text-fg-primary font-sans">
+      <body className={`bg-bg-primary text-fg-primary font-sans ${notoSans.className}`}>
         <NextIntlClientProvider locale={locale as Locale} messages={messages}>
           <ThemeProvider initialTheme={themeCookie}>
             <ReduxProvider>{children}</ReduxProvider>

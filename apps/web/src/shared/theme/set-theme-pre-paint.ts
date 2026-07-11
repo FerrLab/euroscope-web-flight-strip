@@ -6,6 +6,7 @@ export function setThemePrePaint(): string {
     var theme = m ? decodeURIComponent(m[1]) : 'day';
     if (!['day','dusk','night','bright'].includes(theme)) theme = 'day';
     document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.obcTheme = theme;
   } catch (e) {}
 })();
 `;
