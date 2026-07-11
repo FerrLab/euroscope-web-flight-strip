@@ -31,6 +31,12 @@ function DashboardClient() {
           <Link href="./ping" className="underline">
             {t('ping')}
           </Link>
+          <Link href="./console" className="underline">
+            {t('console')}
+          </Link>
+          <Link href="./token" className="underline">
+            {t('gatewayToken')}
+          </Link>
           <form action="/api/auth/logout" method="POST">
             <button type="submit" className="underline">
               {t('logout')}

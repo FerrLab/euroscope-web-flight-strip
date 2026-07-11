@@ -14,6 +14,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "ping": "Pings",
+    "console": "Console",
+    "gatewayToken": "Gateway token",
     "logout": "Log out"
   },
   "theme": {

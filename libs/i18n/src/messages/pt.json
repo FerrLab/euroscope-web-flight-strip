@@ -14,6 +14,8 @@
   "nav": {
     "dashboard": "Painel",
     "ping": "Pings",
+    "console": "Console",
+    "gatewayToken": "Token do gateway",
     "logout": "Sair"
   },
   "theme": {

@@ -1,0 +1,37 @@
+{
+  "gateway": {
+    "console": {
+      "title": "Gateway console",
+      "connected": "● Plugin connected",
+      "disconnected": "○ Plugin offline",
+      "pollLive": "Live",
+      "pollBackoff": "Reconnecting…",
+      "empty": "No messages yet — connect your plugin or send a command.",
+      "pause": "Pause auto-scroll",
+      "resume": "Resume auto-scroll",
+      "directionIn": "▼ in",
+      "directionOut": "▲ out",
+      "composer": {
+        "label": "Command JSON",
+        "hint": "{\"action\":\"set_squawk\",\"callsign\":\"ABC1234\",\"payload\":{\"code\":\"2354\"}}",
+        "send": "Send",
+        "invalidJson": "Not valid JSON.",
+        "invalidEnvelope": "The envelope needs at least an \"action\" string.",
+        "sendFailed": "Sending failed — try again."
+      }
+    },
+    "token": {
+      "title": "Gateway token",
+      "loading": "Loading token status…",
+      "none": "No gateway token yet.",
+      "createdAt": "Created {date}",
+      "generate": "Generate token",
+      "rotate": "Rotate token",
+      "confirm": "Rotating disconnects the currently connected plugin. Continue?",
+      "confirmYes": "Yes, rotate",
+      "confirmNo": "Cancel",
+      "revealHint": "Copy these now — the secret is shown only once.",
+      "error": "Token operation failed."
+    }
+  }
+}

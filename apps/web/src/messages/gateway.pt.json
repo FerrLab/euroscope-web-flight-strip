@@ -1,0 +1,37 @@
+{
+  "gateway": {
+    "console": {
+      "title": "Console do gateway",
+      "connected": "● Plugin conectado",
+      "disconnected": "○ Plugin offline",
+      "pollLive": "Ao vivo",
+      "pollBackoff": "Reconectando…",
+      "empty": "Sem mensagens ainda — conecte seu plugin ou envie um comando.",
+      "pause": "Pausar rolagem automática",
+      "resume": "Retomar rolagem automática",
+      "directionIn": "▼ entrada",
+      "directionOut": "▲ saída",
+      "composer": {
+        "label": "JSON do comando",
+        "hint": "{\"action\":\"set_squawk\",\"callsign\":\"ABC1234\",\"payload\":{\"code\":\"2354\"}}",
+        "send": "Enviar",
+        "invalidJson": "JSON inválido.",
+        "invalidEnvelope": "O envelope precisa de ao menos uma string \"action\".",
+        "sendFailed": "Falha no envio — tente novamente."
+      }
+    },
+    "token": {
+      "title": "Token do gateway",
+      "loading": "Carregando status do token…",
+      "none": "Nenhum token do gateway ainda.",
+      "createdAt": "Criado em {date}",
+      "generate": "Gerar token",
+      "rotate": "Rotacionar token",
+      "confirm": "Rotacionar desconecta o plugin conectado no momento. Continuar?",
+      "confirmYes": "Sim, rotacionar",
+      "confirmNo": "Cancelar",
+      "revealHint": "Copie agora — o segredo é exibido apenas uma vez.",
+      "error": "Falha na operação do token."
+    }
+  }
+}
