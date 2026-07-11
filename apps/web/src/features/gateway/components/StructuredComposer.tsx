@@ -1,16 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@eurostrip/ui';
+import { ObcButton } from '@oicl/openbridge-webcomponents-react/components/button/button';
+import { ObcTextInputField } from '@oicl/openbridge-webcomponents-react/components/text-input-field/text-input-field';
+import { ObcNumberInputField } from '@oicl/openbridge-webcomponents-react/components/number-input-field/number-input-field';
+import { ObcDropdownButton } from '@oicl/openbridge-webcomponents-react/components/dropdown-button/dropdown-button';
+import type { ObcDropdownButtonChangeEvent } from '@oicl/openbridge-webcomponents-react/components/dropdown-button/dropdown-button';
+import { useDropdownAriaLabel } from '@/shared/openbridge/useDropdownAriaLabel';
 import type { CommandEnvelope } from '../schema';
 import { useSendCommandMutation } from '../api';
 import { GATEWAY_ACTIONS, ALTITUDE_SPECIALS, type ActionDef } from '../actions';
 
 type AltitudeMode = 'feet' | 'special';
 
-const fieldClassName = 'border border-neutral-600 bg-transparent p-2 text-sm';
+/**
+ * `ObcTextInputField`/`ObcNumberInputField` (unlike `ObcTextareaField`)
+ * don't dispatch a synthetic `CustomEvent` with a `detail.value` payload —
+ * they just let the shadow-DOM `<input>`'s native, composed `input` event
+ * bubble out. By the time it reaches this listener (attached to the host
+ * by `@lit/react`), the event has been retargeted to the host custom
+ * element, whose own `.value` property the component already updated
+ * internally before the event bubbled. Read the value off the event's
+ * `currentTarget` (the host) rather than `e.detail`, which is `undefined`
+ * for this event.
+ */
+function readInputValue(e: Event): string {
+  return (e.currentTarget as unknown as { value: string }).value;
+}
 
 export function StructuredComposer() {
   const t = useTranslations('gateway.console.structured');
@@ -20,8 +38,12 @@ export function StructuredComposer() {
   const [altitudeMode, setAltitudeMode] = useState<AltitudeMode>('feet');
   const [error, setError] = useState<string | null>(null);
   const [sendCommand, { isLoading }] = useSendCommandMutation();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const action = GATEWAY_ACTIONS.find((a) => a.action === actionKey) as ActionDef;
+
+  const actionAriaRef = useDropdownAriaLabel(t('actionLabel'));
+  const specialAriaRef = useDropdownAriaLabel(t('fields.special'));
 
   function handleActionChange(next: string) {
     setActionKey(next);
@@ -55,13 +77,20 @@ export function StructuredComposer() {
           }
           payload.feet = feet;
         } else {
-          const special = (values.special ?? '').trim();
-          if (special === '') {
-            setError(t('errors.required', { field: t('fields.special') }));
-            return;
-          }
+          // ObcDropdownButton always shows a real selection (it defaults to
+          // the first option, never a blank state) — mirror that default
+          // here so an untouched dropdown validates the same value the UI
+          // is actually showing, rather than reading stale empty state.
+          const special = (values.special ?? ALTITUDE_SPECIALS[0]).trim();
           payload.special = special;
         }
+        continue;
+      }
+
+      if (field.kind === 'select') {
+        const options = field.options ?? [];
+        const raw = values[field.name] ?? options[0] ?? '';
+        payload[field.name] = raw;
         continue;
       }
 
@@ -83,16 +112,8 @@ export function StructuredComposer() {
         continue;
       }
 
-      if (field.kind === 'select') {
-        if (raw === '') {
-          setError(t('errors.required', { field: t(`fields.${field.name}`) }));
-          return;
-        }
-        payload[field.name] = raw;
-        continue;
-      }
-
-      // 'text'
+      // 'text' (the 'select' and 'altitude-mode' kinds are both handled
+      // above and always `continue` before reaching here)
       if (raw === '' && field.optional) continue;
       payload[field.name] = raw;
     }
@@ -110,37 +131,25 @@ export function StructuredComposer() {
   }
 
   return (
-    <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-      <label className="flex flex-col gap-1">
-        <span className="text-sm">{t('actionLabel')}</span>
-        {/* Action names are protocol identifiers, not user-facing prose —
-            not translated, same precedent as the `.wsc` line and ground
-            state enum values (see TokenPanel.tsx and
-            docs/conventions/i18n.md "What NOT to translate"). */}
-        <select
-          aria-label={t('actionLabel')}
-          className={fieldClassName}
-          value={actionKey}
-          onChange={(e) => handleActionChange(e.target.value)}
-        >
-          {GATEWAY_ACTIONS.map((a) => (
-            <option key={a.action} value={a.action}>
-              {a.action}
-            </option>
-          ))}
-        </select>
-      </label>
+    <form ref={formRef} className="flex flex-col gap-3" onSubmit={handleSubmit}>
+      {/* Action names are protocol identifiers, not user-facing prose —
+          not translated, same precedent as the `.wsc` line and ground
+          state enum values (see TokenPanel.tsx and
+          docs/conventions/i18n.md "What NOT to translate"). */}
+      <ObcDropdownButton
+        ref={actionAriaRef}
+        aria-label={t('actionLabel')}
+        value={actionKey}
+        onDropdownChange={(e: ObcDropdownButtonChangeEvent) => handleActionChange(e.detail.value)}
+        options={GATEWAY_ACTIONS.map((a) => ({ value: a.action, label: a.action }))}
+      />
 
       {action.needsCallsign && (
-        <label className="flex flex-col gap-1">
-          <span className="text-sm">{t('callsignLabel')}</span>
-          <input
-            aria-label={t('callsignLabel')}
-            className={fieldClassName}
-            value={callsign}
-            onChange={(e) => setCallsign(e.target.value)}
-          />
-        </label>
+        <ObcTextInputField
+          label={t('callsignLabel')}
+          value={callsign}
+          onInput={(e: Event) => setCallsign(readInputValue(e))}
+        />
       )}
 
       {action.fields.map((field) => {
@@ -158,12 +167,10 @@ export function StructuredComposer() {
                 {t('altitudeMode.feet')}
               </label>
               {altitudeMode === 'feet' && (
-                <input
-                  aria-label={t('fields.feet')}
-                  type="number"
-                  className={fieldClassName}
+                <ObcNumberInputField
+                  label={t('fields.feet')}
                   value={values.feet ?? ''}
-                  onChange={(e) => setFieldValue('feet', e.target.value)}
+                  onInput={(e: Event) => setFieldValue('feet', readInputValue(e))}
                 />
               )}
               <label className="flex items-center gap-2 text-sm">
@@ -176,67 +183,74 @@ export function StructuredComposer() {
                 {t('altitudeMode.special')}
               </label>
               {altitudeMode === 'special' && (
-                <select
+                <ObcDropdownButton
+                  ref={specialAriaRef}
                   aria-label={t('fields.special')}
-                  className={fieldClassName}
-                  value={values.special ?? ''}
-                  onChange={(e) => setFieldValue('special', e.target.value)}
-                >
-                  <option value="" disabled>
-                    {t('selectPlaceholder')}
-                  </option>
-                  {ALTITUDE_SPECIALS.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
+                  value={values.special ?? ALTITUDE_SPECIALS[0]}
+                  onDropdownChange={(e: ObcDropdownButtonChangeEvent) =>
+                    setFieldValue('special', e.detail.value)
+                  }
+                  options={ALTITUDE_SPECIALS.map((opt) => ({ value: opt, label: opt }))}
+                />
               )}
             </div>
           );
         }
 
         if (field.kind === 'select') {
+          const options = field.options ?? [];
           return (
-            <label key={field.name} className="flex flex-col gap-1">
-              <span className="text-sm">{t(`fields.${field.name}`)}</span>
-              <select
-                aria-label={t(`fields.${field.name}`)}
-                className={fieldClassName}
-                value={values[field.name] ?? ''}
-                onChange={(e) => setFieldValue(field.name, e.target.value)}
-              >
-                <option value="" disabled>
-                  {t('selectPlaceholder')}
-                </option>
-                {field.options?.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SelectField
+              key={field.name}
+              label={t(`fields.${field.name}`)}
+              value={values[field.name] ?? options[0]}
+              options={options}
+              onChange={(next) => setFieldValue(field.name, next)}
+            />
           );
         }
 
+        const InputComponent = field.kind === 'number' ? ObcNumberInputField : ObcTextInputField;
         return (
-          <label key={field.name} className="flex flex-col gap-1">
-            <span className="text-sm">{t(`fields.${field.name}`)}</span>
-            <input
-              aria-label={t(`fields.${field.name}`)}
-              type={field.kind === 'number' ? 'number' : 'text'}
-              className={fieldClassName}
-              value={values[field.name] ?? ''}
-              onChange={(e) => setFieldValue(field.name, e.target.value)}
-            />
-          </label>
+          <InputComponent
+            key={field.name}
+            label={t(`fields.${field.name}`)}
+            value={values[field.name] ?? ''}
+            onInput={(e: Event) => setFieldValue(field.name, readInputValue(e))}
+          />
         );
       })}
 
       {error && <p className="text-accent-danger text-sm">{error}</p>}
-      <Button type="submit" disabled={isLoading}>
+      <ObcButton disabled={isLoading} onClick={() => formRef.current?.requestSubmit()}>
         {t('send')}
-      </Button>
+      </ObcButton>
     </form>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: readonly string[];
+  onChange: (next: string) => void;
+}) {
+  const ariaRef = useDropdownAriaLabel(label);
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-sm">{label}</span>
+      <ObcDropdownButton
+        ref={ariaRef}
+        aria-label={label}
+        value={value}
+        onDropdownChange={(e: ObcDropdownButtonChangeEvent) => onChange(e.detail.value)}
+        options={options.map((opt) => ({ value: opt, label: opt }))}
+      />
+    </div>
   );
 }

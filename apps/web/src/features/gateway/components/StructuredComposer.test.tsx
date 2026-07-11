@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen, within } from 'shadow-dom-testing-library';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { NextIntlClientProvider } from 'next-intl';
@@ -82,10 +83,13 @@ describe('StructuredComposer', () => {
     const fetchSpy = stubFetch();
     render(wrap(<StructuredComposer />));
 
-    await userEvent.selectOptions(screen.getByLabelText('Action'), 'set_squawk');
-    await userEvent.type(screen.getByLabelText('Callsign'), 'ABC1234');
-    await userEvent.type(screen.getByLabelText('Squawk code'), '2354');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'set_squawk',
+    );
+    await userEvent.type(await screen.findByShadowLabelText('Callsign'), 'ABC1234');
+    await userEvent.type(await screen.findByShadowLabelText('Squawk code'), '2354');
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
 
     expect(fetchSpy).toHaveBeenCalled();
     const body = await lastRequestBody(fetchSpy);
@@ -101,8 +105,8 @@ describe('StructuredComposer', () => {
     render(wrap(<StructuredComposer />));
 
     // ping is the default selected action.
-    expect(screen.queryByLabelText('Callsign')).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    expect(screen.queryByShadowLabelText('Callsign')).not.toBeInTheDocument();
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
 
     expect(fetchSpy).toHaveBeenCalled();
     const body = await lastRequestBody(fetchSpy);
@@ -115,8 +119,11 @@ describe('StructuredComposer', () => {
     const fetchSpy = stubFetch();
     render(wrap(<StructuredComposer />));
 
-    await userEvent.selectOptions(screen.getByLabelText('Action'), 'list_flights');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'list_flights',
+    );
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
 
     const body = await lastRequestBody(fetchSpy);
     expect(body).toEqual({ action: 'list_flights' });
@@ -127,11 +134,17 @@ describe('StructuredComposer', () => {
     const fetchSpy = stubFetch();
     render(wrap(<StructuredComposer />));
 
-    await userEvent.selectOptions(screen.getByLabelText('Action'), 'set_cleared_altitude');
-    await userEvent.type(screen.getByLabelText('Callsign'), 'ABC1234');
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'set_cleared_altitude',
+    );
+    await userEvent.type(await screen.findByShadowLabelText('Callsign'), 'ABC1234');
     await userEvent.click(screen.getByText('Special mode'));
-    await userEvent.selectOptions(screen.getByLabelText('Special'), 'clear');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Special' }),
+      'clear',
+    );
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
 
     const body = await lastRequestBody(fetchSpy);
     expect(body).toEqual({
@@ -146,11 +159,14 @@ describe('StructuredComposer', () => {
     const fetchSpy = stubFetch();
     render(wrap(<StructuredComposer />));
 
-    await userEvent.selectOptions(screen.getByLabelText('Action'), 'set_cleared_altitude');
-    await userEvent.type(screen.getByLabelText('Callsign'), 'ABC1234');
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'set_cleared_altitude',
+    );
+    await userEvent.type(await screen.findByShadowLabelText('Callsign'), 'ABC1234');
     // feet mode is the default.
-    await userEvent.type(screen.getByLabelText('Feet'), '4000');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.type(await screen.findByShadowLabelText('Feet'), '4000');
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
 
     const body = await lastRequestBody(fetchSpy);
     expect(body).toEqual({
@@ -166,11 +182,14 @@ describe('StructuredComposer', () => {
     const fetchSpy = stubFetch();
     render(wrap(<StructuredComposer />));
 
-    await userEvent.selectOptions(screen.getByLabelText('Action'), 'send_frequency_message');
-    expect(screen.queryByLabelText('Callsign')).not.toBeInTheDocument();
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'send_frequency_message',
+    );
+    expect(screen.queryByShadowLabelText('Callsign')).not.toBeInTheDocument();
 
-    await userEvent.type(screen.getByLabelText('Message'), 'Traffic advisory');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.type(await screen.findByShadowLabelText('Message'), 'Traffic advisory');
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
 
     const body = await lastRequestBody(fetchSpy);
     expect(body).toEqual({
@@ -180,19 +199,20 @@ describe('StructuredComposer', () => {
     expect(body).not.toHaveProperty('callsign');
   });
 
-  it('renders set_ground_state as a real select with all 10 options and sends the choice (happy)', async () => {
+  it('renders set_ground_state as a dropdown with all 10 options, defaulted to the first, and sends the choice (happy)', async () => {
     const fetchSpy = stubFetch();
     render(wrap(<StructuredComposer />));
 
-    await userEvent.selectOptions(screen.getByLabelText('Action'), 'set_ground_state');
-    await userEvent.type(screen.getByLabelText('Callsign'), 'ABC1234');
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'set_ground_state',
+    );
+    await userEvent.type(await screen.findByShadowLabelText('Callsign'), 'ABC1234');
 
-    const stateSelect = screen.getByLabelText('Ground state') as HTMLSelectElement;
-    expect(stateSelect.tagName).toBe('SELECT');
+    const stateSelect = await screen.findByShadowRole('combobox', { name: 'Ground state' });
     const optionValues = within(stateSelect)
-      .getAllByRole('option')
-      .map((o) => (o as HTMLOptionElement).value)
-      .filter((v) => v !== '');
+      .getAllByShadowRole('option')
+      .map((o) => (o as HTMLOptionElement).value);
     expect(optionValues).toEqual([
       'NSTS',
       'STUP',
@@ -207,7 +227,7 @@ describe('StructuredComposer', () => {
     ]);
 
     await userEvent.selectOptions(stateSelect, 'PUSH');
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
 
     const body = await lastRequestBody(fetchSpy);
     expect(body).toEqual({
@@ -217,12 +237,51 @@ describe('StructuredComposer', () => {
     });
   });
 
+  it('defaults set_ground_state to its first option when untouched (happy)', async () => {
+    const fetchSpy = stubFetch();
+    render(wrap(<StructuredComposer />));
+
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'set_ground_state',
+    );
+    await userEvent.type(await screen.findByShadowLabelText('Callsign'), 'ABC1234');
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
+
+    const body = await lastRequestBody(fetchSpy);
+    expect(body).toEqual({
+      action: 'set_ground_state',
+      callsign: 'ABC1234',
+      payload: { state: 'NSTS' },
+    });
+  });
+
+  it('defaults the altitude special select to its first option when untouched (happy)', async () => {
+    const fetchSpy = stubFetch();
+    render(wrap(<StructuredComposer />));
+
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'set_cleared_altitude',
+    );
+    await userEvent.type(await screen.findByShadowLabelText('Callsign'), 'ABC1234');
+    await userEvent.click(screen.getByText('Special mode'));
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
+
+    const body = await lastRequestBody(fetchSpy);
+    expect(body).toEqual({
+      action: 'set_cleared_altitude',
+      callsign: 'ABC1234',
+      payload: { special: 'ils' },
+    });
+  });
+
   it('surfaces a server failure (garbage)', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(new Response('boom', { status: 500 }));
     render(wrap(<StructuredComposer />));
 
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
 
-    expect(await screen.findByText('Sending failed — try again.')).toBeInTheDocument();
+    expect(await screen.findByShadowText('Sending failed — try again.')).toBeInTheDocument();
   });
 });
