@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from 'shadow-dom-testing-library';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { ThemeProvider } from './ThemeProvider';
@@ -20,28 +21,32 @@ function wrap(initial: string, ui: React.ReactElement) {
 describe('ThemeSwitcher', () => {
   it('renders 4 options (happy)', async () => {
     render(wrap('day', <ThemeSwitcher />));
-    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }));
-    expect(await screen.findByRole('option', { name: 'Day' })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: 'Dusk' })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: 'Night' })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: 'Bright' })).toBeInTheDocument();
+    await userEvent.click(await screen.findByShadowRole('combobox', { name: 'Theme' }));
+    expect(await screen.findByShadowRole('option', { name: 'Day' })).toBeInTheDocument();
+    expect(await screen.findByShadowRole('option', { name: 'Dusk' })).toBeInTheDocument();
+    expect(await screen.findByShadowRole('option', { name: 'Night' })).toBeInTheDocument();
+    expect(await screen.findByShadowRole('option', { name: 'Bright' })).toBeInTheDocument();
   });
 
   it('updates data-theme attribute on selection (happy)', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
     render(wrap('day', <ThemeSwitcher />));
-    await userEvent.click(screen.getByRole('combobox', { name: 'Theme' }));
-    await userEvent.click(await screen.findByRole('option', { name: 'Night' }));
+    const combobox = await screen.findByShadowRole('combobox', { name: 'Theme' });
+    await userEvent.selectOptions(
+      combobox,
+      await screen.findByShadowRole('option', { name: 'Night' }),
+    );
     expect(document.documentElement.dataset.theme).toBe('night');
+    expect(document.documentElement.dataset.obcTheme).toBe('night');
   });
 
-  it('starts at the cookie theme (initialTheme prop)', () => {
+  it('starts at the cookie theme (initialTheme prop)', async () => {
     render(wrap('dusk', <ThemeSwitcher />));
-    expect(screen.getByRole('combobox', { name: 'Theme' })).toBeInTheDocument();
+    expect(await screen.findByShadowRole('combobox', { name: 'Theme' })).toBeInTheDocument();
   });
 
-  it('rejects invalid initialTheme as garbage (garbage → falls back to day)', () => {
+  it('rejects invalid initialTheme as garbage (garbage → falls back to day)', async () => {
     render(wrap('purple', <ThemeSwitcher />));
-    expect(screen.getByRole('combobox', { name: 'Theme' })).toBeInTheDocument();
+    expect(await screen.findByShadowRole('combobox', { name: 'Theme' })).toBeInTheDocument();
   });
 });
