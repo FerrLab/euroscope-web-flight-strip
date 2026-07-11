@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Modules\Gateway\Infrastructure\GatewayServiceProvider;
 use App\Modules\Ping\Infrastructure\PingServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\BusServiceProvider;
@@ -16,4 +17,5 @@ return [
     SocialiteStubServiceProvider::class,
     BusServiceProvider::class,
     PingServiceProvider::class,
+    GatewayServiceProvider::class,
 ];
