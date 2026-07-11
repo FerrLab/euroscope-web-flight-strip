@@ -1,0 +1,79 @@
+{
+  "name": "backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/backend",
+  "projectType": "application",
+  "tags": ["scope:backend", "type:app"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml up backend",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "artisan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml exec backend php artisan",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml exec -T backend ./vendor/bin/pest --parallel",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml exec -T backend ./vendor/bin/pint --test",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "lint:fix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml exec -T backend ./vendor/bin/pint",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo 'phpstan added in Phase 2; typecheck is a no-op in Phase 1' && exit 0",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "analyze": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml exec -T backend ./vendor/bin/phpstan analyze --memory-limit=2G",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "deptrac": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml exec -T backend ./vendor/bin/deptrac analyse --no-progress --report-uncovered",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml exec -T backend php artisan migrate",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "tinker": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f infra/docker-compose.yml exec backend php artisan tinker",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

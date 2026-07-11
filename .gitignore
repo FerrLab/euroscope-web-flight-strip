@@ -1,0 +1,49 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Claude local settings (per-developer overrides)
+.claude/settings.local.json
+
+# Node
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+.next/
+out/
+dist/
+build/
+coverage/
+
+# Nx
+.nx/cache
+.nx/workspace-data
+
+# PHP
+apps/backend/vendor/
+apps/backend/storage/framework/cache/data/*
+apps/backend/storage/framework/sessions/*
+apps/backend/storage/framework/testing/*
+apps/backend/storage/framework/views/*
+apps/backend/storage/logs/*
+apps/backend/storage/oauth-private.key
+apps/backend/storage/oauth-public.key
+apps/backend/bootstrap/cache/*.php
+!apps/backend/storage/framework/cache/data/.gitkeep
+!apps/backend/storage/framework/sessions/.gitkeep
+!apps/backend/storage/framework/testing/.gitkeep
+!apps/backend/storage/framework/views/.gitkeep
+!apps/backend/storage/logs/.gitkeep
+!apps/backend/bootstrap/cache/.gitkeep
+
+# Env
+.env
+.env.local
+.env.*.local
+apps/backend/.env
+apps/web/.env
+
+# Docker
+infra/docker/.data/

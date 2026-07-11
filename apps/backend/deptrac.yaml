@@ -1,0 +1,102 @@
+deptrac:
+  paths:
+    - ./app
+
+  exclude_files:
+    - '#.*/Tests/.*#'
+
+  layers:
+    # Pure domain — entities, value objects, repository interfaces, permission
+    # enums. May not depend on anything outside Domain.
+    - name: Domain
+      collectors:
+        - type: directory
+          value: app/Modules/.*/Domain/.*
+
+    # Use cases, commands/queries (DTOs), handlers — orchestration logic.
+    # May only depend on Domain (and its own DTO toolkit, Spatie\LaravelData).
+    # Includes the CQRS contract interfaces (Command, Query, *Handler,
+    # the Bus contracts, HandlerRegistry, and the bus exceptions), which
+    # are pure PHP — no framework dependencies.
+    - name: Application
+      collectors:
+        - type: directory
+          value: app/Modules/.*/Application/.*
+        - type: classLike
+          value: ^App\\Cqrs\\(Command|Query|CommandHandler|QueryHandler)$
+        - type: classLike
+          value: ^App\\Cqrs\\Bus\\(CommandBus|QueryBus|HandlerRegistry)$
+        - type: classLike
+          value: ^App\\Cqrs\\Bus\\Exceptions\\.*
+
+    # Adapters that talk to the framework: Eloquent models, Laravel-flavored
+    # bus implementations, middleware, auth/authz wiring, providers.
+    - name: Infrastructure
+      collectors:
+        - type: directory
+          value: app/Modules/.*/Infrastructure/.*
+        - type: classLike
+          value: ^App\\Cqrs\\Bus\\(LaravelCommandBus|LaravelQueryBus)$
+        - type: directory
+          value: app/Cqrs/Bus/Middleware/.*
+        - type: directory
+          value: app/Authentication/.*
+        - type: directory
+          value: app/Authorization/.*
+        - type: directory
+          value: app/Models/.*
+        - type: directory
+          value: app/Providers/.*
+
+    # Delivery mechanisms: HTTP controllers, Filament resources/pages.
+    # By Laravel/Filament convention, these reference Eloquent models and
+    # the User model directly, so Presentation is allowed to reach into
+    # Infrastructure (and Domain, for return-type DTOs).
+    - name: Presentation
+      collectors:
+        - type: directory
+          value: app/Modules/.*/Presentation/.*
+        - type: directory
+          value: app/Http/.*
+
+    # Vendor framework code. Note: Spatie\LaravelData is intentionally
+    # excluded — it's a DTO toolkit used by every Command/Query in the
+    # Application layer, so treating it as Framework would force every
+    # DTO to live in Infrastructure. We treat it as a neutral DTO library.
+    - name: Framework
+      collectors:
+        - type: classLike
+          value: ^Illuminate\\.*
+        - type: classLike
+          value: ^Filament\\.*
+        - type: classLike
+          value: ^Laravel\\.*
+        - type: classLike
+          value: ^Spatie\\(?!LaravelData\\).*
+
+  ruleset:
+    # Domain is pure: depends on nothing.
+    Domain: ~
+
+    # Application orchestrates Domain. Spatie\LaravelData is treated as
+    # neutral (not Framework), so DTOs in Application/Commands and
+    # Application/Queries are allowed.
+    Application:
+      - Domain
+
+    # Infrastructure can reach everything below plus the framework.
+    Infrastructure:
+      - Domain
+      - Application
+      - Framework
+
+    # Presentation needs Domain (return types from queries/commands),
+    # Application (dispatching Commands/Queries via the bus contracts),
+    # Infrastructure (Filament Resources MUST point at Eloquent models;
+    # controllers reach App\Models\User from $request->user()), and the
+    # framework itself (Illuminate\Http\*, Filament\*).
+    Presentation:
+      - Domain
+      - Application
+      - Infrastructure
+      - Framework

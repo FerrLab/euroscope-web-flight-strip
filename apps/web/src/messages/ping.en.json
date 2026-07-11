@@ -1,0 +1,15 @@
+{
+  "ping": {
+    "title": "Pings",
+    "create": "Create ping",
+    "loading": "Loading pings…",
+    "empty": "No pings yet",
+    "error": "Failed to load pings",
+    "noteLocale": "Locale",
+    "noteText": "Text",
+    "addLocale": "Add locale",
+    "submit": "Submit",
+    "id": "ID",
+    "when": "When"
+  }
+}

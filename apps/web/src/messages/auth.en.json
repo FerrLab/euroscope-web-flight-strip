@@ -1,0 +1,7 @@
+{
+  "auth": {
+    "loginTitle": "Sign in to Azimuth",
+    "continueWithStub": "Continue with Stub",
+    "logoutLabel": "Log out"
+  }
+}

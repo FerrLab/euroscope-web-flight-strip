@@ -1,0 +1,29 @@
+includes:
+  - vendor/larastan/larastan/extension.neon
+
+parameters:
+  paths:
+    - app
+    - database
+    - phpstan-rules
+    - tests
+
+  level: 8
+
+  excludePaths:
+    - tests/Static/RawPermissionFixture.php
+
+  ignoreErrors:
+    # Pest 4 chained DSL — `$this` inside `it(...)` closures resolves to
+    # Pest\PendingCalls\TestCall in PHPStan's eyes, but at runtime is the
+    # bound TestCase (with MakesHttpRequests, InteractsWithDatabase, etc).
+    # Larastan does not yet ship Pest-aware type inference; ignore these.
+    - identifier: method.notFound
+      message: '#Call to an undefined method Pest\\PendingCalls\\TestCall::#'
+    - identifier: property.notFound
+      message: '#(Access to|access)( an)? undefined property Pest\\PendingCalls\\TestCall::#'
+
+services:
+  - class: App\Static\PreventRawPermissionStrings
+    tags:
+      - phpstan.rules.rule

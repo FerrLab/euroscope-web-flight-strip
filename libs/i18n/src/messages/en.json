@@ -1,0 +1,31 @@
+{
+  "common": {
+    "appName": "Azimuth",
+    "tagline": "Your companion from A to Z",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "ping": "Pings",
+    "logout": "Log out"
+  },
+  "theme": {
+    "label": "Theme",
+    "day": "Day",
+    "dusk": "Dusk",
+    "night": "Night",
+    "bright": "Bright"
+  },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "pt": "Português"
+  }
+}

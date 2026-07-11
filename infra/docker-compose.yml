@@ -1,0 +1,296 @@
+name: azimuth
+
+networks:
+  azimuth:
+    driver: bridge
+
+volumes:
+  pgdata:
+  typesense-data:
+  minio-data:
+  passport-keys:
+  composer-cache:
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/docker/frankenphp.Dockerfile
+    image: azimuth-backend:dev
+    container_name: azimuth-backend
+    networks: [azimuth]
+    depends_on:
+      postgres: { condition: service_healthy }
+      dragonfly: { condition: service_healthy }
+      soketi: { condition: service_healthy }
+    ports:
+      - '8000:8000'
+      - '8443:8443'
+      - '2019:2019'
+    environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: dragonfly
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: redis
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      OCTANE_WATCH: 'true'
+      # Soketi runs as a Pusher-protocol-compatible WebSocket server. Laravel's
+      # pusher broadcaster speaks Pusher protocol; pointing PUSHER_HOST at the
+      # soketi service hostname makes broadcasting events flow backend → soketi
+      # → connected browsers. The cluster value is unused by Soketi but the
+      # Pusher PHP client requires it to be set.
+      BROADCAST_CONNECTION: pusher
+      PUSHER_APP_ID: ${PUSHER_APP_ID}
+      PUSHER_APP_KEY: ${PUSHER_APP_KEY}
+      PUSHER_APP_SECRET: ${PUSHER_APP_SECRET}
+      PUSHER_HOST: soketi
+      PUSHER_PORT: 6001
+      PUSHER_SCHEME: http
+      PUSHER_APP_CLUSTER: mt1
+    volumes:
+      - ../apps/backend:/app
+      - composer-cache:/root/.composer/cache
+      - passport-keys:/app/storage/passport
+    # Override the upstream FrankenPHP HEALTHCHECK; it probes a TLS endpoint we
+    # don't terminate in dev. Functional smoke tests cover backend readiness.
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+  web:
+    image: node:22-alpine
+    container_name: azimuth-web
+    networks: [azimuth]
+    working_dir: /workspace
+    # CI=true keeps pnpm non-interactive (no "remove and reinstall?" prompt
+    # when the host's node_modules layout differs from what the container expects).
+    command: sh -c "corepack enable && corepack prepare pnpm@9.12.3 --activate && CI=true pnpm install --frozen-lockfile && pnpm --filter @azimuth/web dev"
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      # Server-side fetches from Next.js route handlers (e.g., /api/auth/stub-callback)
+      # must reach the backend via Docker network DNS, not host-side localhost. The
+      # NEXT_PUBLIC_* var above is for client/browser use and stays as localhost.
+      AZIMUTH_BACKEND_URL: http://backend:8000
+    profiles: ['compose-web']
+    volumes:
+      - ..:/workspace
+      # Mask host node_modules with anonymous volumes so the container manages
+      # them independently. Without this, a Windows host's node_modules layout
+      # bleeds into the Linux container and pnpm cannot reconcile.
+      - /workspace/node_modules
+      - /workspace/apps/web/node_modules
+      - /workspace/apps/backend/node_modules
+      - /workspace/libs/api-client/node_modules
+      - /workspace/libs/design-tokens/node_modules
+      - /workspace/libs/i18n/node_modules
+      - /workspace/libs/ui/node_modules
+    restart: unless-stopped
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: azimuth-postgres
+    networks: [azimuth]
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    container_name: azimuth-dragonfly
+    networks: [azimuth]
+    command: ['--logtostderr', '--cluster_mode=emulated']
+    ports:
+      - '6379:6379'
+    ulimits:
+      memlock: -1
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  typesense:
+    image: typesense/typesense:29.1
+    container_name: azimuth-typesense
+    networks: [azimuth]
+    command: ['--data-dir=/data', '--api-key=${TYPESENSE_API_KEY}', '--enable-cors']
+    ports:
+      - '8108:8108'
+    volumes:
+      - typesense-data:/data
+    # No healthcheck: typesense:29.1 ships without wget/curl/nc and its sh
+    # has no /dev/tcp support, so an in-container HTTP probe isn't possible.
+    # The host smoke-test (`curl http://localhost:8108/health`) covers readiness.
+
+  typesense-dashboard:
+    # Browser-side UI for inspecting the Typesense index (collections, fields,
+    # sample documents, ad-hoc queries). The dashboard is a static SPA; its
+    # connection to Typesense happens in the browser via the host-exposed
+    # 8108 port, so no service-to-service network plumbing is needed beyond
+    # serving the asset bundle.
+    #
+    # On first visit at http://localhost:8109, click "Add Server" with:
+    #   - Host: localhost
+    #   - Port: 8108
+    #   - Protocol: http
+    #   - API Key: value of TYPESENSE_API_KEY in your .env (default: local-dev-typesense-key)
+    image: bfritscher/typesense-dashboard:latest
+    container_name: azimuth-typesense-dashboard
+    networks: [azimuth]
+    ports:
+      - '8109:80'
+    depends_on:
+      - typesense
+    restart: unless-stopped
+
+  soketi:
+    image: quay.io/soketi/soketi:latest-16-alpine
+    container_name: azimuth-soketi
+    networks: [azimuth]
+    environment:
+      SOKETI_DEBUG: '1'
+      SOKETI_DEFAULT_APP_ID: ${PUSHER_APP_ID}
+      SOKETI_DEFAULT_APP_KEY: ${PUSHER_APP_KEY}
+      SOKETI_DEFAULT_APP_SECRET: ${PUSHER_APP_SECRET}
+    ports:
+      - '6001:6001'
+      - '9601:9601'
+    healthcheck:
+      # `localhost` resolves to ::1 inside the Soketi alpine image, but Soketi
+      # only binds IPv4 — use 127.0.0.1 and the metrics port (9601) which always
+      # speaks plain HTTP (port 6001 is WebSocket-only).
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:9601/usage >/dev/null 2>&1 || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  minio:
+    image: minio/minio:latest
+    container_name: azimuth-minio
+    networks: [azimuth]
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - '9100:9000'
+      - '9101:9001'
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://localhost:9000/minio/health/live || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: azimuth-minio-init
+    networks: [azimuth]
+    depends_on:
+      minio: { condition: service_healthy }
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      AZIMUTH_S3_BUCKET: ${AZIMUTH_S3_BUCKET}
+    entrypoint: ['/bin/sh', '/etc/minio-init.sh']
+    volumes:
+      - ./docker/minio-init.sh:/etc/minio-init.sh:ro
+    restart: 'no'
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: azimuth-mailpit
+    networks: [azimuth]
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_SMTP_AUTH_ACCEPT_ANY: 'true'
+      MP_SMTP_AUTH_ALLOW_INSECURE: 'true'
+
+  horizon:
+    image: azimuth-backend:dev
+    container_name: azimuth-horizon
+    networks: [azimuth]
+    depends_on:
+      backend: { condition: service_started }
+      soketi: { condition: service_healthy }
+    command: ['php', 'artisan', 'horizon']
+    environment:
+      APP_ENV: local
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: dragonfly
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: redis
+      # Queued listeners may dispatch broadcast events; mirror the backend's
+      # Soketi-as-Pusher config so horizon workers can emit to the same WS server.
+      BROADCAST_CONNECTION: pusher
+      PUSHER_APP_ID: ${PUSHER_APP_ID}
+      PUSHER_APP_KEY: ${PUSHER_APP_KEY}
+      PUSHER_APP_SECRET: ${PUSHER_APP_SECRET}
+      PUSHER_HOST: soketi
+      PUSHER_PORT: 6001
+      PUSHER_SCHEME: http
+      PUSHER_APP_CLUSTER: mt1
+    volumes:
+      - ../apps/backend:/app
+      - composer-cache:/root/.composer/cache
+    # Inherits the FrankenPHP HEALTHCHECK from the backend image, which probes
+    # a TLS endpoint the worker doesn't serve. Disable it; "Horizon started
+    # successfully" in the logs is the readiness signal.
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+  scheduler:
+    image: azimuth-backend:dev
+    container_name: azimuth-scheduler
+    networks: [azimuth]
+    depends_on:
+      backend: { condition: service_started }
+    command: ['php', 'artisan', 'schedule:work']
+    environment:
+      APP_ENV: local
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ../apps/backend:/app
+    restart: unless-stopped
+    profiles: ['queue']

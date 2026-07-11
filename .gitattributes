@@ -1,0 +1,11 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Force LF on files that run inside Linux containers, regardless of host OS.
+# Without these, a Windows checkout (core.autocrlf=true) gives them CRLF line
+# endings, which makes `#!/usr/bin/env bash\r` unfindable to the Linux kernel.
+*.sh                text eol=lf
+*.Dockerfile        text eol=lf
+Dockerfile          text eol=lf
+docker-compose*.yml text eol=lf
+*.bash              text eol=lf

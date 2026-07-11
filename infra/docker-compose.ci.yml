@@ -1,0 +1,75 @@
+name: azimuth-ci
+
+volumes:
+  composer-cache:
+  passport-keys:
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: azimuth
+      POSTGRES_USER: azimuth
+      POSTGRES_PASSWORD: azimuth
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U azimuth -d azimuth']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    command: ['--logtostderr', '--cluster_mode=emulated']
+    ulimits:
+      memlock: -1
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  typesense:
+    image: typesense/typesense:29.1
+    command: ['--data-dir=/data', '--api-key=ci', '--enable-cors']
+    # No in-container healthcheck (image ships without wget/curl/nc and its sh
+    # lacks /dev/tcp). Workflow probes /health externally before running tests.
+    ports:
+      - '8108:8108'
+    # tmpfs satisfies typesense's --data-dir requirement without persisting
+    # across CI runs (each job starts clean).
+    tmpfs:
+      - /data
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/docker/frankenphp.Dockerfile
+    depends_on:
+      postgres: { condition: service_healthy }
+      dragonfly: { condition: service_healthy }
+    environment:
+      APP_ENV: testing
+      APP_KEY: base64:AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: azimuth
+      DB_USERNAME: azimuth
+      DB_PASSWORD: azimuth
+      REDIS_HOST: dragonfly
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+      SCOUT_DRIVER: typesense
+      TYPESENSE_API_KEY: ci
+      TYPESENSE_HOST: typesense
+      TYPESENSE_PORT: 8108
+      TYPESENSE_PROTOCOL: http
+    ports:
+      - '8000:8000'
+    volumes:
+      - ../apps/backend:/app
+      - composer-cache:/root/.composer/cache
+      - passport-keys:/app/storage/passport
+    healthcheck:
+      disable: true

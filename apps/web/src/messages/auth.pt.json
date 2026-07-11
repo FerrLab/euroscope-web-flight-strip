@@ -1,0 +1,7 @@
+{
+  "auth": {
+    "loginTitle": "Entrar em Azimuth",
+    "continueWithStub": "Continuar com Stub",
+    "logoutLabel": "Sair"
+  }
+}

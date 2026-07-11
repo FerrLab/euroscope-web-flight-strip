@@ -1,0 +1,38 @@
+{
+  "name": "api-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api-client/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:lib"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rtk-query-codegen-openapi codegen.config.ts",
+        "cwd": "libs/api-client"
+      }
+    },
+    "refresh": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "curl -fsS http://localhost:8000/docs/api.json -o apps/backend/openapi.json && pnpm nx build api-client",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run", "cwd": "libs/api-client" }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "eslint src --max-warnings=0", "cwd": "libs/api-client" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/api-client/tsconfig.json",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

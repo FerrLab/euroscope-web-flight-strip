@@ -1,0 +1,24 @@
+extends:
+  - recommended
+
+rules:
+  # Scramble emits operationIds in camelCase; Redocly's default style allows it.
+  operation-operationId: warn
+  operation-operationId-unique: error
+
+  # Scramble doesn't always emit operation summaries on every endpoint; treat as warn.
+  operation-summary: warn
+
+  # Tags are populated from controller class names; require uniqueness but allow free naming.
+  tag-description: off
+
+  # Scramble does not emit per-operation `security` blocks (auth is documented
+  # at the controller/middleware layer, not in the OpenAPI snapshot). Downgrade
+  # to warn so the snapshot lints clean while still surfacing the gap.
+  security-defined: warn
+
+  # Scramble's array response schemas emit `additionalItems: false` alongside
+  # `prefixItems`, which is a holdover from JSON Schema draft-2019-09 that
+  # Redocly's structural rule rejects under OAS 3.1. Surface as warn until the
+  # upstream emitter is updated.
+  struct: warn

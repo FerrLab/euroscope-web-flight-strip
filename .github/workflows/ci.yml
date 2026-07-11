@@ -1,0 +1,223 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-typecheck:
+    name: Lint + Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, pdo_pgsql, pgsql, redis, zip, bcmath, sockets
+          tools: composer:v2
+
+      - name: Install Node deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Install PHP deps
+        working-directory: apps/backend
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Set Nx SHAs (for affected)
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Lint (Nx affected)
+        # backend:lint runs Pint inside the dev docker container; CI runs Pint
+        # natively in the dedicated step below, so exclude it here.
+        run: pnpm nx affected --target=lint --parallel=4 --exclude=backend
+
+      - name: Typecheck (Nx affected)
+        run: pnpm nx affected --target=typecheck --parallel=4
+
+      - name: Pint (apps/backend)
+        working-directory: apps/backend
+        run: ./vendor/bin/pint --test
+
+  test-backend:
+    name: Test Backend (Pest + PHPStan + Deptrac)
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Boot CI stack (no --wait; Typesense lacks self-probe)
+        run: docker compose -f infra/docker-compose.ci.yml up -d
+      - name: Wait for backend, postgres, dragonfly, typesense
+        run: |
+          set -e
+          # Backend (Octane on FrankenPHP)
+          for i in $(seq 1 60); do
+            if curl -fsS -o /dev/null http://localhost:8000/; then echo "backend ready"; break; fi
+            sleep 2
+          done
+          # Postgres
+          for i in $(seq 1 30); do
+            if docker compose -f infra/docker-compose.ci.yml exec -T postgres pg_isready -U azimuth -d azimuth; then break; fi
+            sleep 2
+          done
+          # Dragonfly
+          for i in $(seq 1 30); do
+            if docker compose -f infra/docker-compose.ci.yml exec -T dragonfly redis-cli ping | grep -q PONG; then break; fi
+            sleep 2
+          done
+          # Typesense (host probe)
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8108/health | grep -q '"ok":true'; then echo "typesense ready"; break; fi
+            sleep 2
+          done
+
+      - name: Run migrations
+        run: docker compose -f infra/docker-compose.ci.yml exec -T backend php artisan migrate --force
+
+      - name: Pest
+        run: docker compose -f infra/docker-compose.ci.yml exec -T backend ./vendor/bin/pest --parallel
+
+      - name: PHPStan
+        run: docker compose -f infra/docker-compose.ci.yml exec -T backend ./vendor/bin/phpstan analyze --memory-limit=2G
+
+      - name: Deptrac
+        run: docker compose -f infra/docker-compose.ci.yml exec -T backend ./vendor/bin/deptrac analyse --no-progress --report-uncovered
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build design tokens
+        run: pnpm nx build design-tokens
+      - name: Build api-client
+        run: pnpm nx build api-client
+      - name: Test all frontend libs and apps
+        run: pnpm nx run-many --target=test --projects=design-tokens,i18n,ui,api-client,web
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - name: Boot backend stack (no --wait; Typesense lacks self-probe)
+        run: docker compose -f infra/docker-compose.ci.yml up -d
+      - name: Wait for backend, postgres, dragonfly, typesense
+        run: |
+          set -e
+          # Backend (Octane on FrankenPHP)
+          for i in $(seq 1 60); do
+            if curl -fsS -o /dev/null http://localhost:8000/; then echo "backend ready"; break; fi
+            sleep 2
+          done
+          # Postgres
+          for i in $(seq 1 30); do
+            if docker compose -f infra/docker-compose.ci.yml exec -T postgres pg_isready -U azimuth -d azimuth; then break; fi
+            sleep 2
+          done
+          # Dragonfly
+          for i in $(seq 1 30); do
+            if docker compose -f infra/docker-compose.ci.yml exec -T dragonfly redis-cli ping | grep -q PONG; then break; fi
+            sleep 2
+          done
+          # Typesense (host probe)
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8108/health | grep -q '"ok":true'; then echo "typesense ready"; break; fi
+            sleep 2
+          done
+      - name: Migrate
+        run: docker compose -f infra/docker-compose.ci.yml exec -T backend php artisan migrate --force
+      - name: Build api-client
+        run: pnpm nx build api-client
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+      - name: E2E
+        env:
+          # global-setup.ts shells out to `docker compose`; in CI we use the
+          # ci compose file with no `.env`. Override the dev default.
+          AZIMUTH_COMPOSE_ARGS: '-f infra/docker-compose.ci.yml'
+        run: pnpm nx e2e web
+
+  docs-build:
+    runs-on: ubuntu-latest
+    # No `needs:` — runs in parallel with backend/frontend test jobs.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: markdownlint-cli2
+        run: pnpm lint:docs
+
+      - name: Redocly OpenAPI lint
+        run: pnpm lint:openapi
+
+      - name: Boot backend stack (route-coverage needs `php artisan route:list`)
+        run: docker compose -f infra/docker-compose.ci.yml up -d
+      - name: Wait for backend
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS -o /dev/null http://localhost:8000/; then break; fi
+            sleep 2
+          done
+
+      - name: Refresh OpenAPI snapshot from running backend
+        run: |
+          curl -fsS http://localhost:8000/docs/api.json -o apps/backend/openapi.json
+      - name: Route coverage
+        env:
+          # check-route-coverage.mjs shells out to `docker compose`; in CI we
+          # use the ci compose file with no `.env`. Override the dev default.
+          AZIMUTH_COMPOSE_ARGS: '-f infra/docker-compose.ci.yml'
+        run: pnpm check:route-coverage
+
+      - name: Assert OpenAPI snapshot in repo matches live
+        run: |
+          if ! git diff --exit-code apps/backend/openapi.json; then
+            echo "::error::apps/backend/openapi.json is stale. Refresh it locally with 'pnpm nx run api-client:refresh' and commit."
+            exit 1
+          fi

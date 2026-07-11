@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+@config '../../tailwind.config.ts';
+@import '../../../../libs/design-tokens/src/tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}

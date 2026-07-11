@@ -1,0 +1,15 @@
+node_modules
+.pnpm-store
+.next
+out
+dist
+build
+coverage
+.nx
+apps/backend/vendor
+apps/backend/storage
+apps/backend/bootstrap/cache
+# Scramble emits this with 4-space JSON; the CI docs-build job diffs the
+# in-repo copy against curl output from a live backend. Don't reformat.
+apps/backend/openapi.json
+pnpm-lock.yaml

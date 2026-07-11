@@ -1,0 +1,43 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.deptrac.cache
+.phpunit.result.cache
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+**/caddy
+frankenphp
+frankenphp-worker.php
+
+# Filament publishes vendor assets to public/ on every `composer install`,
+# `filament:upgrade`, or any package's post-update-cmd hook that triggers it.
+# These are deterministic outputs of vendor code, so they don't need to live
+# in the repo — CI/deploy republishes them with `php artisan filament:assets`.
+/public/css/filament/
+/public/fonts/filament/
+/public/js/filament/
+
+# Passport encryption keys — generated per environment by passport:keys --force
+# in the entrypoint. Never commit; AppServiceProvider chmods them at boot.
+/storage/passport/

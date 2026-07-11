@@ -1,0 +1,13 @@
+pre-commit:
+  parallel: true
+  commands:
+    prettier:
+      glob: '*.{js,jsx,ts,tsx,json,md,yaml,yml,css}'
+      run: pnpm exec prettier --write {staged_files} && git add {staged_files}
+    eslint:
+      glob: '{apps/web,libs}/**/*.{ts,tsx}'
+      run: pnpm exec eslint --fix {staged_files} && git add {staged_files}
+    pint:
+      root: 'apps/backend/'
+      glob: '**/*.php'
+      run: docker compose --env-file ../../.env -f ../../infra/docker-compose.yml --project-directory ../.. exec -T backend ./vendor/bin/pint {staged_files} && git add {staged_files}

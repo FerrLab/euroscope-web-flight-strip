@@ -1,0 +1,43 @@
+config:
+  default: true
+
+  # MD013 (line length): noisy with long URLs in docs and pre-formatted code.
+  MD013: false
+
+  # MD024 (no duplicate headings): allow duplicate headings under different parents
+  # (e.g., "## Step 1" inside multiple Task N sections of plan files).
+  MD024:
+    siblings_only: true
+
+  # MD033 (no inline HTML): allow specific tags used for advanced rendering
+  # (Mermaid blocks render via fenced ```mermaid; details/summary used in some runbooks).
+  MD033:
+    allowed_elements: [details, summary, sub, sup, br]
+
+  # MD034 (no bare URLs): allow bare URLs in tables and prose; angle-bracket wrapping
+  # would fight Markdown table column alignment.
+  MD034: false
+
+  # MD040 (fenced-code language): require all fenced code blocks to declare a language.
+  MD040: true
+
+  # MD041 (first-line h1): docs always start with H1, but ADRs use front-matter style
+  # in some communities; we use H1 universally so this stays on.
+  MD041: true
+
+  # MD046 (code block style): enforce fenced (``` triple-backtick) over indented.
+  MD046:
+    style: fenced
+
+globs:
+  - '**/*.md'
+
+ignores:
+  - 'node_modules'
+  - '**/node_modules'
+  - '**/node_modules/**'
+  - 'apps/backend/vendor/**'
+  - 'apps/backend/storage/**'
+  - '.next/**'
+  - 'apps/web/.next/**'
+  - 'apps/web/test-results/**'

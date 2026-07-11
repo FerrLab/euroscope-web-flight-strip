@@ -1,0 +1,44 @@
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/web/src",
+  "projectType": "application",
+  "tags": ["scope:web", "type:app"],
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": { "command": "next dev -p 3000", "cwd": "apps/web" }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "next build", "cwd": "apps/web" }
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": { "command": "next start -p 3000", "cwd": "apps/web" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run", "cwd": "apps/web" }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest", "cwd": "apps/web" }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "eslint src --max-warnings=0", "cwd": "apps/web" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc --noEmit -p apps/web/tsconfig.json", "cwd": "{workspaceRoot}" }
+    },
+    "e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright test --config=e2e/playwright.config.ts",
+        "cwd": "apps/web"
+      }
+    }
+  }
+}
