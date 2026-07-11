@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Modules\Gateway\Domain\GatewayToken;
 use App\Modules\Gateway\Domain\GatewayTokenRepository;
 use DateTimeImmutable;
+use RuntimeException;
 
 final class PassportGatewayTokenRepository implements GatewayTokenRepository
 {
@@ -25,9 +26,15 @@ final class PassportGatewayTokenRepository implements GatewayTokenRepository
 
         $result = $user->createToken(self::TOKEN_NAME);
 
+        $token = $result->getToken()
+            ?? throw new RuntimeException('Newly minted gateway token could not be reloaded.');
+
+        $createdAt = $token->created_at
+            ?? throw new RuntimeException('Newly minted gateway token is missing its creation timestamp.');
+
         return new GatewayToken(
             plainText: $result->accessToken,
-            createdAt: $result->token->created_at->toDateTimeImmutable(),
+            createdAt: $createdAt->toDateTimeImmutable(),
         );
     }
 

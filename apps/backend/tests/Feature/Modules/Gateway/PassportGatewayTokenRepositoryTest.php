@@ -25,7 +25,8 @@ it('mints a personal access token named gateway (happy)', function (): void {
 
     $token = $repo->rotate($user->id);
 
-    expect($token->plainText)->toBeString()->not->toBe('');
+    expect($token->plainText)->toBeString();
+    expect($token->plainText)->not->toBe('');
     expect($token->createdAt)->toBeInstanceOf(DateTimeImmutable::class);
     expect($user->tokens()->where('name', 'gateway')->where('revoked', false)->count())->toBe(1);
 });

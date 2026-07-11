@@ -9,6 +9,7 @@ use Spatie\LaravelData\Data;
 use Tests\Support\Modules\Gateway\InMemoryCommandQueueRepository;
 use Tests\Support\Modules\Gateway\InMemoryGatewayStreamRepository;
 
+/** @return array{EnqueuePluginCommandHandler, InMemoryCommandQueueRepository, InMemoryGatewayStreamRepository} */
 function enqueueHandler(): array
 {
     $queue = new InMemoryCommandQueueRepository;
@@ -46,7 +47,8 @@ it('generates an id when absent (happy)', function (): void {
 
     $envelope = $handler->handle(new EnqueuePluginCommandCommand(userId: 7, action: 'ping'));
 
-    expect($envelope['id'])->toBeString()->not->toBe('');
+    expect($envelope['id'])->toBeString();
+    expect($envelope['id'])->not->toBe('');
 });
 
 it('omits callsign and payload when null (happy)', function (): void {
