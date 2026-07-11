@@ -1,12 +1,12 @@
 # Repo tour
 
-> Welcome to Azimuth. Read this top-to-bottom — it's a 10-minute
+> Welcome to EuroStrip. Read this top-to-bottom — it's a 10-minute
 > tour of the repo, designed to give you the mental map before you
 > do anything else.
 
 ## What this repo is
 
-Azimuth is a general-aviation PDCA companion: pilots and small ops
+EuroStrip is a general-aviation PDCA companion: pilots and small ops
 teams record observations, run checklists, review what happened, and
 refine. It's an Nx 20 monorepo with two deployable apps (Laravel 13
 backend, Next.js 15 frontend) and four shared libraries.
@@ -17,7 +17,7 @@ It has the system diagram and ERD.
 ## The 60-second skim
 
 ```text
-azimuth/
+eurostrip/
 ├── apps/
 │   ├── backend/        ← Laravel 13 + Octane/FrankenPHP
 │   └── web/            ← Next.js 15 (App Router)
@@ -56,8 +56,8 @@ to see how `apps/` and `libs/` relate under Nx.
 ### Minute 3: Bring up the stack
 
 ```bash
-git clone <repo-url> azimuth
-cd azimuth
+git clone <repo-url> eurostrip
+cd eurostrip
 cp .env.example .env
 
 # Generate a Laravel app key into .env (the placeholder is not valid)

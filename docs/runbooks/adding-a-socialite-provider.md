@@ -1,6 +1,6 @@
 # Adding a Socialite provider
 
-This runbook walks through extending Azimuth's Socialite-based auth
+This runbook walks through extending EuroStrip's Socialite-based auth
 with a real OAuth provider, using the existing stub as the template.
 Worked example: GitHub.
 
@@ -29,7 +29,7 @@ Worked example: GitHub.
 
 For GitHub: <https://github.com/settings/developers> → New OAuth App.
 
-- Application name: `Azimuth (dev)`, `Azimuth (prod)`, etc.
+- Application name: `EuroStrip (dev)`, `EuroStrip (prod)`, etc.
 - Homepage URL: `http://localhost:3000` (dev) or your production URL.
 - Authorization callback URL: `http://localhost:8000/auth/socialite/github/callback`
   (dev) — this is the **Laravel** route, NOT the Next.js proxy.
@@ -142,7 +142,7 @@ that's where the real IdP round-trip starts:
 ```ts
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.AZIMUTH_BACKEND_URL ?? 'http://127.0.0.1:8000';
+const BACKEND_URL = process.env.EUROSTRIP_BACKEND_URL ?? 'http://127.0.0.1:8000';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -150,7 +150,7 @@ export async function GET(request: Request) {
   // Persist locale across the OAuth round-trip so the callback handler
   // can land the user on the right /<locale>/dashboard.
   const res = NextResponse.redirect(`${BACKEND_URL}/auth/socialite/github/redirect`, 302);
-  res.cookies.set('azimuth_oauth_locale', locale, {
+  res.cookies.set('eurostrip_oauth_locale', locale, {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
@@ -178,7 +178,7 @@ For a first-pass implementation, cheat: have the backend `callback`
 return HTML that POSTs the JSON to the Next.js handler. Whichever
 you pick, write `apps/web/src/app/api/auth/github-callback/route.ts`
 modelled on `stub-callback/route.ts` — `buildSessionCookie` from
-`@/shared/auth/cookie`, locale via the `azimuth_oauth_locale` cookie
+`@/shared/auth/cookie`, locale via the `eurostrip_oauth_locale` cookie
 set in step 7.
 
 ### 9. Frontend login UI

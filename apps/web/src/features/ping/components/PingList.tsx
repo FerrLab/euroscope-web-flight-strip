@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Spinner, Table } from '@azimuth/ui';
+import { Spinner, Table } from '@eurostrip/ui';
 import { useListPingsQuery, type PingDto } from '../api';
 
 export function PingList() {

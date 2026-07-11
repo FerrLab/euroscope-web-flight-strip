@@ -153,16 +153,16 @@ importers:
 
   apps/web:
     dependencies:
-      '@azimuth/api-client':
+      '@eurostrip/api-client':
         specifier: workspace:*
         version: link:../../libs/api-client
-      '@azimuth/design-tokens':
+      '@eurostrip/design-tokens':
         specifier: workspace:*
         version: link:../../libs/design-tokens
-      '@azimuth/i18n':
+      '@eurostrip/i18n':
         specifier: workspace:*
         version: link:../../libs/i18n
-      '@azimuth/ui':
+      '@eurostrip/ui':
         specifier: workspace:*
         version: link:../../libs/ui
       next:

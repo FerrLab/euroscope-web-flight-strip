@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   }
   const secure = process.env.NODE_ENV === 'production';
   const cookie = [
-    `azimuth_theme=${theme}`,
+    `eurostrip_theme=${theme}`,
     'Path=/',
     'SameSite=Strict',
     `Max-Age=${60 * 60 * 24 * 365}`,

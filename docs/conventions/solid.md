@@ -13,12 +13,12 @@
 SOLID gets cited so often it has lost meaning. This doc skips the
 textbook framing and shows where each principle is load-bearing in
 _this_ codebase, so the rule is concrete instead of folklore. Every
-section cites a real Azimuth file path. If a section ever drifts from
+section cites a real EuroStrip file path. If a section ever drifts from
 the code, fix the code or fix the doc — don't let the example rot.
 
 ## S — Single Responsibility
 
-A class has one reason to change. In Azimuth: one Handler per Command,
+A class has one reason to change. In EuroStrip: one Handler per Command,
 one Repository per aggregate, one ValueObject per concept, one
 Middleware per cross-cutting concern.
 

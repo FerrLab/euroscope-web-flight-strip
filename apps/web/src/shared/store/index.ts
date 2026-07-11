@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import { baseApi } from '@azimuth/api-client';
+import { baseApi } from '@eurostrip/api-client';
 import { authSlice } from './slices/auth';
 
 export function makeStore() {

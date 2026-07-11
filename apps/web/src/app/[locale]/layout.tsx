@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { LOCALES, isLocale, type Locale } from '@azimuth/i18n';
+import { LOCALES, isLocale, type Locale } from '@eurostrip/i18n';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { ReduxProvider } from '@/shared/store/ReduxProvider';
@@ -23,7 +23,7 @@ export default async function LocaleLayout({
   if (!isLocale(locale)) notFound();
 
   const messages = await getMessages();
-  const themeCookie = (await cookies()).get('azimuth_theme')?.value ?? 'day';
+  const themeCookie = (await cookies()).get('eurostrip_theme')?.value ?? 'day';
 
   return (
     <html lang={locale} data-theme={themeCookie} suppressHydrationWarning>

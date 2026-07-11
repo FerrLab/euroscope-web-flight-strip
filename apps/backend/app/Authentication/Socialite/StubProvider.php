@@ -11,7 +11,7 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 /**
  * Stub Socialite driver — decision #7 (per-request fixture identity).
  *
- * Accepts ?identity=<email> query param; defaults to stub-user@azimuth.local.
+ * Accepts ?identity=<email> query param; defaults to stub-user@eurostrip.local.
  * The "OAuth flow" is a no-op redirect (back to callback) and a deterministic
  * user payload. Used for dev and integration tests without a real IdP.
  */
@@ -20,7 +20,7 @@ class StubProvider extends AbstractProvider implements ProviderInterface
     /** @var list<string> */
     protected $scopes = [];
 
-    private const DEFAULT_IDENTITY = 'stub-user@azimuth.local';
+    private const DEFAULT_IDENTITY = 'stub-user@eurostrip.local';
 
     protected function getAuthUrl($state): string
     {

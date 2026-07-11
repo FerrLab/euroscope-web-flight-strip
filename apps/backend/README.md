@@ -1,6 +1,6 @@
-# Azimuth Backend
+# EuroStrip Backend
 
-Laravel 13 + Octane/FrankenPHP application for the Azimuth platform.
+Laravel 13 + Octane/FrankenPHP application for the EuroStrip platform.
 
 This app follows a CQRS three-layer architecture (Command/Query → Handler →
 UseCase). See [`docs/architecture/backend.md`](../../docs/architecture/backend.md)

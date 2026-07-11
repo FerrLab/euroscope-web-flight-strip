@@ -5,7 +5,7 @@
 
 ## Context
 
-Azimuth is a monorepo containing a Next.js frontend (TypeScript) and a Laravel backend (PHP). We chose Nx as the monorepo orchestration tool. Nx is fundamentally TypeScript/JavaScript-oriented; PHP support is not first-class. We needed a way to expose the Laravel app as a real Nx project so that:
+EuroStrip is a monorepo containing a Next.js frontend (TypeScript) and a Laravel backend (PHP). We chose Nx as the monorepo orchestration tool. Nx is fundamentally TypeScript/JavaScript-oriented; PHP support is not first-class. We needed a way to expose the Laravel app as a real Nx project so that:
 
 - `nx serve`, `nx test`, `nx lint`, etc., work uniformly across both apps
 - `nx affected` correctly picks up backend changes and re-runs only what's needed

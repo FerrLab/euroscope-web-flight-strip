@@ -7,7 +7,7 @@
 
 ## Context
 
-Azimuth's backend has two competing forces. SOLID separation requires that
+EuroStrip's backend has two competing forces. SOLID separation requires that
 business logic not depend on the framework — the same logic should be testable
 without booting Laravel, and a future swap of bus implementation, ORM, or HTTP
 stack should not ripple through Domain code. At the same time, the bus needs
@@ -96,7 +96,7 @@ This decision imposes the following constraints:
 
 ## References
 
-- [Phase 2 decision log row 6 (middleware order ties to this layout).](../superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md)
-- [Original spec §5 — backend architecture.](../superpowers/specs/2026-05-02-azimuth-scaffold-design.md)
+- [Phase 2 decision log row 6 (middleware order ties to this layout).](../superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md)
+- [Original spec §5 — backend architecture.](../superpowers/specs/2026-05-02-eurostrip-scaffold-design.md)
 - [`docs/architecture/cqrs.md`](../architecture/cqrs.md) — current contracts and conventions.
 - [ADR 0007 — Bus Middleware Order](0007-bus-middleware-order.md).

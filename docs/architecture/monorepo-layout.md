@@ -1,6 +1,6 @@
-# Azimuth — Monorepo layout
+# EuroStrip — Monorepo layout
 
-Azimuth is an [Nx 20](https://nx.dev) monorepo with [pnpm](https://pnpm.io)
+EuroStrip is an [Nx 20](https://nx.dev) monorepo with [pnpm](https://pnpm.io)
 workspaces. There are two deployable apps and a small set of shared
 libraries; everything else (infra, docs, scripts) lives at the repo root.
 
@@ -10,7 +10,7 @@ This doc is the map. For _why_ the topology looks this way, see
 ## Directory map
 
 ```text
-azimuth/
+eurostrip/
 ├── apps/
 │   ├── backend/        # Laravel 13 + Octane/FrankenPHP, Filament, Scramble
 │   └── web/            # Next.js 15 (App Router) + Redux Toolkit
@@ -94,7 +94,7 @@ generated artefacts, not bundles.
 
 ### `libs/api-client`
 
-Tags: `scope:shared`, `type:lib`. Path alias: `@azimuth/api-client`.
+Tags: `scope:shared`, `type:lib`. Path alias: `@eurostrip/api-client`.
 
 RTK Query slice auto-generated from `apps/backend/openapi.json`. The
 `build` target invokes `rtk-query-codegen-openapi`; the `refresh` target
@@ -111,7 +111,7 @@ Consumed by `apps/web` and (eventually) any other client.
 
 ### `libs/design-tokens`
 
-Tags: `scope:shared`, `type:lib`. Path alias: `@azimuth/design-tokens`.
+Tags: `scope:shared`, `type:lib`. Path alias: `@eurostrip/design-tokens`.
 
 Source-of-truth palette + Tailwind tokens for the 4 themes. The `build`
 target (`tsx src/build.ts`) emits CSS variable files consumed by
@@ -127,10 +127,10 @@ target (`tsx src/build.ts`) emits CSS variable files consumed by
 
 ### `libs/i18n`
 
-Tags: `scope:shared`, `type:lib`. Path alias: `@azimuth/i18n`.
+Tags: `scope:shared`, `type:lib`. Path alias: `@eurostrip/i18n`.
 
 `LOCALES` registry plus message-catalog loaders for next-intl. The
-single source of truth for "what locales does Azimuth ship?". No build
+single source of truth for "what locales does EuroStrip ship?". No build
 step; consumed via path alias.
 
 | Target      | What it runs                              |
@@ -141,7 +141,7 @@ step; consumed via path alias.
 
 ### `libs/ui`
 
-Tags: `scope:ui`, `type:lib`. Path alias: `@azimuth/ui`.
+Tags: `scope:ui`, `type:lib`. Path alias: `@eurostrip/ui`.
 
 Squared-UI primitives (Button, Input, Dialog, Toast …) wrapping
 `@radix-ui/*`. Tailwind classes only — no `border-radius` other than
@@ -208,7 +208,7 @@ is a Phase 5 TODO. The intended rules:
 1. Generate with the Nx generator that matches the consumer:
 
    ```bash
-   pnpm nx g @nx/js:library <name> --directory=libs/<name> --importPath=@azimuth/<name>
+   pnpm nx g @nx/js:library <name> --directory=libs/<name> --importPath=@eurostrip/<name>
    # or @nx/next:library / @nx/react:library if you need framework presets
    ```
 
@@ -222,10 +222,10 @@ is a Phase 5 TODO. The intended rules:
 4. Add the path alias to `tsconfig.base.json` under `compilerOptions.paths`:
 
    ```json
-   "@azimuth/<name>": ["libs/<name>/src/index.ts"]
+   "@eurostrip/<name>": ["libs/<name>/src/index.ts"]
    ```
 
-5. Reference the lib from a consumer (`import { … } from '@azimuth/<name>'`)
+5. Reference the lib from a consumer (`import { … } from '@eurostrip/<name>'`)
    and verify the new edge appears in `pnpm nx graph`.
 
 ## CI shape

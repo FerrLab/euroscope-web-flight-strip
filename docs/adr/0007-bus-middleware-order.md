@@ -5,7 +5,7 @@
 
 ## Context
 
-Azimuth's CQRS bus pipeline runs five middleware before invoking a handler
+EuroStrip's CQRS bus pipeline runs five middleware before invoking a handler
 (four for the QueryBus — no transaction). The order of these middleware is
 load-bearing: it determines what an unauthorized caller sees, where a
 malformed payload is caught, and which checks run when a command is
@@ -106,7 +106,7 @@ This decision imposes the following constraints:
 
 ## References
 
-- [Phase 2 decision log row 6.](../superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md)
-- [Original spec §5 — backend architecture.](../superpowers/specs/2026-05-02-azimuth-scaffold-design.md)
+- [Phase 2 decision log row 6.](../superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md)
+- [Original spec §5 — backend architecture.](../superpowers/specs/2026-05-02-eurostrip-scaffold-design.md)
 - [`docs/architecture/cqrs.md`](../architecture/cqrs.md) §4 (the pipeline) and §5 (the rationale).
 - [ADR 0002 — Three-Layer CQRS](0002-cqrs-three-layer.md).

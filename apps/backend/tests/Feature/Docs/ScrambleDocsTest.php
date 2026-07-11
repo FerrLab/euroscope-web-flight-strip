@@ -6,7 +6,7 @@ it('renders the Scramble docs UI at /docs/api', function (): void {
     $response = $this->get('/docs/api');
 
     $response->assertStatus(200);
-    expect($response->content())->toContain('Azimuth API');
+    expect($response->content())->toContain('EuroStrip API');
 });
 
 it('serves openapi.json describing the API', function (): void {
@@ -15,5 +15,5 @@ it('serves openapi.json describing the API', function (): void {
     $response->assertStatus(200);
     $body = $response->json();
     expect($body)->toHaveKey('openapi');
-    expect($body)->toHaveKey('info.title', 'Azimuth API');
+    expect($body)->toHaveKey('info.title', 'EuroStrip API');
 });

@@ -1,9 +1,9 @@
-# Azimuth — Phase 2 Scope-Validation & Decision Log
+# EuroStrip — Phase 2 Scope-Validation & Decision Log
 
 **Date:** 2026-05-05
 **Status:** Approved (pending written-spec review)
 **Author:** Brainstormed with Kewyn Ferreira
-**Parent spec:** `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` §13.2
+**Parent spec:** `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` §13.2
 **Predecessor handoff:** `docs/runbooks/phase-2-handoff.md`
 
 ---
@@ -31,15 +31,15 @@ Phase 2 §13.2 stands as-is with one substitution and zero deletions:
 
 ## 3. Decision log
 
-| #   | Decision                                                    | Locked choice                                                                                                                                                                                                           | Rationale                                                                                                       |
+| # | Decision | Locked choice | Rationale |
 | --- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| 1   | Test runner                                                 | **Pest** (migrate from PHPUnit in Phase 2 task #1)                                                                                                                                                                      | Spec calls for Pest; later migration costs more                                                                 |
-| 2   | GitHub remote rename (`FerrLab/vector` → `FerrLab/azimuth`) | **Defer** until Phase 2 is on a feature branch                                                                                                                                                                          | Cosmetic; one-shot rename when branch is up                                                                     |
-| 3   | Phase 1 deviations in spec                                  | **Patch §13.1** (done in commit `923bcc1`)                                                                                                                                                                              | Cold readers shouldn't be misled                                                                                |
-| 4   | Phase 3 parallelism                                         | **Strict serial** for now; revisit at Phase 2 task ~20 (after Ping HTTP routes are live)                                                                                                                                | Phase 2 already has 25+ tasks; CQRS contracts touch foundation; interleaving risks rework                       |
-| 5   | Permission contract shape                                   | **Marker interface**: `interface Permission` in `App\Authorization\Contracts`, every module's enum `implements Permission` (e.g., `enum PingPermission: string implements Permission { case View = 'ping.view'; ... }`) | Type system carries the constraint; PHPStan rule only needs to forbid raw strings in `Gate::*`/`policy()` calls |
-| 6   | Bus middleware ordering                                     | **Logging → Metrics → Authorize → Validate → Transaction** (spec order; Authorize before Validate)                                                                                                                      | Don't reveal schema knowledge to unauthorized callers; defense-in-depth; revisit if perf ever bites             |
-| 7   | Stub Socialite identity                                     | **Per-request fixture user**: stub driver accepts `?identity=<email>` query param; defaults to `stub-user@azimuth.local` when absent; upserts on each call                                                              | Unlocks multi-role testing (admin vs regular) without test-only branches in production code                     |
+| 1 | Test runner | **Pest** (migrate from PHPUnit in Phase 2 task #1) | Spec calls for Pest; later migration costs more |
+| 2 | GitHub remote rename (`FerrLab/vector` → `FerrLab/eurostrip`) | **Defer** until Phase 2 is on a feature branch | Cosmetic; one-shot rename when branch is up |
+| 3 | Phase 1 deviations in spec | **Patch §13.1** (done in commit `923bcc1`) | Cold readers shouldn't be misled |
+| 4 | Phase 3 parallelism | **Strict serial** for now; revisit at Phase 2 task ~20 (after Ping HTTP routes are live) | Phase 2 already has 25+ tasks; CQRS contracts touch foundation; interleaving risks rework |
+| 5 | Permission contract shape | **Marker interface**: `interface Permission` in `App\Authorization\Contracts`, every module's enum `implements Permission` (e.g., `enum PingPermission: string implements Permission { case View = 'ping.view'; ... }`) | Type system carries the constraint; PHPStan rule only needs to forbid raw strings in `Gate::*`/`policy()` calls |
+| 6 | Bus middleware ordering | **Logging → Metrics → Authorize → Validate → Transaction** (spec order; Authorize before Validate) | Don't reveal schema knowledge to unauthorized callers; defense-in-depth; revisit if perf ever bites |
+| 7 | Stub Socialite identity | **Per-request fixture user**: stub driver accepts `?identity=<email>` query param; defaults to `stub-user@eurostrip.local` when absent; upserts on each call | Unlocks multi-role testing (admin vs regular) without test-only branches in production code |
 
 ---
 
@@ -119,7 +119,7 @@ None. The seven decisions above + §13.2 + §11 (naming conventions) fully const
 
 ## 9. References
 
-- Original spec: `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` (§5 backend architecture, §11 naming, §13.2 Phase 2)
+- Original spec: `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` (§5 backend architecture, §11 naming, §13.2 Phase 2)
 - Phase 2 handoff runbook: `docs/runbooks/phase-2-handoff.md`
 - CLAUDE.md hard rules: `/CLAUDE.md`
 - Phase 1 cross-platform fixes: commit `4b7cbb6`

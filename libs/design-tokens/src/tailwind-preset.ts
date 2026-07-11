@@ -1,6 +1,6 @@
 import type { Config } from 'tailwindcss';
 
-export const azimuthPreset: Partial<Config> = {
+export const eurostripPreset: Partial<Config> = {
   theme: {
     extend: {
       colors: {
@@ -38,4 +38,4 @@ export const azimuthPreset: Partial<Config> = {
   },
 };
 
-export default azimuthPreset;
+export default eurostripPreset;

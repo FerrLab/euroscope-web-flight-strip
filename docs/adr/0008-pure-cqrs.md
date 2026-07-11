@@ -53,6 +53,6 @@ The `App\Cqrs\CommandUseCase` and `App\Cqrs\QueryUseCase` marker interfaces are 
 ## References
 
 - [ADR 0002: Three-Layer CQRS (Superseded)](./0002-cqrs-three-layer.md)
-- Phase 4 decision-log spec, decision #6 + §12 (concrete file impact): `docs/superpowers/specs/2026-05-07-azimuth-scaffold-phase-4-decisions.md`
+- Phase 4 decision-log spec, decision #6 + §12 (concrete file impact): `docs/superpowers/specs/2026-05-07-eurostrip-scaffold-phase-4-decisions.md`
 - Implementation commits: `4069172` (drop UseCase contracts), `92587a3` (collapse RecordPing), `aa2ffa2` (collapse ListPings)
 - Bus middleware order: [ADR 0007](./0007-bus-middleware-order.md) — unchanged

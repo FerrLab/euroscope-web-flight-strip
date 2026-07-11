@@ -1,6 +1,6 @@
 # CQRS Architecture
 
-Azimuth's backend separates writes from reads using pure CQRS:
+EuroStrip's backend separates writes from reads using pure CQRS:
 **Command/Query → Handler**. The Handler holds the business logic; the bus
 middleware wraps it with cross-cutting concerns. This document is the
 canonical reference for the contracts, the bus pipeline, and the conventions
@@ -142,7 +142,7 @@ have failed validation); the asymmetry buys consistent behavior across all
 callers.
 
 The decision is locked in row 6 of the decision log
-([`docs/superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md`](../superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md))
+([`docs/superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md`](../superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md))
 and recorded in [ADR 0007](../adr/0007-bus-middleware-order.md).
 
 ## 6. Adding a new command end-to-end (worked example: `RecordPing`)
@@ -343,9 +343,9 @@ garbage** triad mandated by CLAUDE.md hard rule #1; Handlers add a fourth
 ## 10. References
 
 - Original spec — bounded-context module shape:
-  [`docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md`](../superpowers/specs/2026-05-02-azimuth-scaffold-design.md) §5.
+  [`docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md`](../superpowers/specs/2026-05-02-eurostrip-scaffold-design.md) §5.
 - Phase 2 decision log:
-  [`docs/superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md`](../superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md)
+  [`docs/superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md`](../superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md)
   (rows 5, 6).
 - [ADR 0008 — Pure CQRS](../adr/0008-pure-cqrs.md) (current).
 - [ADR 0002 — Three-Layer CQRS](../adr/0002-cqrs-three-layer.md) (superseded).

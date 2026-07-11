@@ -1,6 +1,6 @@
 # Authentication & Authorization
 
-This document is the canonical reference for how Azimuth authenticates users
+This document is the canonical reference for how EuroStrip authenticates users
 and authorizes their actions. For the rationale on the unusual pieces (the
 permission marker interface, the stub Socialite driver) see
 [ADR 0003](../adr/0003-permission-marker-interface.md) and
@@ -8,7 +8,7 @@ permission marker interface, the stub Socialite driver) see
 
 ## 1. Overview
 
-Azimuth uses **Passport** for OAuth2 access tokens (the API surface),
+EuroStrip uses **Passport** for OAuth2 access tokens (the API surface),
 **Socialite** with a stub driver for IdP-shaped login flows (real providers
 plug in later without changing call-sites), and **spatie/laravel-permission v7**
 for the role/permission model. The Filament admin panel and Laravel Horizon
@@ -67,7 +67,7 @@ into production code.
 1. Caller hits `GET /auth/socialite/stub/redirect?identity=alice@example.com`.
 2. The controller calls `Socialite::driver('stub')->redirect()`. The stub's
    `getAuthUrl` returns the callback URL with the `identity` query param
-   carried forward. Default identity is `stub-user@azimuth.local` when the
+   carried forward. Default identity is `stub-user@eurostrip.local` when the
    query is absent.
 3. The browser follows the redirect to
    `GET /auth/socialite/stub/callback?identity=alice@example.com`.
@@ -293,6 +293,6 @@ Same role gate as above — `Gate::define('viewHorizon', ...)` returns true iff
 - [ADR 0003 — Permission as a Marker Interface](../adr/0003-permission-marker-interface.md).
 - [ADR 0004 — Stub Socialite with Per-Request Fixture Identity](../adr/0004-stub-socialite-per-request-fixture.md).
 - Phase 2 decision log:
-  [`docs/superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md`](../superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md)
+  [`docs/superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md`](../superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md)
   rows 5 (permission contract shape) and 7 (stub Socialite identity).
 - CLAUDE.md hard rule #3 (no raw permission strings).

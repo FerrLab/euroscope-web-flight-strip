@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Card } from '@azimuth/ui';
+import { Card } from '@eurostrip/ui';
 import { PingList } from '@/features/ping/components/PingList';
 import { RecordPingForm } from '@/features/ping/components/RecordPingForm';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';

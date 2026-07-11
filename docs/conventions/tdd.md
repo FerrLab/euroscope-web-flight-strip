@@ -5,7 +5,7 @@
 > first is a bug we haven't seen yet.
 
 This document is the canonical reference for the TDD discipline used
-throughout Azimuth. It is enforced by reviewer judgment on every PR
+throughout EuroStrip. It is enforced by reviewer judgment on every PR
 and underpins the `superpowers:test-driven-development` workflow that
 ships features in this repo.
 

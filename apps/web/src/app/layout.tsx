@@ -2,8 +2,8 @@ import './globals.css';
 import type { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'Azimuth',
-  description: 'Your companion from A to Z',
+  title: 'EuroStrip',
+  description: 'Web flight strips for EuroScope',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

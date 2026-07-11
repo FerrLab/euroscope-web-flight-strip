@@ -5,7 +5,7 @@
 
 ## Context
 
-Phase 3 of the Azimuth scaffold delivers the frontend skeleton. The backend
+Phase 3 of the EuroStrip scaffold delivers the frontend skeleton. The backend
 landed in Phase 2 with Passport-issued Bearer tokens minted through the stub
 Socialite driver ([ADR 0004](0004-stub-socialite-per-request-fixture.md)). The
 frontend now has to make a series of cross-cutting choices that, taken
@@ -31,7 +31,7 @@ together fix the shape of every `features/<module>/` directory and the four
 ## Decision
 
 The eight choices below are taken verbatim from rows 1–8 of the
-[Phase 3 decision log](../superpowers/specs/2026-05-06-azimuth-scaffold-phase-3-decisions.md)
+[Phase 3 decision log](../superpowers/specs/2026-05-06-eurostrip-scaffold-phase-3-decisions.md)
 §3.
 
 1. **Branch strategy.** Phase 2 PR #1 is merged (commit `99bac88`); Phase 3
@@ -139,7 +139,7 @@ The eight choices below are taken verbatim from rows 1–8 of the
 ## References
 
 - Phase 3 decision log:
-  [`docs/superpowers/specs/2026-05-06-azimuth-scaffold-phase-3-decisions.md`](../superpowers/specs/2026-05-06-azimuth-scaffold-phase-3-decisions.md)
+  [`docs/superpowers/specs/2026-05-06-eurostrip-scaffold-phase-3-decisions.md`](../superpowers/specs/2026-05-06-eurostrip-scaffold-phase-3-decisions.md)
   rows 1–8.
 - Frontend architecture: [`architecture/frontend.md`](../architecture/frontend.md).
 - [ADR 0005 — Filament for admin](0005-filament-for-admin.md), which

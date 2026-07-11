@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { Button, Input } from '@azimuth/ui';
+import { Button, Input } from '@eurostrip/ui';
 import { useState } from 'react';
 import { useRecordPingMutation } from '../api';
 

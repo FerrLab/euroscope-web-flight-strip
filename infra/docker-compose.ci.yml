@@ -1,4 +1,4 @@
-name: azimuth-ci
+name: eurostrip-ci
 
 volumes:
   composer-cache:
@@ -8,11 +8,11 @@ services:
   postgres:
     image: postgis/postgis:16-3.4
     environment:
-      POSTGRES_DB: azimuth
-      POSTGRES_USER: azimuth
-      POSTGRES_PASSWORD: azimuth
+      POSTGRES_DB: eurostrip
+      POSTGRES_USER: eurostrip
+      POSTGRES_PASSWORD: eurostrip
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U azimuth -d azimuth']
+      test: ['CMD-SHELL', 'pg_isready -U eurostrip -d eurostrip']
       interval: 5s
       timeout: 3s
       retries: 12
@@ -53,9 +53,9 @@ services:
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_DATABASE: azimuth
-      DB_USERNAME: azimuth
-      DB_PASSWORD: azimuth
+      DB_DATABASE: eurostrip
+      DB_USERNAME: eurostrip
+      DB_PASSWORD: eurostrip
       REDIS_HOST: dragonfly
       REDIS_PORT: 6379
       QUEUE_CONNECTION: sync

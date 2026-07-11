@@ -1,4 +1,4 @@
-# Azimuth — Phase 4 Implementation Plan
+# EuroStrip — Phase 4 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -10,8 +10,8 @@
 
 **Source documents (read all before starting):**
 
-- `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` — §10 (docs structure), §11 (naming conventions), §12 (canonical 12-step workflow), §13.4 (Phase 4 scope)
-- `docs/superpowers/specs/2026-05-07-azimuth-scaffold-phase-4-decisions.md` — six locked decisions, pre-flight hygiene already on `main`, pure-CQRS impact in §12
+- `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` — §10 (docs structure), §11 (naming conventions), §12 (canonical 12-step workflow), §13.4 (Phase 4 scope)
+- `docs/superpowers/specs/2026-05-07-eurostrip-scaffold-phase-4-decisions.md` — six locked decisions, pre-flight hygiene already on `main`, pure-CQRS impact in §12
 
 **Hard rules from `/CLAUDE.md` (apply to every task):**
 
@@ -24,7 +24,7 @@
 **Pre-flight hygiene already on `main` (do NOT redo):**
 
 - `7cb45c3` — host-side `next dev` binds to localhost (no more `0.0.0.0` redirect URL leak)
-- `fa46da7` — docker-compose `web` service profile-gated (`compose-web`); `AZIMUTH_BACKEND_URL=http://backend:8000`
+- `fa46da7` — docker-compose `web` service profile-gated (`compose-web`); `EUROSTRIP_BACKEND_URL=http://backend:8000`
 - `8ca6003` — route handlers default `BACKEND_URL` to `127.0.0.1:8000` (sidesteps Node IPv6-preferred resolution)
 - `e9c4df9` — `apps/web/.env.local.example` documenting `host.docker.internal:8000` for WSL2
 - `2af4ed2` — `AppServiceProvider::boot()` chmod's Passport keys to 600/660 every Octane worker boot
@@ -149,7 +149,7 @@ Find the `test-backend` and `e2e` jobs. Replace the `docker compose ... up -d --
     done
     # Postgres
     for i in $(seq 1 30); do
-      if docker compose -f infra/docker-compose.ci.yml exec -T postgres pg_isready -U azimuth -d azimuth; then break; fi
+      if docker compose -f infra/docker-compose.ci.yml exec -T postgres pg_isready -U eurostrip -d eurostrip; then break; fi
       sleep 2
     done
     # Dragonfly
@@ -1138,7 +1138,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const identity = url.searchParams.get('identity') ?? 'stub-user@azimuth.local';
+  const identity = url.searchParams.get('identity') ?? 'stub-user@eurostrip.local';
   const locale = url.searchParams.get('locale') ?? 'en';
   const cb = new URL('/api/auth/stub-callback', url);
   cb.searchParams.set('identity', identity);
@@ -1152,9 +1152,9 @@ export async function GET(request: Request) {
 ```ts
 import { NextResponse } from 'next/server';
 import { buildSessionCookie } from '@/shared/auth/cookie';
-import { LOCALES, type Locale } from '@azimuth/i18n';
+import { LOCALES, type Locale } from '@eurostrip/i18n';
 
-const BACKEND_URL = process.env.AZIMUTH_BACKEND_URL ?? 'http://127.0.0.1:8000';
+const BACKEND_URL = process.env.EUROSTRIP_BACKEND_URL ?? 'http://127.0.0.1:8000';
 
 function pickLocale(value: string | null): Locale {
   if (value && (LOCALES as readonly string[]).includes(value)) {
@@ -1165,7 +1165,7 @@ function pickLocale(value: string | null): Locale {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const identity = url.searchParams.get('identity') ?? 'stub-user@azimuth.local';
+  const identity = url.searchParams.get('identity') ?? 'stub-user@eurostrip.local';
   const locale = pickLocale(url.searchParams.get('locale'));
 
   const upstream = await fetch(
@@ -1200,7 +1200,7 @@ export async function GET(request: Request) {
 ```tsx
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import { Button, Card } from '@azimuth/ui';
+import { Button, Card } from '@eurostrip/ui';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
@@ -1544,9 +1544,9 @@ In the `backend:` service's `environment:` block, after the existing Redis vars,
 
 ```yaml
 BROADCAST_CONNECTION: ${BROADCAST_CONNECTION:-pusher}
-PUSHER_APP_ID: ${PUSHER_APP_ID:-azimuth-local}
-PUSHER_APP_KEY: ${PUSHER_APP_KEY:-azimuth-local-key}
-PUSHER_APP_SECRET: ${PUSHER_APP_SECRET:-azimuth-local-secret}
+PUSHER_APP_ID: ${PUSHER_APP_ID:-eurostrip-local}
+PUSHER_APP_KEY: ${PUSHER_APP_KEY:-eurostrip-local-key}
+PUSHER_APP_SECRET: ${PUSHER_APP_SECRET:-eurostrip-local-secret}
 PUSHER_HOST: ${PUSHER_HOST:-soketi}
 PUSHER_PORT: ${PUSHER_PORT:-6001}
 PUSHER_SCHEME: ${PUSHER_SCHEME:-http}
@@ -1615,7 +1615,7 @@ EOF
 
 The doc has six required sections, in this order:
 
-1. **One-paragraph framing.** What Azimuth is, what the scaffold proves, where to look first.
+1. **One-paragraph framing.** What EuroStrip is, what the scaffold proves, where to look first.
 2. **System diagram.** Mermaid `flowchart` showing: browser → Next.js (apps/web) → /api/proxy → backend (Octane on FrankenPHP) → {Postgres, Dragonfly, Typesense, Soketi, MinIO}. Sidecars: Mailpit, Horizon, Filament admin at /admin, Scramble at /docs/api.
 3. **Request lifecycle for `RecordPing`.** Mermaid `sequenceDiagram` showing: browser → /api/proxy → backend route → CommandBus → Logging→Metrics→Authorize→Validate→Transaction → RecordPingHandler → PingRepository → PingModel → DB. Highlights the four layers (Domain, Application, Infrastructure, Presentation).
 4. **ERD.** Mermaid `erDiagram` of the day-1 schema: `users`, `pings`, `permissions`, `roles`, `model_has_permissions`, `model_has_roles`, `role_has_permissions`, `oauth_clients`, `oauth_access_tokens`, `oauth_refresh_tokens`, `features`, Cashier tables (commented as unmigrated).
@@ -1664,7 +1664,7 @@ Required sections:
 2. **Top-level layout.** Tree:
 
 ```text
-azimuth/
+eurostrip/
 ├── apps/
 │   ├── backend/      # Laravel 13 + Octane on FrankenPHP
 │   └── web/          # Next.js 15 App Router
@@ -2132,7 +2132,7 @@ EOF
 
 Required sections (a 10-minute walkthrough for a fresh contributor or Claude session):
 
-1. **What is Azimuth.** One paragraph. Link to `architecture/overview.md` for diagrams.
+1. **What is EuroStrip.** One paragraph. Link to `architecture/overview.md` for diagrams.
 2. **Clone + run (5 minutes).** Reference `runbooks/local-dev.md` for the commands.
 3. **Read these four files first.**
    - `CLAUDE.md` — collaboration rules and pointers.
@@ -2196,9 +2196,9 @@ Required sections:
 3. **Probing channels via the Pusher HTTP API.** Recipe for listing active channels for an app, using the app secret to sign the query:
 
 ```bash
-APP_ID=azimuth-local
-APP_KEY=azimuth-local-key
-APP_SECRET=azimuth-local-secret
+APP_ID=eurostrip-local
+APP_KEY=eurostrip-local-key
+APP_SECRET=eurostrip-local-secret
 
 # List channels
 curl -fsS "http://localhost:6001/apps/${APP_ID}/channels" -G \
@@ -2265,7 +2265,7 @@ The Phase 1 version is ~50 lines with hard rules and forward-references ("see X 
 Replace `CLAUDE.md` entirely with the structure below. Real prose, no placeholders.
 
 ```markdown
-# Azimuth — Collaboration Rules
+# EuroStrip — Collaboration Rules
 
 > Your companion from A to Z.
 
@@ -2479,7 +2479,7 @@ After the PR is merged, write a brief Phase 4 progress memory note at `~/.claude
 5. docs-build CI job FIRST → Task 4 lands before any of Tasks 13–24
 6. Pure CQRS → Tasks 5, 6, 7, 8
 
-**Type consistency:** `RecordPingHandler`, `ListPingsHandler` signatures consistent across Tasks 6, 7, 8, 19. `Locale` type from `@azimuth/i18n` referenced in Tasks 9, 18, 20. `App\Authorization\Contracts\Permission` referenced in Tasks 16, 17, 25 — all consistent. The `BACKEND_URL` default is `http://127.0.0.1:8000` everywhere it's referenced (per pre-flight `8ca6003`).
+**Type consistency:** `RecordPingHandler`, `ListPingsHandler` signatures consistent across Tasks 6, 7, 8, 19. `Locale` type from `@eurostrip/i18n` referenced in Tasks 9, 18, 20. `App\Authorization\Contracts\Permission` referenced in Tasks 16, 17, 25 — all consistent. The `BACKEND_URL` default is `http://127.0.0.1:8000` everywhere it's referenced (per pre-flight `8ca6003`).
 
 **Out-of-scope sentinel:** No task includes Aircraft CRUD work, Storybook, i18n drift checks, theme visual regression, PR templates, conventional-commits hooks, or soketi-ui (the `inspecting-soketi.md` runbook covers curl recipes per Task 24).
 

@@ -2,12 +2,12 @@
 
 **Date:** 2026-07-10
 **Status:** Approved
-**Scope:** v1 of EuroScope Web Flight Strip — login, gateway token
+**Scope:** v1 of EuroStrip — login, gateway token
 management, and a raw JSON console to watch/send protocol payloads.
 
 ## 1. Purpose
 
-EuroScope Web Flight Strip is a web UI for interacting with a running
+EuroStrip is a web UI for interacting with a running
 EuroScope instance through the
 [euroscope-websocket-connector](https://github.com/FerrLab/euroscope-websocket-connector)
 plugin. The plugin speaks **JSON Contract Protocol v1**
@@ -28,7 +28,7 @@ later on top of this plumbing.
 ## 2. Decisions (settled during brainstorming)
 
 | # | Decision | Choice |
-|---|----------|--------|
+| --- | --- | --- |
 | 1 | v1 watch/send surface | Raw JSON console (live feed + JSON composer) |
 | 2 | Token model | **One gateway token per user**; "create" rotates and revokes the previous one |
 | 3 | Tenancy | Private per user — your token → your plugin → your console only |
@@ -44,14 +44,14 @@ All endpoints live in the Laravel backend, `app/Modules/Gateway/`.
 ### Plugin-facing (Bearer = gateway token)
 
 | Route | Behavior |
-|-------|----------|
+| --- | --- |
 | `POST /api/euroscope/messages` | Accepts `{"messages":[...]}` (≤200 entries / 512 KB). Each JSON-object entry is appended verbatim to the user's message stream tagged `direction: in`. Non-object entries are dropped and logged — never fail the batch. Returns `204`. |
 | `GET /api/euroscope/poll?timeout=25` | Blocks up to `min(timeout, 25)`s on the user's command queue. Returns `200 {"commands":[...]}` (drains everything queued) or `204` on timeout. Refreshes the presence key on every call. |
 
 ### Browser-facing (httpOnly cookie → Next.js proxy → Bearer)
 
 | Route | Behavior |
-|-------|----------|
+| --- | --- |
 | `POST /api/gateway/commands` | Validates one command envelope (object; `action` string required; `type` coerced to `"command"`; `id` auto-assigned if absent). Pushes to the command queue and mirrors into the message stream as `direction: out`. Rate limit 60/min/user. |
 | `GET /api/gateway/console/poll?after=<cursor>&timeout=15` | Tails the message stream after `cursor` (Redis stream entry ID), blocking up to 15s. No `after` → returns the full ring buffer (backfill). If `after` was trimmed out of the ring, returns the full buffer with `reset: true`. Every response includes `pluginConnected: bool` from the presence key. |
 | `POST /api/gateway/token` | Rotates: revokes any existing gateway token, mints a Passport PAT named `gateway`, returns the plaintext secret **once** plus `created_at`. |
@@ -72,7 +72,7 @@ Three keys per user; nothing else. Postgres gains **no new tables**
 (the token lives in Passport's existing `oauth_access_tokens`).
 
 | Key | Type | Purpose |
-|-----|------|---------|
+| --- | --- | --- |
 | `gateway:{userId}:messages` | Stream, `XADD MAXLEN ~200` | Ring buffer of all traffic (plugin events/responses + mirrored sent commands). Entry ID doubles as the console cursor. Fields: `direction` (`in`/`out`), `envelope` (raw JSON string). |
 | `gateway:{userId}:commands` | List | Commands awaiting the plugin. Blocking pop with timeout implements the plugin long-poll; on wake, remaining entries are drained non-blocking so a batch goes out in one response. |
 | `gateway:{userId}:plugin-seen` | String, `EX 35` | Set on every plugin poll. Existence ⇒ "plugin connected". |
@@ -227,8 +227,8 @@ TDD throughout; every suite covers happy, invalid, and garbage paths.
   "why not Soketi for this feature" rationale.
 - `docs/architecture/overview.md` — topology updated with the Gateway
   module and plugin transport.
-- `README.md` + `CLAUDE.md` intro — rebrand from Azimuth to
-  **EuroScope Web Flight Strip** (rules, stack, and workflow sections
+- `README.md` + `CLAUDE.md` intro — rebrand from EuroStrip to
+  **EuroStrip** (rules, stack, and workflow sections
   unchanged).
 
 ## 10. Out of scope (v1)

@@ -5,7 +5,7 @@ const config: ConfigFile = {
   apiFile: './src/baseApi.ts',
   apiImport: 'baseApi',
   outputFile: './src/generated.ts',
-  exportName: 'azimuthApi',
+  exportName: 'eurostripApi',
   hooks: true,
   tag: true,
 };

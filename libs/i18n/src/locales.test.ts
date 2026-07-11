@@ -27,7 +27,7 @@ describe('locales', () => {
   it('every locale has a populated messages catalog (happy)', () => {
     for (const locale of LOCALES) {
       expect(messages[locale]).toBeDefined();
-      expect(messages[locale].common.appName).toBe('Azimuth');
+      expect(messages[locale].common.appName).toBe('EuroStrip');
     }
   });
 

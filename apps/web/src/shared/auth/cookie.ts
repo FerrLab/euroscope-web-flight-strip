@@ -1,4 +1,4 @@
-const COOKIE_NAME = 'azimuth_session';
+const COOKIE_NAME = 'eurostrip_session';
 
 export function buildSessionCookie(token: string, opts: { secure: boolean }): string {
   const attrs = [

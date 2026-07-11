@@ -1,14 +1,14 @@
-# Azimuth Scaffold — Phase 1: Workspace + Docker Bring-up Implementation Plan
+# EuroStrip Scaffold — Phase 1: Workspace + Docker Bring-up Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Turn the empty `azimuth/` repository into an Nx monorepo where `git clone && docker compose up` lands a running, empty, but correctly-wired full-stack environment (Laravel on FrankenPHP/Octane + Next.js + Postgres/PostGIS + Dragonfly + Typesense + Soketi + MinIO + Mailpit), with lint/typecheck CI green.
+**Goal:** Turn the empty `eurostrip/` repository into an Nx monorepo where `git clone && docker compose up` lands a running, empty, but correctly-wired full-stack environment (Laravel on FrankenPHP/Octane + Next.js + Postgres/PostGIS + Dragonfly + Typesense + Soketi + MinIO + Mailpit), with lint/typecheck CI green.
 
 **Architecture:** Single Nx 20 monorepo at the repo root. `apps/web` is a Next.js 15 app and `apps/backend` is a Laravel 13 app exposed to Nx via `nx:run-commands` targets that shell into Docker. `libs/{design-tokens,ui,api-client,i18n}` are stub TS libraries created now to lock the public surface in (filled later in Phase 3). All services run from a single `infra/docker-compose.yml`. CI runs only lint + typecheck in Phase 1; full test/E2E jobs come in later phases.
 
 **Tech Stack:** pnpm 9, Node 22, Nx 20, TypeScript 5.6 strict, Next.js 15 (App Router), Laravel 13 / PHP 8.3 / Composer 2.7+, FrankenPHP, Pint, ESLint flat config, Prettier, Lefthook, GitHub Actions, Docker Compose, Postgres+PostGIS, Dragonfly, Typesense, Soketi, MinIO, Mailpit.
 
-**Spec:** `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` §13.1.
+**Spec:** `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` §13.1.
 
 **Prerequisites on the dev host:**
 
@@ -104,7 +104,7 @@ Create `.nvmrc`:
 
 ```json
 {
-  "name": "azimuth",
+  "name": "eurostrip",
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@9.12.3",
@@ -202,10 +202,10 @@ packages:
     "isolatedModules": true,
     "resolveJsonModule": true,
     "paths": {
-      "@azimuth/design-tokens": ["libs/design-tokens/src/index.ts"],
-      "@azimuth/ui": ["libs/ui/src/index.ts"],
-      "@azimuth/api-client": ["libs/api-client/src/index.ts"],
-      "@azimuth/i18n": ["libs/i18n/src/index.ts"]
+      "@eurostrip/design-tokens": ["libs/design-tokens/src/index.ts"],
+      "@eurostrip/ui": ["libs/ui/src/index.ts"],
+      "@eurostrip/api-client": ["libs/api-client/src/index.ts"],
+      "@eurostrip/i18n": ["libs/i18n/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
@@ -271,7 +271,7 @@ infra/docker/.data/
 - [ ] **Step 1.7: Create `README.md`**
 
 ```markdown
-# Azimuth
+# EuroStrip
 
 A full PDCA application for general aviation — navigation data, flight planning, route parsing, and operations management.
 
@@ -467,7 +467,7 @@ git commit -m "chore: add ESLint flat config, Prettier, EditorConfig at workspac
 
 ```json
 {
-  "name": "@azimuth/design-tokens",
+  "name": "@eurostrip/design-tokens",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -523,7 +523,7 @@ export const placeholder = 'design-tokens-stub' as const;
 - [ ] **Step 3.5: Create `libs/design-tokens/README.md`**
 
 ```markdown
-# @azimuth/design-tokens
+# @eurostrip/design-tokens
 
 Openbridge-derived color palettes (light, dark, high-contrast) and shared design tokens. Filled in Phase 3.
 ```
@@ -534,7 +534,7 @@ Openbridge-derived color palettes (light, dark, high-contrast) and shared design
 
 ```json
 {
-  "name": "@azimuth/ui",
+  "name": "@eurostrip/ui",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -589,7 +589,7 @@ export const placeholder = 'ui-stub' as const;
 `README.md`:
 
 ```markdown
-# @azimuth/ui
+# @eurostrip/ui
 
 Squared, themed React component primitives. Filled in Phase 3.
 ```
@@ -600,7 +600,7 @@ Squared, themed React component primitives. Filled in Phase 3.
 
 ```json
 {
-  "name": "@azimuth/api-client",
+  "name": "@eurostrip/api-client",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -656,7 +656,7 @@ export const placeholder = 'api-client-stub' as const;
 `README.md`:
 
 ```markdown
-# @azimuth/api-client
+# @eurostrip/api-client
 
 Typed TS client for the backend, generated from Scramble's OpenAPI document. Generation script added in Phase 2 / Phase 3.
 ```
@@ -667,7 +667,7 @@ Typed TS client for the backend, generated from Scramble's OpenAPI document. Gen
 
 ```json
 {
-  "name": "@azimuth/i18n",
+  "name": "@eurostrip/i18n",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -720,7 +720,7 @@ export const placeholder = 'i18n-stub' as const;
 `README.md`:
 
 ```markdown
-# @azimuth/i18n
+# @eurostrip/i18n
 
 Locale registry and shared message catalogs (consumed by both `apps/web` via next-intl and `apps/backend` via Laravel `lang/`). Filled in Phase 3.
 ```
@@ -779,7 +779,7 @@ git commit -m "feat: scaffold shared libs (design-tokens, ui, api-client, i18n) 
 
 ```json
 {
-  "name": "@azimuth/web",
+  "name": "@eurostrip/web",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -814,11 +814,11 @@ git commit -m "feat: scaffold shared libs (design-tokens, ui, api-client, i18n) 
   "targets": {
     "dev": {
       "executor": "nx:run-commands",
-      "options": { "command": "pnpm --filter @azimuth/web dev", "cwd": "{workspaceRoot}" }
+      "options": { "command": "pnpm --filter @eurostrip/web dev", "cwd": "{workspaceRoot}" }
     },
     "build": {
       "executor": "nx:run-commands",
-      "options": { "command": "pnpm --filter @azimuth/web build", "cwd": "{workspaceRoot}" }
+      "options": { "command": "pnpm --filter @eurostrip/web build", "cwd": "{workspaceRoot}" }
     },
     "lint": {
       "executor": "nx:run-commands",
@@ -866,10 +866,10 @@ export default nextConfig;
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"],
-      "@azimuth/design-tokens": ["../../libs/design-tokens/src/index.ts"],
-      "@azimuth/ui": ["../../libs/ui/src/index.ts"],
-      "@azimuth/api-client": ["../../libs/api-client/src/index.ts"],
-      "@azimuth/i18n": ["../../libs/i18n/src/index.ts"]
+      "@eurostrip/design-tokens": ["../../libs/design-tokens/src/index.ts"],
+      "@eurostrip/ui": ["../../libs/ui/src/index.ts"],
+      "@eurostrip/api-client": ["../../libs/api-client/src/index.ts"],
+      "@eurostrip/i18n": ["../../libs/i18n/src/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
@@ -913,7 +913,7 @@ import './globals.css';
 import type { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'Azimuth',
+  title: 'EuroStrip',
   description: 'General aviation operations platform',
 };
 
@@ -932,7 +932,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 export default function HomePage() {
   return (
     <main style={{ padding: '2rem' }}>
-      <h1>Azimuth</h1>
+      <h1>EuroStrip</h1>
       <p>Frontend scaffold is alive. Phase 1 — workspace + Docker bring-up.</p>
     </main>
   );
@@ -1262,7 +1262,7 @@ RUN apk add --no-cache \
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 # PHP ini overrides
-COPY infra/docker/php.ini /usr/local/etc/php/conf.d/zz-azimuth.ini
+COPY infra/docker/php.ini /usr/local/etc/php/conf.d/zz-eurostrip.ini
 
 WORKDIR /app
 
@@ -1312,7 +1312,7 @@ chmod -R 775 storage bootstrap/cache
 
 # Wait for Postgres
 echo "Waiting for postgres..."
-until pg_isready -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USERNAME:-azimuth}" >/dev/null 2>&1; do
+until pg_isready -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USERNAME:-eurostrip}" >/dev/null 2>&1; do
   sleep 1
 done
 echo "Postgres is ready"
@@ -1378,22 +1378,22 @@ until /usr/bin/mc alias set local http://minio:9000 "${MINIO_ROOT_USER}" "${MINI
   sleep 1
 done
 
-if ! /usr/bin/mc ls local/"${AZIMUTH_S3_BUCKET}" >/dev/null 2>&1; then
-  /usr/bin/mc mb local/"${AZIMUTH_S3_BUCKET}"
-  /usr/bin/mc anonymous set download local/"${AZIMUTH_S3_BUCKET}"
-  echo "Bucket ${AZIMUTH_S3_BUCKET} created"
+if ! /usr/bin/mc ls local/"${EUROSTRIP_S3_BUCKET}" >/dev/null 2>&1; then
+  /usr/bin/mc mb local/"${EUROSTRIP_S3_BUCKET}"
+  /usr/bin/mc anonymous set download local/"${EUROSTRIP_S3_BUCKET}"
+  echo "Bucket ${EUROSTRIP_S3_BUCKET} created"
 else
-  echo "Bucket ${AZIMUTH_S3_BUCKET} already exists"
+  echo "Bucket ${EUROSTRIP_S3_BUCKET} already exists"
 fi
 ```
 
 - [ ] **Step 9.3: Create `infra/docker-compose.yml`**
 
 ```yaml
-name: azimuth
+name: eurostrip
 
 networks:
-  azimuth:
+  eurostrip:
     driver: bridge
 
 volumes:
@@ -1408,9 +1408,9 @@ services:
     build:
       context: ..
       dockerfile: infra/docker/frankenphp.Dockerfile
-    image: azimuth-backend:dev
-    container_name: azimuth-backend
-    networks: [azimuth]
+    image: eurostrip-backend:dev
+    container_name: eurostrip-backend
+    networks: [eurostrip]
     depends_on:
       postgres: { condition: service_healthy }
       dragonfly: { condition: service_healthy }
@@ -1442,10 +1442,10 @@ services:
 
   web:
     image: node:22-alpine
-    container_name: azimuth-web
-    networks: [azimuth]
+    container_name: eurostrip-web
+    networks: [eurostrip]
     working_dir: /workspace
-    command: sh -c "corepack enable && corepack prepare pnpm@9.12.3 --activate && pnpm install --frozen-lockfile && pnpm --filter @azimuth/web dev"
+    command: sh -c "corepack enable && corepack prepare pnpm@9.12.3 --activate && pnpm install --frozen-lockfile && pnpm --filter @eurostrip/web dev"
     ports:
       - '3000:3000'
     environment:
@@ -1457,8 +1457,8 @@ services:
 
   postgres:
     image: postgis/postgis:16-3.4
-    container_name: azimuth-postgres
-    networks: [azimuth]
+    container_name: eurostrip-postgres
+    networks: [eurostrip]
     ports:
       - '5432:5432'
     environment:
@@ -1476,8 +1476,8 @@ services:
 
   dragonfly:
     image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
-    container_name: azimuth-dragonfly
-    networks: [azimuth]
+    container_name: eurostrip-dragonfly
+    networks: [eurostrip]
     command: ['--logtostderr', '--cluster_mode=emulated']
     ports:
       - '6379:6379'
@@ -1491,8 +1491,8 @@ services:
 
   typesense:
     image: typesense/typesense:0.27.0
-    container_name: azimuth-typesense
-    networks: [azimuth]
+    container_name: eurostrip-typesense
+    networks: [eurostrip]
     command: ['--data-dir=/data', '--api-key=${TYPESENSE_API_KEY}', '--enable-cors']
     ports:
       - '8108:8108'
@@ -1506,8 +1506,8 @@ services:
 
   soketi:
     image: quay.io/soketi/soketi:latest-16-alpine
-    container_name: azimuth-soketi
-    networks: [azimuth]
+    container_name: eurostrip-soketi
+    networks: [eurostrip]
     environment:
       SOKETI_DEBUG: '1'
       SOKETI_DEFAULT_APP_ID: ${PUSHER_APP_ID}
@@ -1524,8 +1524,8 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: azimuth-minio
-    networks: [azimuth]
+    container_name: eurostrip-minio
+    networks: [eurostrip]
     command: ['server', '/data', '--console-address', ':9001']
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -1543,14 +1543,14 @@ services:
 
   minio-init:
     image: minio/mc:latest
-    container_name: azimuth-minio-init
-    networks: [azimuth]
+    container_name: eurostrip-minio-init
+    networks: [eurostrip]
     depends_on:
       minio: { condition: service_healthy }
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      AZIMUTH_S3_BUCKET: ${AZIMUTH_S3_BUCKET}
+      EUROSTRIP_S3_BUCKET: ${EUROSTRIP_S3_BUCKET}
     entrypoint: ['/bin/sh', '/etc/minio-init.sh']
     volumes:
       - ./docker/minio-init.sh:/etc/minio-init.sh:ro
@@ -1558,8 +1558,8 @@ services:
 
   mailpit:
     image: axllent/mailpit:latest
-    container_name: azimuth-mailpit
-    networks: [azimuth]
+    container_name: eurostrip-mailpit
+    networks: [eurostrip]
     ports:
       - '1025:1025'
       - '8025:8025'
@@ -1569,9 +1569,9 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: 'true'
 
   horizon:
-    image: azimuth-backend:dev
-    container_name: azimuth-horizon
-    networks: [azimuth]
+    image: eurostrip-backend:dev
+    container_name: eurostrip-horizon
+    networks: [eurostrip]
     depends_on:
       backend: { condition: service_started }
     command: ['php', 'artisan', 'horizon']
@@ -1593,9 +1593,9 @@ services:
     profiles: ['queue']
 
   scheduler:
-    image: azimuth-backend:dev
-    container_name: azimuth-scheduler
-    networks: [azimuth]
+    image: eurostrip-backend:dev
+    container_name: eurostrip-scheduler
+    networks: [eurostrip]
     depends_on:
       backend: { condition: service_started }
     command: ['php', 'artisan', 'schedule:work']
@@ -1619,7 +1619,7 @@ Note on `horizon` and `scheduler`: marked with `profiles: ["queue"]` so they don
 - [ ] **Step 9.4: Create `infra/docker-compose.ci.yml` (CI override)**
 
 ```yaml
-name: azimuth-ci
+name: eurostrip-ci
 
 services:
   backend:
@@ -1629,7 +1629,7 @@ services:
 
   web:
     volumes: !reset []
-    command: sh -c "corepack enable && corepack prepare pnpm@9.12.3 --activate && pnpm install --frozen-lockfile && pnpm --filter @azimuth/web build"
+    command: sh -c "corepack enable && corepack prepare pnpm@9.12.3 --activate && pnpm install --frozen-lockfile && pnpm --filter @eurostrip/web build"
 
   postgres:
     volumes: !override
@@ -1657,7 +1657,7 @@ git commit -m "feat: add docker-compose stack (10 services) with healthchecks + 
 
 ```bash
 # ----------------------------------------------------------------------
-# Azimuth — root environment file
+# EuroStrip — root environment file
 # Copy to `.env` (git-ignored) and fill in any per-developer secrets.
 # All defaults here are safe for local development only.
 # ----------------------------------------------------------------------
@@ -1670,9 +1670,9 @@ APP_URL=http://localhost:8000
 APP_TIMEZONE=UTC
 
 # Postgres / PostGIS
-POSTGRES_DB=azimuth
-POSTGRES_USER=azimuth
-POSTGRES_PASSWORD=azimuth
+POSTGRES_DB=eurostrip
+POSTGRES_USER=eurostrip
+POSTGRES_PASSWORD=eurostrip
 
 # Dragonfly (Redis-compatible)
 REDIS_PASSWORD=
@@ -1685,9 +1685,9 @@ TYPESENSE_PORT=8108
 TYPESENSE_PROTOCOL=http
 
 # Soketi / Pusher-compatible WS
-PUSHER_APP_ID=azimuth-local
-PUSHER_APP_KEY=azimuth-local-key
-PUSHER_APP_SECRET=azimuth-local-secret
+PUSHER_APP_ID=eurostrip-local
+PUSHER_APP_KEY=eurostrip-local-key
+PUSHER_APP_SECRET=eurostrip-local-secret
 PUSHER_HOST=soketi
 PUSHER_PORT=6001
 PUSHER_SCHEME=http
@@ -1695,11 +1695,11 @@ PUSHER_SCHEME=http
 # MinIO (S3-compatible)
 MINIO_ROOT_USER=minioadmin
 MINIO_ROOT_PASSWORD=minioadmin
-AZIMUTH_S3_BUCKET=azimuth-dev
+EUROSTRIP_S3_BUCKET=eurostrip-dev
 AWS_ACCESS_KEY_ID=minioadmin
 AWS_SECRET_ACCESS_KEY=minioadmin
 AWS_DEFAULT_REGION=us-east-1
-AWS_BUCKET=azimuth-dev
+AWS_BUCKET=eurostrip-dev
 AWS_ENDPOINT=http://minio:9000
 AWS_USE_PATH_STYLE_ENDPOINT=true
 
@@ -1710,8 +1710,8 @@ MAIL_PORT=1025
 MAIL_USERNAME=null
 MAIL_PASSWORD=null
 MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS=hello@azimuth.local
-MAIL_FROM_NAME="Azimuth"
+MAIL_FROM_ADDRESS=hello@eurostrip.local
+MAIL_FROM_NAME="EuroStrip"
 
 # Frontend
 NEXT_PUBLIC_API_URL=http://localhost:8000
@@ -1877,9 +1877,9 @@ git commit -m "ci: add lint + typecheck + pint workflow"
 - [ ] **Step 13.1: Create `docs/README.md`**
 
 ```markdown
-# Azimuth — Internal Documentation
+# EuroStrip — Internal Documentation
 
-Evergreen reference material for the Azimuth codebase.
+Evergreen reference material for the EuroStrip codebase.
 
 ## Sections
 
@@ -1906,23 +1906,23 @@ The full doc set listed in the scaffold spec (architecture, more ADRs, conventio
 ````markdown
 # Local Development Runbook
 
-This guide takes you from a fresh `git clone` to a fully running Azimuth stack in under five minutes.
+This guide takes you from a fresh `git clone` to a fully running EuroStrip stack in under five minutes.
 
 ## Prerequisites
 
-| Tool     | Version                | Notes                                                                                                                       |
+| Tool | Version | Notes |
 | -------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Node     | 22 LTS                 | `nvm install 22 && nvm use 22`                                                                                              |
-| pnpm     | 9.x                    | `corepack enable && corepack prepare pnpm@9 --activate`                                                                     |
-| Docker   | latest with Compose v2 | Docker Desktop, OrbStack, or Colima                                                                                         |
-| PHP      | 8.3                    | Required only for the initial Laravel install (Task 5 of Phase 1). Herd works on macOS. After that, all PHP runs in Docker. |
-| Composer | 2.7+                   | Same as PHP — only needed for the initial install.                                                                          |
+| Node | 22 LTS | `nvm install 22 && nvm use 22` |
+| pnpm | 9.x | `corepack enable && corepack prepare pnpm@9 --activate` |
+| Docker | latest with Compose v2 | Docker Desktop, OrbStack, or Colima |
+| PHP | 8.3 | Required only for the initial Laravel install (Task 5 of Phase 1). Herd works on macOS. After that, all PHP runs in Docker. |
+| Composer | 2.7+ | Same as PHP — only needed for the initial install. |
 
 ## First run
 
 ```bash
-git clone <repo-url> azimuth
-cd azimuth
+git clone <repo-url> eurostrip
+cd eurostrip
 cp .env.example .env
 
 # Generate a Laravel app key into .env (the placeholder in .env.example is not valid)
@@ -1956,16 +1956,16 @@ open http://localhost:9001                  # MinIO console (minioadmin / minioa
 
 ## Service endpoints
 
-| Service            | Host port   | URL / DSN                                                       | Notes                                                              |
+| Service | Host port | URL / DSN | Notes |
 | ------------------ | ----------- | --------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Backend (Laravel)  | 8000        | http://localhost:8000                                           | Falls back to `artisan serve` until Octane is installed in Phase 2 |
-| Frontend (Next.js) | 3000        | http://localhost:3000                                           | Hot reload via bind-mount                                          |
-| Postgres+PostGIS   | 5432        | `postgresql://azimuth:azimuth@localhost:5432/azimuth`           |                                                                    |
-| Dragonfly (Redis)  | 6379        | `redis://localhost:6379`                                        | Wire-compatible with `redis-cli`                                   |
-| Typesense          | 8108        | http://localhost:8108                                           | API key in `.env`                                                  |
-| Soketi (WS)        | 6001 / 9601 | ws://localhost:6001, http://localhost:9601 (metrics)            |                                                                    |
-| MinIO (S3)         | 9000 / 9001 | http://localhost:9000 (S3 API), http://localhost:9001 (console) |                                                                    |
-| Mailpit            | 1025 / 8025 | smtp://localhost:1025, http://localhost:8025 (UI)               |                                                                    |
+| Backend (Laravel) | 8000 | http://localhost:8000 | Falls back to `artisan serve` until Octane is installed in Phase 2 |
+| Frontend (Next.js) | 3000 | http://localhost:3000 | Hot reload via bind-mount |
+| Postgres+PostGIS | 5432 | `postgresql://eurostrip:eurostrip@localhost:5432/eurostrip` | |
+| Dragonfly (Redis) | 6379 | `redis://localhost:6379` | Wire-compatible with `redis-cli` |
+| Typesense | 8108 | http://localhost:8108 | API key in `.env` |
+| Soketi (WS) | 6001 / 9601 | ws://localhost:6001, http://localhost:9601 (metrics) | |
+| MinIO (S3) | 9000 / 9001 | http://localhost:9000 (S3 API), http://localhost:9001 (console) | |
+| Mailpit | 1025 / 8025 | smtp://localhost:1025, http://localhost:8025 (UI) | |
 
 ## Common commands
 
@@ -2014,7 +2014,7 @@ docker compose -f infra/docker-compose.yml down -v
 
 ## Context
 
-Azimuth is a monorepo containing a Next.js frontend (TypeScript) and a Laravel backend (PHP). We chose Nx as the monorepo orchestration tool. Nx is fundamentally TypeScript/JavaScript-oriented; PHP support is not first-class. We needed a way to expose the Laravel app as a real Nx project so that:
+EuroStrip is a monorepo containing a Next.js frontend (TypeScript) and a Laravel backend (PHP). We chose Nx as the monorepo orchestration tool. Nx is fundamentally TypeScript/JavaScript-oriented; PHP support is not first-class. We needed a way to expose the Laravel app as a real Nx project so that:
 
 - `nx serve`, `nx test`, `nx lint`, etc., work uniformly across both apps
 - `nx affected` correctly picks up backend changes and re-runs only what's needed
@@ -2067,7 +2067,7 @@ git commit -m "docs: seed /docs with index, local-dev runbook, ADR 0001"
 - [ ] **Step 14.1: Create `CLAUDE.md`**
 
 ```markdown
-# Azimuth — Collaboration Rules
+# EuroStrip — Collaboration Rules
 
 This file is loaded automatically into every Claude Code session in this repo. It encodes the non-negotiable rules; details live in `docs/`.
 
@@ -2103,8 +2103,8 @@ See `docs/runbooks/local-dev.md`.
 
 ## What lives where
 
-- Spec for this scaffold: `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md`
-- Phase 1 plan: `docs/superpowers/plans/2026-05-02-azimuth-scaffold-phase-1.md`
+- Spec for this scaffold: `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md`
+- Phase 1 plan: `docs/superpowers/plans/2026-05-02-eurostrip-scaffold-phase-1.md`
 - Architecture: `docs/architecture/` (filled in Phases 2–4)
 - ADRs: `docs/adr/`
 ```
@@ -2197,14 +2197,14 @@ Run:
 curl -fsS http://localhost:3000 | head -c 400
 ```
 
-Expected: HTML containing `Azimuth` and `Frontend scaffold is alive`. The first response is slow because Next.js dev server compiles on demand.
+Expected: HTML containing `EuroStrip` and `Frontend scaffold is alive`. The first response is slow because Next.js dev server compiles on demand.
 
 - [ ] **Step 15.7: Smoke-test Postgres has PostGIS**
 
 Run:
 
 ```bash
-docker compose -f infra/docker-compose.yml exec -T postgres psql -U azimuth -d azimuth -c "SELECT PostGIS_Full_Version();"
+docker compose -f infra/docker-compose.yml exec -T postgres psql -U eurostrip -d eurostrip -c "SELECT PostGIS_Full_Version();"
 ```
 
 Expected: prints a row containing the PostGIS version (e.g. `POSTGIS="3.4.x" ...`).
@@ -2235,7 +2235,7 @@ Run:
 
 ```bash
 docker compose -f infra/docker-compose.yml run --rm minio-init /bin/sh -c \
-  "/usr/bin/mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD && /usr/bin/mc ls local/\$AZIMUTH_S3_BUCKET"
+  "/usr/bin/mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD && /usr/bin/mc ls local/\$EUROSTRIP_S3_BUCKET"
 ```
 
 Expected: command exits 0; lists the (empty) bucket without error.

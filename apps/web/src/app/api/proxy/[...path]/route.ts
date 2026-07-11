@@ -4,7 +4,7 @@ import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';
 // Default to 127.0.0.1 not localhost: Node's fetch (undici) on some Windows/IPv6
 // configurations tries ::1 first and fails with ECONNREFUSED when the upstream
 // (Docker on Desktop) only meaningfully binds IPv4. 127.0.0.1 sidesteps it.
-const BACKEND_URL = process.env.AZIMUTH_BACKEND_URL ?? 'http://127.0.0.1:8000';
+const BACKEND_URL = process.env.EUROSTRIP_BACKEND_URL ?? 'http://127.0.0.1:8000';
 
 type Ctx = { params: Promise<{ path: string[] }> };
 

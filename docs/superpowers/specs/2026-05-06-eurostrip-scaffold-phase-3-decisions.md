@@ -1,10 +1,10 @@
-# Azimuth — Phase 3 Scope-Validation & Decision Log
+# EuroStrip — Phase 3 Scope-Validation & Decision Log
 
 **Date:** 2026-05-06
 **Status:** Approved (pending written-spec review)
 **Author:** Brainstormed with Kewyn Ferreira
-**Parent spec:** `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` §13.3
-**Predecessor decision log:** `docs/superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md`
+**Parent spec:** `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` §13.3
+**Predecessor decision log:** `docs/superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md`
 
 ---
 
@@ -134,7 +134,7 @@ These are intentionally _not_ locked here — the plan will resolve them with th
 - **Style Dictionary or hand-rolled token build:** the `libs/design-tokens` build script that turns the TypeScript token modules into a single `tokens.css` with all 4 theme blocks. Either Style Dictionary (more standard) or a 30-line custom script (less dependency surface). Plan picks one.
 - **Token extraction from `@oicl/openbridge-webcomponents`:** whether to consume the package as a build-time dependency and pull tokens from it, or hand-extract token values once and ship them in our repo. Hand-extract is safer (no transitive dep on Lit at runtime); plan locks the values.
 - **MSW vs. raw fetch mocks for component tests:** RTK Query in component tests benefits from a real fetch mock. MSW is the standard but heavy. Plan picks one.
-- **Cookie name and attributes:** `azimuth_session` vs `__Host-azimuth-session`; `SameSite=Strict` vs `Lax`; `Secure` flag (always on in prod, conditional in dev). Plan picks one set.
+- **Cookie name and attributes:** `eurostrip_session` vs `__Host-eurostrip-session`; `SameSite=Strict` vs `Lax`; `Secure` flag (always on in prod, conditional in dev). Plan picks one set.
 - **Theme persistence mechanism:** server cookie (set by Next.js route handler) so SSR sees the same theme + no flash, vs. client localStorage. Plan picks server cookie to align with the auth-cookie pattern.
 - **OpenAPI input source for codegen:** consume committed `apps/backend/openapi.json` (snapshot, deterministic) vs. live fetch of `http://localhost:8000/docs/api.json` (always-current, requires backend running at codegen time). Plan picks the snapshot for CI determinism, with a Nx target that refreshes the snapshot on demand.
 
@@ -165,8 +165,8 @@ None blocking. The eight decisions above + §13.3 + §6 (frontend architecture) 
 
 ## 9. References
 
-- Original spec: `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` (§6 frontend architecture, §11 naming, §13.3 Phase 3)
-- Phase 2 decision log: `docs/superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md`
+- Original spec: `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` (§6 frontend architecture, §11 naming, §13.3 Phase 3)
+- Phase 2 decision log: `docs/superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md`
 - CLAUDE.md hard rules: `/CLAUDE.md`
-- Phase 2 PR (merged): `https://github.com/FerrLab/azimuth/pull/1`, merge commit `99bac88`
+- Phase 2 PR (merged): `https://github.com/FerrLab/eurostrip/pull/1`, merge commit `99bac88`
 - Openbridge: https://www.openbridge.no/, GitHub `Ocean-Industries-Concept-Lab/openbridge-webcomponents`, npm `@oicl/openbridge-webcomponents-react` (Apache 2.0 / AGPL-with-window)

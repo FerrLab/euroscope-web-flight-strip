@@ -87,7 +87,7 @@ jobs:
           done
           # Postgres
           for i in $(seq 1 30); do
-            if docker compose -f infra/docker-compose.ci.yml exec -T postgres pg_isready -U azimuth -d azimuth; then break; fi
+            if docker compose -f infra/docker-compose.ci.yml exec -T postgres pg_isready -U eurostrip -d eurostrip; then break; fi
             sleep 2
           done
           # Dragonfly
@@ -152,7 +152,7 @@ jobs:
           done
           # Postgres
           for i in $(seq 1 30); do
-            if docker compose -f infra/docker-compose.ci.yml exec -T postgres pg_isready -U azimuth -d azimuth; then break; fi
+            if docker compose -f infra/docker-compose.ci.yml exec -T postgres pg_isready -U eurostrip -d eurostrip; then break; fi
             sleep 2
           done
           # Dragonfly
@@ -175,7 +175,7 @@ jobs:
         env:
           # global-setup.ts shells out to `docker compose`; in CI we use the
           # ci compose file with no `.env`. Override the dev default.
-          AZIMUTH_COMPOSE_ARGS: '-f infra/docker-compose.ci.yml'
+          EUROSTRIP_COMPOSE_ARGS: '-f infra/docker-compose.ci.yml'
         run: pnpm nx e2e web
 
   docs-build:
@@ -212,7 +212,7 @@ jobs:
         env:
           # check-route-coverage.mjs shells out to `docker compose`; in CI we
           # use the ci compose file with no `.env`. Override the dev default.
-          AZIMUTH_COMPOSE_ARGS: '-f infra/docker-compose.ci.yml'
+          EUROSTRIP_COMPOSE_ARGS: '-f infra/docker-compose.ci.yml'
         run: pnpm check:route-coverage
 
       - name: Assert OpenAPI snapshot in repo matches live

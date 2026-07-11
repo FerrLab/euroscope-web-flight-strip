@@ -1,4 +1,4 @@
-# Azimuth — Phase 2 Implementation Plan
+# EuroStrip — Phase 2 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -10,8 +10,8 @@
 
 **Source documents (read both before starting):**
 
-- `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` — §5 (backend architecture detail), §11 (naming), §13.2 (Phase 2 scope)
-- `docs/superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md` — seven locked decisions + canonical Ping module shape
+- `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` — §5 (backend architecture detail), §11 (naming), §13.2 (Phase 2 scope)
+- `docs/superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md` — seven locked decisions + canonical Ping module shape
 
 **Hard rules from `/CLAUDE.md` (apply to every task):**
 
@@ -1200,10 +1200,10 @@ return [
     'export_path' => 'api.json', // generated openapi.json for libs/api-client (Phase 3)
     'info' => [
         'version' => '0.1.0',
-        'description' => 'Azimuth backend API',
+        'description' => 'EuroStrip backend API',
     ],
     'ui' => [
-        'title' => 'Azimuth API',
+        'title' => 'EuroStrip API',
     ],
 ];
 ```
@@ -1221,7 +1221,7 @@ it('renders the Scramble docs UI at /docs/api', function (): void {
     $response = $this->get('/docs/api');
 
     $response->assertStatus(200);
-    expect($response->content())->toContain('Azimuth API');
+    expect($response->content())->toContain('EuroStrip API');
 });
 
 it('serves openapi.json describing the API', function (): void {
@@ -1230,7 +1230,7 @@ it('serves openapi.json describing the API', function (): void {
     $response->assertStatus(200);
     $body = $response->json();
     expect($body)->toHaveKey('openapi');
-    expect($body)->toHaveKey('info.title', 'Azimuth API');
+    expect($body)->toHaveKey('info.title', 'EuroStrip API');
 });
 ```
 
@@ -1293,7 +1293,7 @@ use Laravel\Socialite\Two\User as SocialiteUser;
 /**
  * Stub Socialite driver — decision #7 (per-request fixture identity).
  *
- * Accepts ?identity=<email> query param; defaults to stub-user@azimuth.local.
+ * Accepts ?identity=<email> query param; defaults to stub-user@eurostrip.local.
  * The "OAuth flow" is a no-op redirect (back to callback) and a deterministic
  * user payload. Used for dev and integration tests without a real IdP.
  */
@@ -1301,7 +1301,7 @@ class StubProvider extends AbstractProvider implements ProviderInterface
 {
     protected $scopes = [];
 
-    private const DEFAULT_IDENTITY = 'stub-user@azimuth.local';
+    private const DEFAULT_IDENTITY = 'stub-user@eurostrip.local';
 
     protected function getAuthUrl($state): string
     {
@@ -1450,10 +1450,10 @@ it('mints a Passport token for the default stub identity (happy)', function (): 
 
     $response->assertStatus(200);
     $response->assertJsonStructure(['access_token', 'token_type', 'user' => ['id', 'email']]);
-    expect($response->json('user.email'))->toBe('stub-user@azimuth.local');
+    expect($response->json('user.email'))->toBe('stub-user@eurostrip.local');
     expect($response->json('access_token'))->toBeString();
 
-    $this->assertDatabaseHas('users', ['email' => 'stub-user@azimuth.local']);
+    $this->assertDatabaseHas('users', ['email' => 'stub-user@eurostrip.local']);
 });
 
 it('honors ?identity=<email> for fixture identities (happy)', function (): void {
@@ -1468,7 +1468,7 @@ it('honors ?identity=<email> for fixture identities (happy)', function (): void 
 it('mints valid tokens that authenticate against api guard (happy)', function (): void {
     $login = $this->getJson('/auth/socialite/stub/callback')->json();
 
-    $userId = User::query()->where('email', 'stub-user@azimuth.local')->value('id');
+    $userId = User::query()->where('email', 'stub-user@eurostrip.local')->value('id');
 
     $auth = $this
         ->withToken($login['access_token'])
@@ -1508,7 +1508,7 @@ git commit -m "$(cat <<'EOF'
 feat(backend): install Socialite and register stub driver
 
 Decision #7: stub driver accepts ?identity=<email>; defaults to
-stub-user@azimuth.local. Callback upserts the User and mints a Passport
+stub-user@eurostrip.local. Callback upserts the User and mints a Passport
 access token. Three feature tests cover default identity, fixture
 identity, and end-to-end token validation against the api guard.
 
@@ -3930,7 +3930,7 @@ class PreventRawPermissionStrings implements Rule
                     $arg->value,
                     $calleeType,
                     $methodName,
-                ))->identifier('azimuth.rawPermissionString')->build(),
+                ))->identifier('eurostrip.rawPermissionString')->build(),
             ];
         }
 
@@ -4160,17 +4160,17 @@ EOF
 Create `infra/docker-compose.ci.yml`:
 
 ```yaml
-name: azimuth-ci
+name: eurostrip-ci
 
 services:
   postgres:
     image: postgis/postgis:16-3.4
     environment:
-      POSTGRES_DB: azimuth
-      POSTGRES_USER: azimuth
-      POSTGRES_PASSWORD: azimuth
+      POSTGRES_DB: eurostrip
+      POSTGRES_USER: eurostrip
+      POSTGRES_PASSWORD: eurostrip
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U azimuth -d azimuth']
+      test: ['CMD-SHELL', 'pg_isready -U eurostrip -d eurostrip']
       interval: 5s
       timeout: 3s
       retries: 12
@@ -4203,9 +4203,9 @@ services:
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_DATABASE: azimuth
-      DB_USERNAME: azimuth
-      DB_PASSWORD: azimuth
+      DB_DATABASE: eurostrip
+      DB_USERNAME: eurostrip
+      DB_PASSWORD: eurostrip
       REDIS_HOST: dragonfly
       REDIS_PORT: 6379
       QUEUE_CONNECTION: sync
@@ -4296,7 +4296,7 @@ The doc MUST contain these sections, in this order, with the content described:
 7. **Adding a new query.** Same shape, abbreviated; reference the `ListPings` files from Task 18.
 8. **Module ServiceProvider conventions.** State the rule: every module under `app/Modules/<Bounded>/Infrastructure/<Bounded>ServiceProvider.php` registers its repository binding and its handler registrations; gets listed in `bootstrap/providers.php`.
 9. **Testing patterns.** UseCase tests use in-memory repository fixtures (no DB); Handler tests reuse those; Controller tests use `RefreshDatabase` + Passport tokens. Reference `EloquentPingRepositoryTest` and `PingControllerTest`.
-10. **References.** Links to: `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` §5, the decision-log spec, ADR 0002, ADR 0007.
+10. **References.** Links to: `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` §5, the decision-log spec, ADR 0002, ADR 0007.
 
 - [ ] **Step 2: Author `docs/architecture/auth.md` against this section checklist**
 
@@ -4304,7 +4304,7 @@ Required sections:
 
 1. **Overview.** One paragraph: Passport for access tokens; Socialite for IdP-shaped login; Spatie laravel-permission for roles/permissions; Filament/Horizon panels gated by role; Permission marker interface forbids raw strings.
 2. **Passport configuration.** Token expirations (15d/30d/6mo per Task 6 step 4); key persistence via the `passport-keys` named volume; idempotent provisioning in entrypoint.
-3. **The stub Socialite driver.** Decision #7 explained: per-request `?identity=<email>` fixture, default `stub-user@azimuth.local`. File paths: `app/Authentication/Socialite/StubProvider.php`, `SocialiteStubServiceProvider`, controller, routes. Walk the redirect → callback → token mint flow.
+3. **The stub Socialite driver.** Decision #7 explained: per-request `?identity=<email>` fixture, default `stub-user@eurostrip.local`. File paths: `app/Authentication/Socialite/StubProvider.php`, `SocialiteStubServiceProvider`, controller, routes. Walk the redirect → callback → token mint flow.
 4. **Adding a real OAuth provider (future).** Steps to add e.g. Google: `composer require socialiteproviders/google`, register, add `services.google` config, add routes that copy the stub controller's pattern.
 5. **Permissions and roles.** Decision #5: marker interface `App\Authorization\Contracts\Permission`. Every module declares a `<Module>Permission` enum. The `PermissionsSeeder` reflects across enums under `app/Modules` and reconciles. Spatie's tables: `permissions`, `roles`, `model_has_*`. The `Role` enum is in `app/Authorization/Roles/Role.php`.
 6. **Authorization in practice.** Three call-sites: (a) bus dispatch — `AuthorizeMiddleware` calls `Gate::authorize($message->permission()->value)`; (b) Filament resources — `canViewAny` / `canCreate` use `auth()->user()?->can(<Permission>::<Case>->value)`; (c) Horizon — gate calls `$user->hasRole(Role::Admin->value)`. The PHPStan rule (Task 23) forbids raw strings in any `Gate::*` call.
@@ -4316,12 +4316,12 @@ Required sections:
 
 Required sections — one subsection per data store:
 
-1. **Postgres + PostGIS.** Image: `postgis/postgis:16-3.4`. Container: `azimuth-postgres`. Port: `5432`. Extensions enabled: `postgis`, `postgis_topology`, `pgcrypto`, `uuid-ossp` (+ defaults). Reads/writes: every Eloquent model. Migrations live at `apps/backend/database/migrations`.
-2. **Dragonfly (Redis-compatible).** Image: `docker.dragonflydb.io/dragonflydb/dragonfly:latest`. Container: `azimuth-dragonfly`. Port: `6379`. Used for: cache (`CACHE_DRIVER=redis`), session, queue (`QUEUE_CONNECTION=redis`), Horizon, broadcasting (when running through pusher driver against Soketi, the queue still flows here).
-3. **Typesense.** Image: `typesense/typesense:29.1`. Container: `azimuth-typesense`. Port: `8108`. Driver: Laravel Scout (`SCOUT_DRIVER=typesense`). Searchable models: `PingModel` (Task 19); future modules opt in via the `Searchable` trait.
-4. **MinIO (S3-compatible).** Image: `minio/minio:latest`. Container: `azimuth-minio`. Host ports: `9100` (S3) / `9101` (console). Bucket: `azimuth-dev`. Used for: any `Storage::disk('s3')->put(...)` call, future Browsershot output.
-5. **Soketi.** Image: `quay.io/soketi/soketi:latest-16-alpine`. Container: `azimuth-soketi`. Ports: `6001` WS / `9601` metrics. Used for: broadcasting via `pusher` driver. Channel definitions live in `routes/channels.php`.
-6. **Mailpit.** Image: `axllent/mailpit:latest`. Container: `azimuth-mailpit`. Ports: `1025` SMTP / `8025` UI. Catches every dev mail.
+1. **Postgres + PostGIS.** Image: `postgis/postgis:16-3.4`. Container: `eurostrip-postgres`. Port: `5432`. Extensions enabled: `postgis`, `postgis_topology`, `pgcrypto`, `uuid-ossp` (+ defaults). Reads/writes: every Eloquent model. Migrations live at `apps/backend/database/migrations`.
+2. **Dragonfly (Redis-compatible).** Image: `docker.dragonflydb.io/dragonflydb/dragonfly:latest`. Container: `eurostrip-dragonfly`. Port: `6379`. Used for: cache (`CACHE_DRIVER=redis`), session, queue (`QUEUE_CONNECTION=redis`), Horizon, broadcasting (when running through pusher driver against Soketi, the queue still flows here).
+3. **Typesense.** Image: `typesense/typesense:29.1`. Container: `eurostrip-typesense`. Port: `8108`. Driver: Laravel Scout (`SCOUT_DRIVER=typesense`). Searchable models: `PingModel` (Task 19); future modules opt in via the `Searchable` trait.
+4. **MinIO (S3-compatible).** Image: `minio/minio:latest`. Container: `eurostrip-minio`. Host ports: `9100` (S3) / `9101` (console). Bucket: `eurostrip-dev`. Used for: any `Storage::disk('s3')->put(...)` call, future Browsershot output.
+5. **Soketi.** Image: `quay.io/soketi/soketi:latest-16-alpine`. Container: `eurostrip-soketi`. Ports: `6001` WS / `9601` metrics. Used for: broadcasting via `pusher` driver. Channel definitions live in `routes/channels.php`.
+6. **Mailpit.** Image: `axllent/mailpit:latest`. Container: `eurostrip-mailpit`. Ports: `1025` SMTP / `8025` UI. Catches every dev mail.
 7. **Cross-cutting health checks.** Reproduce the gate's HTTP/CLI probes (from `docs/runbooks/local-dev.md`).
 8. **References.** Links to: `infra/docker-compose.yml`, `infra/docker-compose.ci.yml`, the Phase 1 deviation notes in spec §13.1.
 
@@ -4331,7 +4331,7 @@ Each ADR uses the same shape as `docs/adr/0001-nx-with-laravel-via-run-commands.
 
 - **`docs/adr/0002-cqrs-three-layer.md`** — title: "Three-Layer CQRS (Command/Query → Handler → UseCase)". Context: SOLID separation of bus-adapter concerns from pure business logic; framework imports must not leak into Domain or Application UseCases. Decision: split write side into Command (Data DTO) / Handler (bus adapter) / UseCase (pure); same for reads; HandlerRegistry binds them. Consequences: + testability, + framework-free unit tests; − more files per feature; ~ requires module ServiceProvider per bounded context.
 - **`docs/adr/0003-permission-marker-interface.md`** — title: "Permission as a Marker Interface (no raw strings)". Context: spatie/laravel-permission stores names as strings; raw-string sites drift. Decision: every module declares `enum <Module>Permission: string implements App\Authorization\Contracts\Permission`; PHPStan rule forbids raw strings in `Gate::*` calls. Consequences: + compile-time safety, + reconciler seeder works by reflection; − one extra file per module; ~ developers must add cases to the enum, not migrations.
-- **`docs/adr/0004-stub-socialite-per-request-fixture.md`** — title: "Stub Socialite Driver with Per-Request Fixture Identity". Context: dev needs an OAuth-shaped flow without IdP wiring; tests need multi-role flexibility. Decision: stub driver accepts `?identity=<email>`, default `stub-user@azimuth.local`. Consequences: + multi-role tests with no test-only branches in production code; − stub identity must never reach prod (controller is wired only when stub provider is registered); ~ real providers added later by following the same controller pattern.
+- **`docs/adr/0004-stub-socialite-per-request-fixture.md`** — title: "Stub Socialite Driver with Per-Request Fixture Identity". Context: dev needs an OAuth-shaped flow without IdP wiring; tests need multi-role flexibility. Decision: stub driver accepts `?identity=<email>`, default `stub-user@eurostrip.local`. Consequences: + multi-role tests with no test-only branches in production code; − stub identity must never reach prod (controller is wired only when stub provider is registered); ~ real providers added later by following the same controller pattern.
 - **`docs/adr/0005-filament-for-admin.md`** — title: "Filament for the Admin Panel". Context: needs CRUD UI for every module gated by Spatie permissions; building from scratch is wasteful. Decision: Filament panel at `/admin` with `discoverResources(in: app_path('Modules'))`. Consequences: + fastest path to module-CRUD admin; − Filament conventions leak into Presentation layer; ~ panel is gated by `Role::Admin`.
 - **`docs/adr/0007-bus-middleware-order.md`** — title: "Bus Middleware Order: Authorize Before Validate". Context: standard CQRS literature places Validate first; we deliberately invert. Decision: order is `Logging → Metrics → Authorize → Validate → Transaction` (CommandBus); QueryBus drops `Transaction`. Consequences: + unauthorized callers never see schema-shaped errors; − slightly more compute per malformed-and-unauthorized call; ~ revisit if perf bites at Phase 4.
 
@@ -4395,7 +4395,7 @@ Open `http://localhost:8000/admin` in a browser. Log in as a user with the Admin
 
 - [ ] **Step 4: Scramble docs gate**
 
-Open `http://localhost:8000/docs/api`. Confirm: the page renders, the API title is "Azimuth API", and the `/api/ping` GET and POST endpoints are both listed.
+Open `http://localhost:8000/docs/api`. Confirm: the page renders, the API title is "EuroStrip API", and the `/api/ping` GET and POST endpoints are both listed.
 
 - [ ] **Step 5: CI gate**
 
@@ -4442,11 +4442,11 @@ Modify `docs/runbooks/phase-2-handoff.md` — change the document's framing from
 
 Now that the branch is up and the PR is open, rename the remote:
 
-1. On GitHub: Settings → Repository name → `vector` → `azimuth`.
+1. On GitHub: Settings → Repository name → `vector` → `eurostrip`.
 2. Locally:
 
 ```bash
-git remote set-url origin https://github.com/FerrLab/azimuth.git
+git remote set-url origin https://github.com/FerrLab/eurostrip.git
 git fetch origin
 ```
 

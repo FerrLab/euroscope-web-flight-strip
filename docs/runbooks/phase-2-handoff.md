@@ -1,4 +1,4 @@
-# Azimuth — Phase 2 Handoff
+# EuroStrip — Phase 2 Handoff
 
 > Pickup point for another machine / another session continuing the scaffold.
 
@@ -31,9 +31,9 @@ Phase 3 picks up from here. A fresh `phase-3-handoff.md` will be written as Phas
 
 ## TL;DR (historical — kept for context)
 
-Phase 1 of the scaffold is **done and green**. The project was renamed mid-stream from **Vector** to **Azimuth** ("Your companion from A to Z"), including the on-disk directory and the Claude memory directory. The next session should pick up at **Phase 2** — backend core (CQRS contracts + every Laravel package configured + Filament + Scramble + Ping module), per `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` §13.2.
+Phase 1 of the scaffold is **done and green**. The project was renamed mid-stream from **Vector** to **EuroStrip** ("Your companion from A to Z"), including the on-disk directory and the Claude memory directory. The next session should pick up at **Phase 2** — backend core (CQRS contracts + every Laravel package configured + Filament + Scramble + Ping module), per `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` §13.2.
 
-The Phase 2 implementation **plan has not been written yet**. The first action for the new session is to invoke `superpowers:writing-plans` against the existing spec section 13.2 to produce `docs/superpowers/plans/2026-05-05-azimuth-scaffold-phase-2.md`, then execute it via `superpowers:subagent-driven-development`.
+The Phase 2 implementation **plan has not been written yet**. The first action for the new session is to invoke `superpowers:writing-plans` against the existing spec section 13.2 to produce `docs/superpowers/plans/2026-05-05-eurostrip-scaffold-phase-2.md`, then execute it via `superpowers:subagent-driven-development`.
 
 ---
 
@@ -57,17 +57,17 @@ The Phase 2 implementation **plan has not been written yet**. The first action f
 | T14. Author root CLAUDE.md collaboration rules                     | ✅     | `c169156`                    |
 | T15. Bring up the stack and verify the Phase 1 gate                | ✅     | `c190b1b` (gate fixes)       |
 
-Plus the rename to Azimuth: `78fc4e2`.
+Plus the rename to EuroStrip: `78fc4e2`.
 
 ### Phase 1 gate (functionally verified at handoff time)
 
 - Backend at `http://localhost:8000` — serves Laravel welcome (HTTP 200)
-- Frontend at `http://localhost:3000` — serves "Azimuth — Frontend scaffold is alive" (HTTP 200)
+- Frontend at `http://localhost:3000` — serves "EuroStrip — Frontend scaffold is alive" (HTTP 200)
 - Postgres has `postgis`, `postgis_topology`, `pgcrypto`, `uuid-ossp` extensions enabled
 - Dragonfly responds to `redis-cli ping` with `PONG`
 - Typesense `/health` returns `{"ok":true}`
-- MinIO bucket `azimuth-dev` exists
-- All 8 services come up under `azimuth-*` container names; stateful ones report `healthy`
+- MinIO bucket `eurostrip-dev` exists
+- All 8 services come up under `eurostrip-*` container names; stateful ones report `healthy`
 - `pnpm nx run-many --target=typecheck --all` succeeds for all 6 projects (api-client, design-tokens, i18n, ui, web, backend)
 
 ---
@@ -105,14 +105,14 @@ The new session should be aware of these — they're already committed but might
 - **Branch:** `main` (no feature branches in flight)
 - **Working tree:** clean except `.env` (git-ignored, contains a real `APP_KEY=base64:...`)
 - **Docker:** stack is up; `docker compose --env-file .env -f infra/docker-compose.yml ps` shows all 8 services
-- **Memory:** at `~/.claude/projects/-Users-kewyn-Herd-azimuth/memory/` (renamed from `-vector` after the directory move)
-- **GitHub remote:** still `https://github.com/FerrLab/vector.git`. The remote repo has not been renamed — that's a manual step on GitHub (Settings → Repository name → vector → azimuth) and then `git remote set-url origin https://github.com/FerrLab/azimuth.git`. Optional but recommended.
+- **Memory:** at `~/.claude/projects/-Users-kewyn-Herd-eurostrip/memory/` (renamed from `-vector` after the directory move)
+- **GitHub remote:** still `https://github.com/FerrLab/vector.git`. The remote repo has not been renamed — that's a manual step on GitHub (Settings → Repository name → vector → eurostrip) and then `git remote set-url origin https://github.com/FerrLab/eurostrip.git`. Optional but recommended.
 
 ---
 
 ## What's next — Phase 2
 
-**Spec source:** `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` §13.2.
+**Spec source:** `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` §13.2.
 
 **Goal:** Backend fully wired with every Laravel package configured; canonical CQRS pattern proven by a real (trivial) Ping module.
 
@@ -127,7 +127,7 @@ The new session should be aware of these — they're already committed but might
   - `EloquentPingRepository` (Infrastructure)
   - `PingResource` (Filament admin)
   - HTTP controller with Scramble OpenAPI annotations
-- Stub Socialite driver registered as `stub`; login route `/auth/socialite/stub` works end-to-end and mints a Passport access token (deterministic identity `stub-user@azimuth.local`).
+- Stub Socialite driver registered as `stub`; login route `/auth/socialite/stub` works end-to-end and mints a Passport access token (deterministic identity `stub-user@eurostrip.local`).
 - PHPStan/Larastan level 8 + Deptrac with the four-layer ruleset (Domain / Application / Infrastructure / Presentation) added; **a custom PHPStan rule forbidding raw-string permission usage** outside the seeder.
 - Pest test suite: happy/invalid/garbage for `RecordPingUseCase`, `PingHandler`, `PingController`; bus dispatch tests; Socialite-stub → Passport-token integration test.
 - CI extended with a `test-backend` job (in `.github/workflows/ci.yml`) that boots `infra/docker-compose.ci.yml`, runs `nx test backend`, `nx analyze backend`, `nx deptrac backend`.
@@ -155,11 +155,11 @@ The new session should be aware of these — they're already committed but might
 2. **Bring the stack up (if not already running):**
 
    ```bash
-   cd /Users/kewyn/Herd/azimuth   # or wherever you cloned
+   cd /Users/kewyn/Herd/eurostrip   # or wherever you cloned
    pnpm install
    docker compose --env-file .env -f infra/docker-compose.yml up -d
    curl -fsS http://localhost:8000 | head -c 100   # should mention Laravel
-   curl -fsS http://localhost:3000 | head -c 100   # should mention Azimuth
+   curl -fsS http://localhost:3000 | head -c 100   # should mention EuroStrip
    ```
 
 3. **Re-establish the Phase 1 gate (sanity check):**
@@ -169,14 +169,14 @@ The new session should be aware of these — they're already committed but might
    docker compose --env-file .env -f infra/docker-compose.yml ps --format 'table {{.Name}}\t{{.Status}}'
    ```
 
-4. **Read the design spec** at `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md`, paying particular attention to:
+4. **Read the design spec** at `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md`, paying particular attention to:
    - §5 (Backend architecture — CQRS three-layer flow, bus middleware pipeline, module layout, package wiring table, auth flow, testing baseline)
    - §13.2 (Phase 2 scope and gate)
    - §11 (naming conventions — Commands, Queries, Handlers, UseCases, Results, repository interfaces)
 
-5. **Read the project memory** in `~/.claude/projects/-Users-kewyn-Herd-azimuth/memory/`:
+5. **Read the project memory** in `~/.claude/projects/-Users-kewyn-Herd-eurostrip/memory/`:
    - `MEMORY.md` (index)
-   - `project_azimuth_overview.md` (full stack and conventions)
+   - `project_eurostrip_overview.md` (full stack and conventions)
    - `project_permissions_with_enums.md` (the PHP-enum permission rule, important for Phase 2)
    - `feedback_tdd.md` (TDD rule with happy/invalid/garbage paths)
    - `feedback_run_pint.md` (run Pint after every backend task)
@@ -184,7 +184,7 @@ The new session should be aware of these — they're already committed but might
 
 6. **Invoke the brainstorming skill** to confirm the Phase 2 scope is still right (the user may have evolved their thinking since 2026-05-02), or skip directly to writing-plans if the spec stands.
 
-7. **Invoke `superpowers:writing-plans`** to produce `docs/superpowers/plans/2026-05-05-azimuth-scaffold-phase-2.md`. Suggested task decomposition (about 22–25 bite-sized tasks):
+7. **Invoke `superpowers:writing-plans`** to produce `docs/superpowers/plans/2026-05-05-eurostrip-scaffold-phase-2.md`. Suggested task decomposition (about 22–25 bite-sized tasks):
    1. Replace PHPUnit with Pest as the test runner; baseline Pest config + test directory layout; verify `php artisan test` works inside the container
    2. Install spatie/laravel-data + spatie/browsershot + spatie/laravel-translatable + register service providers
    3. Install spatie/laravel-permission v7; author the `Permission` (string-backed enum) contract + `Role` enum; author the seeder that reconciles enum cases to DB rows; document the convention

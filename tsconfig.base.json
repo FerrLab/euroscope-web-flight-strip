@@ -27,10 +27,10 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "paths": {
-      "@azimuth/design-tokens": ["libs/design-tokens/src/index.ts"],
-      "@azimuth/ui": ["libs/ui/src/index.ts"],
-      "@azimuth/api-client": ["libs/api-client/src/index.ts"],
-      "@azimuth/i18n": ["libs/i18n/src/index.ts"]
+      "@eurostrip/design-tokens": ["libs/design-tokens/src/index.ts"],
+      "@eurostrip/ui": ["libs/ui/src/index.ts"],
+      "@eurostrip/api-client": ["libs/api-client/src/index.ts"],
+      "@eurostrip/i18n": ["libs/i18n/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

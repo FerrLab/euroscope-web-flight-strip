@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { buildSessionCookie } from '@/shared/auth/cookie';
-import { LOCALES, type Locale } from '@azimuth/i18n';
+import { LOCALES, type Locale } from '@eurostrip/i18n';
 
 // Default to 127.0.0.1 not localhost: Node's fetch (undici) on some Windows/IPv6
 // configurations tries ::1 first and fails with ECONNREFUSED when the upstream
 // (Docker on Desktop) only meaningfully binds IPv4. 127.0.0.1 sidesteps it.
-const BACKEND_URL = process.env.AZIMUTH_BACKEND_URL ?? 'http://127.0.0.1:8000';
+const BACKEND_URL = process.env.EUROSTRIP_BACKEND_URL ?? 'http://127.0.0.1:8000';
 
 function pickLocale(value: string | null): Locale {
   if (value && (LOCALES as readonly string[]).includes(value)) {
@@ -16,7 +16,7 @@ function pickLocale(value: string | null): Locale {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const identity = url.searchParams.get('identity') ?? 'stub-user@azimuth.local';
+  const identity = url.searchParams.get('identity') ?? 'stub-user@eurostrip.local';
   const locale = pickLocale(url.searchParams.get('locale'));
 
   const upstream = await fetch(

@@ -1,7 +1,7 @@
 {
   "common": {
-    "appName": "Azimuth",
-    "tagline": "Your companion from A to Z",
+    "appName": "EuroStrip",
+    "tagline": "Web flight strips for EuroScope",
     "loading": "Loading…",
     "error": "Something went wrong",
     "retry": "Try again",

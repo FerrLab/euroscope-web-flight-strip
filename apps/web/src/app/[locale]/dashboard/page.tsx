@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Card } from '@azimuth/ui';
+import { Card } from '@eurostrip/ui';
 import { ThemeSwitcher } from '@/shared/theme/ThemeSwitcher';
 import { LocaleSwitcher } from '@/shared/i18n/LocaleSwitcher';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';

@@ -1,5 +1,5 @@
 {
-  "name": "@azimuth/web",
+  "name": "@eurostrip/web",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@azimuth/api-client": "workspace:*",
-    "@azimuth/design-tokens": "workspace:*",
-    "@azimuth/i18n": "workspace:*",
-    "@azimuth/ui": "workspace:*",
+    "@eurostrip/api-client": "workspace:*",
+    "@eurostrip/design-tokens": "workspace:*",
+    "@eurostrip/i18n": "workspace:*",
+    "@eurostrip/ui": "workspace:*",
     "next": "^15.0.3",
     "next-intl": "^3.0.0",
     "react": "^19.0.0-rc-66855b96-20241106",

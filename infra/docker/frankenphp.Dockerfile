@@ -27,7 +27,7 @@ RUN apk add --no-cache \
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 # PHP ini overrides
-COPY infra/docker/php.ini /usr/local/etc/php/conf.d/zz-azimuth.ini
+COPY infra/docker/php.ini /usr/local/etc/php/conf.d/zz-eurostrip.ini
 
 WORKDIR /app
 

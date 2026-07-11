@@ -14,7 +14,7 @@ chmod -R 775 storage bootstrap/cache
 
 # Wait for Postgres
 echo "Waiting for postgres..."
-until pg_isready -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USERNAME:-azimuth}" >/dev/null 2>&1; do
+until pg_isready -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USERNAME:-eurostrip}" >/dev/null 2>&1; do
   sleep 1
 done
 echo "Postgres is ready"
@@ -46,15 +46,15 @@ chmod 660 storage/passport/oauth-public.key 2>/dev/null || true
 # files), and `passport:client --personal` always inserts a new row, so we
 # gate on a direct count of personal-access clients for true idempotency.
 # In Passport 13 the grant type is encoded in the JSON `grant_types` column.
-PERSONAL_CLIENT_COUNT=$(PGPASSWORD="${DB_PASSWORD:-azimuth}" psql \
+PERSONAL_CLIENT_COUNT=$(PGPASSWORD="${DB_PASSWORD:-eurostrip}" psql \
   -h "${DB_HOST:-postgres}" \
   -p "${DB_PORT:-5432}" \
-  -U "${DB_USERNAME:-azimuth}" \
-  -d "${DB_DATABASE:-azimuth}" \
+  -U "${DB_USERNAME:-eurostrip}" \
+  -d "${DB_DATABASE:-eurostrip}" \
   -tAc "SELECT COUNT(*) FROM oauth_clients WHERE grant_types::text LIKE '%personal_access%' AND revoked = false" 2>/dev/null || echo 0)
 
 if [ "${PERSONAL_CLIENT_COUNT:-0}" = "0" ]; then
-  php artisan passport:client --personal --no-interaction --name="${APP_NAME:-Azimuth} Personal Access Client" || true
+  php artisan passport:client --personal --no-interaction --name="${APP_NAME:-EuroStrip} Personal Access Client" || true
 fi
 
 OCTANE_ARGS=(--server=frankenphp --host=0.0.0.0 --port=8000 --workers=auto --max-requests=1000)

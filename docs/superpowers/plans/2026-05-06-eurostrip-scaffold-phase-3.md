@@ -1,8 +1,8 @@
-# Azimuth — Phase 3 Implementation Plan
+# EuroStrip — Phase 3 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the Azimuth frontend skeleton — themed (4 modes), localized (en/pt), authenticated Next.js shell that talks to the Phase 2 backend through a typed RTK Query client. Land 8 squared `libs/ui` primitives, the auth/proxy plumbing, and a working Ping feature mirroring the backend module. Phase 3 closes when `nx test web && nx e2e web` are green and a manual smoke proves theme + locale switchers + the Ping create/list cycle.
+**Goal:** Build the EuroStrip frontend skeleton — themed (4 modes), localized (en/pt), authenticated Next.js shell that talks to the Phase 2 backend through a typed RTK Query client. Land 8 squared `libs/ui` primitives, the auth/proxy plumbing, and a working Ping feature mirroring the backend module. Phase 3 closes when `nx test web && nx e2e web` are green and a manual smoke proves theme + locale switchers + the Ping create/list cycle.
 
 **Architecture:** Next.js 15 App Router with `[locale]` segment; Redux Toolkit + RTK Query for state and HTTP; httpOnly cookie + Next.js proxy route handlers so the Bearer token never reaches browser JS; CSS-vars-driven theming with `data-theme="day|dusk|night|bright"` set pre-paint to avoid flash; Openbridge tokens (hand-extracted) drive `libs/design-tokens` and a Tailwind preset that enforces the squared-UI rule (no border-radius except `rounded-full`); React Hook Form + Zod for forms (Zod schemas double-duty as RTK Query payload types).
 
@@ -10,8 +10,8 @@
 
 **Source documents (read both before starting):**
 
-- `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` — §6 (frontend architecture detail), §11 (naming conventions), §13.3 (Phase 3 scope)
-- `docs/superpowers/specs/2026-05-06-azimuth-scaffold-phase-3-decisions.md` — eight locked decisions + canonical `features/ping` module shape
+- `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` — §6 (frontend architecture detail), §11 (naming conventions), §13.3 (Phase 3 scope)
+- `docs/superpowers/specs/2026-05-06-eurostrip-scaffold-phase-3-decisions.md` — eight locked decisions + canonical `features/ping` module shape
 
 **Hard rules from `/CLAUDE.md` (apply to every task):**
 
@@ -623,7 +623,7 @@ This preset enforces the squared-UI rule — only `borderRadius: { none, full }`
 ```ts
 import type { Config } from 'tailwindcss';
 
-export const azimuthPreset: Partial<Config> = {
+export const eurostripPreset: Partial<Config> = {
   theme: {
     extend: {
       colors: {
@@ -663,7 +663,7 @@ export const azimuthPreset: Partial<Config> = {
   },
 };
 
-export default azimuthPreset;
+export default eurostripPreset;
 ```
 
 - [ ] **Step 10: Add a test that the Tailwind preset only exposes `none` + `full`**
@@ -671,18 +671,18 @@ export default azimuthPreset;
 Append to `libs/design-tokens/src/build.test.ts`:
 
 ```ts
-import { azimuthPreset } from './tailwind-preset';
+import { eurostripPreset } from './tailwind-preset';
 
-describe('azimuthPreset', () => {
+describe('eurostripPreset', () => {
   it('exposes only `none` and `full` border radii (happy — squared UI rule)', () => {
-    const radii = azimuthPreset.theme?.borderRadius ?? {};
+    const radii = eurostripPreset.theme?.borderRadius ?? {};
     expect(Object.keys(radii).sort()).toEqual(['full', 'none']);
     expect(radii.none).toBe('0');
     expect(radii.full).toBe('9999px');
   });
 
   it('rejects any other radius keys (invalid path — regression check)', () => {
-    const radii = azimuthPreset.theme?.borderRadius ?? {};
+    const radii = eurostripPreset.theme?.borderRadius ?? {};
     expect(radii).not.toHaveProperty('sm');
     expect(radii).not.toHaveProperty('md');
     expect(radii).not.toHaveProperty('lg');
@@ -703,7 +703,7 @@ export { colors, type ThemeName, type ColorTokens } from './colors';
 export { typography } from './typography';
 export { spacing } from './spacing';
 export { generateTokensCss } from './build';
-export { azimuthPreset } from './tailwind-preset';
+export { eurostripPreset } from './tailwind-preset';
 ```
 
 `libs/design-tokens/project.json`:
@@ -756,7 +756,7 @@ export default defineConfig({
 
 ```json
 {
-  "name": "@azimuth/design-tokens",
+  "name": "@eurostrip/design-tokens",
   "version": "0.1.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -822,7 +822,7 @@ export function isLocale(value: string): value is Locale {
 ```json
 {
   "common": {
-    "appName": "Azimuth",
+    "appName": "EuroStrip",
     "tagline": "Your companion from A to Z",
     "loading": "Loading…",
     "error": "Something went wrong",
@@ -858,7 +858,7 @@ export function isLocale(value: string): value is Locale {
 ```json
 {
   "common": {
-    "appName": "Azimuth",
+    "appName": "EuroStrip",
     "tagline": "Seu companheiro de A a Z",
     "loading": "Carregando…",
     "error": "Algo deu errado",
@@ -942,7 +942,7 @@ describe('locales', () => {
   it('every locale has a populated messages catalog (happy)', () => {
     for (const locale of LOCALES) {
       expect(messages[locale]).toBeDefined();
-      expect(messages[locale].common.appName).toBe('Azimuth');
+      expect(messages[locale].common.appName).toBe('EuroStrip');
     }
   });
 
@@ -997,7 +997,7 @@ Update `libs/i18n/project.json`:
 
 ```json
 {
-  "name": "@azimuth/i18n",
+  "name": "@eurostrip/i18n",
   "version": "0.1.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -2148,7 +2148,7 @@ Expected: file written, non-zero size, valid JSON. Verify with:
 node -e 'console.log(JSON.parse(require("fs").readFileSync("apps/backend/openapi.json","utf8")).info.title)'
 ```
 
-Expected output: `Azimuth API`.
+Expected output: `EuroStrip API`.
 
 - [ ] **Step 3: Author `libs/api-client/src/baseApi.ts`**
 
@@ -2178,7 +2178,7 @@ const config: ConfigFile = {
   apiFile: './src/baseApi.ts',
   apiImport: 'baseApi',
   outputFile: './src/generated.ts',
-  exportName: 'azimuthApi',
+  exportName: 'eurostripApi',
   hooks: true,
   tag: true,
 };
@@ -2337,7 +2337,7 @@ export default withNextIntl(nextConfig);
 
 ```ts
 import { getRequestConfig } from 'next-intl/server';
-import { LOCALES, DEFAULT_LOCALE, isLocale, messages } from '@azimuth/i18n';
+import { LOCALES, DEFAULT_LOCALE, isLocale, messages } from '@eurostrip/i18n';
 import { notFound } from 'next/navigation';
 
 export default getRequestConfig(async ({ requestLocale }) => {
@@ -2360,7 +2360,7 @@ import './globals.css';
 import type { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'Azimuth',
+  title: 'EuroStrip',
   description: 'Your companion from A to Z',
 };
 
@@ -2377,11 +2377,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 import type { ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { LOCALES, isLocale, type Locale } from '@azimuth/i18n';
+import { LOCALES, isLocale, type Locale } from '@eurostrip/i18n';
 import { notFound } from 'next/navigation';
 import { ThemeProvider } from '@/shared/theme/ThemeProvider';
 import { ReduxProvider } from '@/shared/store/ReduxProvider';
-import { ToastProvider } from '@azimuth/ui';
+import { ToastProvider } from '@eurostrip/ui';
 import { setThemePrePaint } from '@/shared/theme/set-theme-pre-paint';
 import { cookies } from 'next/headers';
 
@@ -2400,7 +2400,7 @@ export default async function LocaleLayout({
   if (!isLocale(locale)) notFound();
 
   const messages = await getMessages();
-  const themeCookie = (await cookies()).get('azimuth_theme')?.value ?? 'day';
+  const themeCookie = (await cookies()).get('eurostrip_theme')?.value ?? 'day';
 
   return (
     <html lang={locale} data-theme={themeCookie} suppressHydrationWarning>
@@ -2464,7 +2464,7 @@ function ServerHomePage() {
 
 ```ts
 import createMiddleware from 'next-intl/middleware';
-import { LOCALES, DEFAULT_LOCALE } from '@azimuth/i18n';
+import { LOCALES, DEFAULT_LOCALE } from '@eurostrip/i18n';
 
 export default createMiddleware({
   locales: [...LOCALES],
@@ -2497,10 +2497,10 @@ body {
 
 ```ts
 import type { Config } from 'tailwindcss';
-import { azimuthPreset } from '@azimuth/design-tokens';
+import { eurostripPreset } from '@eurostrip/design-tokens';
 
 const config: Config = {
-  presets: [azimuthPreset as Config],
+  presets: [eurostripPreset as Config],
   content: [
     './src/**/*.{ts,tsx}',
     '../../libs/ui/src/**/*.{ts,tsx}',
@@ -2565,11 +2565,11 @@ DEV_PID=$!
 sleep 15
 curl -fsSL http://localhost:3000/en -o /tmp/home-en.html -w "HTTP %{http_code} (%{size_download} bytes)\n"
 curl -fsSL http://localhost:3000/pt -o /tmp/home-pt.html -w "HTTP %{http_code} (%{size_download} bytes)\n"
-grep -oE "Azimuth|Painel|Dashboard|Idioma" /tmp/home-{en,pt}.html | head
+grep -oE "EuroStrip|Painel|Dashboard|Idioma" /tmp/home-{en,pt}.html | head
 kill $DEV_PID 2>/dev/null || true
 ```
 
-Expected: both locales return HTTP 200; the markers appear (en has "Azimuth"/"Dashboard"; pt has "Painel"). The dev server is killed after the probe.
+Expected: both locales return HTTP 200; the markers appear (en has "EuroStrip"/"Dashboard"; pt has "Painel"). The dev server is killed after the probe.
 
 (If lint fails on the placeholder `Login` literal in Step 6, that's acceptable — Task 18 wires the proper i18n key. We carry the eslint-disable-next-line in the meantime.)
 
@@ -2644,7 +2644,7 @@ export const { setUser, setPending } = authSlice.actions;
 ```ts
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import { baseApi } from '@azimuth/api-client';
+import { baseApi } from '@eurostrip/api-client';
 import { authSlice } from './slices/auth';
 
 export function makeStore() {
@@ -2764,7 +2764,7 @@ EOF
 `apps/web/src/shared/auth/cookie.ts`:
 
 ```ts
-const COOKIE_NAME = 'azimuth_session';
+const COOKIE_NAME = 'eurostrip_session';
 
 export function buildSessionCookie(token: string, opts: { secure: boolean }): string {
   const attrs = [
@@ -2832,11 +2832,11 @@ Run: `pnpm nx test web -- shared/auth 2>&1 | tail -10`. Expected: 4 passing.
 ```ts
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.AZIMUTH_BACKEND_URL ?? 'http://localhost:8000';
+const BACKEND_URL = process.env.EUROSTRIP_BACKEND_URL ?? 'http://localhost:8000';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const identity = url.searchParams.get('identity') ?? 'stub-user@azimuth.local';
+  const identity = url.searchParams.get('identity') ?? 'stub-user@eurostrip.local';
   const cb = new URL('/api/auth/stub-callback', url);
   cb.searchParams.set('identity', identity);
   return NextResponse.redirect(
@@ -2856,7 +2856,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   // Skip the backend redirect — fetch its callback directly from our route handler.
   const url = new URL(request.url);
-  const identity = url.searchParams.get('identity') ?? 'stub-user@azimuth.local';
+  const identity = url.searchParams.get('identity') ?? 'stub-user@eurostrip.local';
   const cb = new URL('/api/auth/stub-callback', url);
   cb.searchParams.set('identity', identity);
   return NextResponse.redirect(cb, 302);
@@ -2871,11 +2871,11 @@ export async function GET(request: Request) {
 import { NextResponse } from 'next/server';
 import { buildSessionCookie } from '@/shared/auth/cookie';
 
-const BACKEND_URL = process.env.AZIMUTH_BACKEND_URL ?? 'http://localhost:8000';
+const BACKEND_URL = process.env.EUROSTRIP_BACKEND_URL ?? 'http://localhost:8000';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const identity = url.searchParams.get('identity') ?? 'stub-user@azimuth.local';
+  const identity = url.searchParams.get('identity') ?? 'stub-user@eurostrip.local';
 
   const upstream = await fetch(
     `${BACKEND_URL}/auth/socialite/stub/callback?identity=${encodeURIComponent(identity)}`,
@@ -2929,7 +2929,7 @@ export async function POST(request: Request) {
 ```json
 {
   "auth": {
-    "loginTitle": "Sign in to Azimuth",
+    "loginTitle": "Sign in to EuroStrip",
     "continueWithStub": "Continue with Stub",
     "logoutLabel": "Log out"
   }
@@ -2941,7 +2941,7 @@ export async function POST(request: Request) {
 ```json
 {
   "auth": {
-    "loginTitle": "Entrar em Azimuth",
+    "loginTitle": "Entrar em EuroStrip",
     "continueWithStub": "Continuar com Stub",
     "logoutLabel": "Sair"
   }
@@ -2952,7 +2952,7 @@ export async function POST(request: Request) {
 
 ```ts
 import { getRequestConfig } from 'next-intl/server';
-import { LOCALES, DEFAULT_LOCALE, isLocale, messages as shared } from '@azimuth/i18n';
+import { LOCALES, DEFAULT_LOCALE, isLocale, messages as shared } from '@eurostrip/i18n';
 import { notFound } from 'next/navigation';
 
 import authEn from '@/messages/auth.en.json';
@@ -2979,7 +2979,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
 ```tsx
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Button, Card } from '@azimuth/ui';
+import { Button, Card } from '@eurostrip/ui';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
@@ -3007,7 +3007,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Card } from '@azimuth/ui';
+import { Card } from '@eurostrip/ui';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';
 
 export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -3048,12 +3048,12 @@ DEV_PID=$!
 sleep 15
 # Login flow:
 curl -fsSL -c /tmp/cookies.txt -L "http://localhost:3000/api/auth/stub-redirect?identity=demo@local" -o /tmp/dashboard.html -w "final HTTP %{http_code}\n"
-grep -oE "Azimuth|Painel|Dashboard|Sign in|Logout" /tmp/dashboard.html | head
-grep -E "azimuth_session" /tmp/cookies.txt | head -1
+grep -oE "EuroStrip|Painel|Dashboard|Sign in|Logout" /tmp/dashboard.html | head
+grep -E "eurostrip_session" /tmp/cookies.txt | head -1
 kill $DEV_PID 2>/dev/null || true
 ```
 
-Expected: redirect chain ends at `/en/dashboard` (HTTP 200); the cookie file contains `azimuth_session=...`.
+Expected: redirect chain ends at `/en/dashboard` (HTTP 200); the cookie file contains `eurostrip_session=...`.
 
 - [ ] **Step 9: Verify + commit**
 
@@ -3112,7 +3112,7 @@ function makeCtx(path: string) {
 describe('/api/proxy/[...path]', () => {
   it('forwards GET with Bearer header from cookie (happy)', async () => {
     mockFetch.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
-    const req = makeReq('api/ping', { cookie: 'azimuth_session=tok123' });
+    const req = makeReq('api/ping', { cookie: 'eurostrip_session=tok123' });
     const res = await GET(req, makeCtx('api/ping'));
     expect(mockFetch).toHaveBeenCalledOnce();
     const [, init] = mockFetch.mock.calls[0];
@@ -3132,7 +3132,7 @@ describe('/api/proxy/[...path]', () => {
     const body = JSON.stringify({ note: { en: 'hi' } });
     const req = new Request('http://localhost:3000/api/proxy/api/ping', {
       method: 'POST',
-      headers: { cookie: 'azimuth_session=tok123', 'content-type': 'application/json' },
+      headers: { cookie: 'eurostrip_session=tok123', 'content-type': 'application/json' },
       body,
     });
     const res = await POST(req, makeCtx('api/ping'));
@@ -3144,7 +3144,7 @@ describe('/api/proxy/[...path]', () => {
 
   it('handles upstream 5xx as garbage (garbage)', async () => {
     mockFetch.mockResolvedValue(new Response('boom', { status: 503 }));
-    const req = makeReq('api/ping', { cookie: 'azimuth_session=tok123' });
+    const req = makeReq('api/ping', { cookie: 'eurostrip_session=tok123' });
     const res = await GET(req, makeCtx('api/ping'));
     expect(res.status).toBe(503);
   });
@@ -3161,7 +3161,7 @@ Run: `pnpm nx test web -- proxy 2>&1 | tail -10`. Expected: 4 fail.
 import { NextResponse } from 'next/server';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';
 
-const BACKEND_URL = process.env.AZIMUTH_BACKEND_URL ?? 'http://localhost:8000';
+const BACKEND_URL = process.env.EUROSTRIP_BACKEND_URL ?? 'http://localhost:8000';
 
 type Ctx = { params: Promise<{ path: string[] }> };
 
@@ -3320,7 +3320,7 @@ Run: `pnpm nx test web -- schema 2>&1 | tail -10`. Expected: 5 passing.
 `apps/web/src/features/ping/api.ts`:
 
 ```ts
-import { baseApi } from '@azimuth/api-client';
+import { baseApi } from '@eurostrip/api-client';
 import type { RecordPingPayload } from './schema';
 
 export interface PingDto {
@@ -3508,7 +3508,7 @@ describe('PingList', () => {
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Spinner, Table } from '@azimuth/ui';
+import { Spinner, Table } from '@eurostrip/ui';
 import { useListPingsQuery, type PingDto } from '../api';
 
 export function PingList() {
@@ -3644,7 +3644,7 @@ describe('RecordPingForm', () => {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { Button, Input } from '@azimuth/ui';
+import { Button, Input } from '@eurostrip/ui';
 import { recordPingSchema, type RecordPingPayload } from '../schema';
 import { useRecordPingMutation } from '../api';
 import { useState } from 'react';
@@ -3740,7 +3740,7 @@ export function setThemePrePaint(): string {
   return `
 (function() {
   try {
-    var m = document.cookie.match(/(?:^|; )azimuth_theme=([^;]+)/);
+    var m = document.cookie.match(/(?:^|; )eurostrip_theme=([^;]+)/);
     var theme = m ? decodeURIComponent(m[1]) : 'day';
     if (!['day','dusk','night','bright'].includes(theme)) theme = 'day';
     document.documentElement.dataset.theme = theme;
@@ -3766,7 +3766,7 @@ export async function POST(request: Request) {
   }
   const secure = process.env.NODE_ENV === 'production';
   const cookie = [
-    `azimuth_theme=${theme}`,
+    `eurostrip_theme=${theme}`,
     'Path=/',
     'SameSite=Strict',
     `Max-Age=${60 * 60 * 24 * 365}`,
@@ -3839,7 +3839,7 @@ export function useTheme() {
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Select } from '@azimuth/ui';
+import { Select } from '@eurostrip/ui';
 import { useTheme } from './ThemeProvider';
 
 export function ThemeSwitcher() {
@@ -3954,8 +3954,8 @@ EOF
 
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
-import { Select } from '@azimuth/ui';
-import { LOCALES, type Locale } from '@azimuth/i18n';
+import { Select } from '@eurostrip/ui';
+import { LOCALES, type Locale } from '@eurostrip/i18n';
 
 export function LocaleSwitcher() {
   const t = useTranslations('locale');
@@ -4072,7 +4072,7 @@ EOF
 import { useTranslations } from 'next-intl';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Card } from '@azimuth/ui';
+import { Card } from '@eurostrip/ui';
 import { PingList } from '@/features/ping/components/PingList';
 import { RecordPingForm } from '@/features/ping/components/RecordPingForm';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';
@@ -4110,7 +4110,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Card } from '@azimuth/ui';
+import { Card } from '@eurostrip/ui';
 import { ThemeSwitcher } from '@/shared/theme/ThemeSwitcher';
 import { LocaleSwitcher } from '@/shared/i18n/LocaleSwitcher';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';
@@ -4384,12 +4384,12 @@ Required sections, with the content described:
 1. **Overview.** Next.js 15 App Router with `[locale]` segment; Redux Toolkit + RTK Query for state and HTTP; httpOnly cookie + Next.js proxy for the Bearer token; Openbridge tokens drive `libs/design-tokens` and a Tailwind preset that enforces no-border-radius-except-rounded-full; Vitest + RTL for components; Playwright for E2E.
 2. **The four libs.** Per `libs/{design-tokens, ui, api-client, i18n}`: file paths, what they export, who consumes them. Reference Tasks 2, 4–11, 12, 3.
 3. **App Router shape.** `[locale]/layout.tsx` provides Redux + i18n + Theme + Toast providers; `[locale]/page.tsx`, `[locale]/login/page.tsx`, `[locale]/dashboard/page.tsx`, `[locale]/ping/page.tsx`. Middleware at `src/middleware.ts` handles locale prefixing; `src/i18n/request.ts` merges shared + per-feature catalogs.
-4. **The 4-theme system.** `data-theme="day|dusk|night|bright"` on `<html>` set pre-paint via inline script. Cookie `azimuth_theme` persists user choice. CSS vars come from `libs/design-tokens/src/tokens.css`. Tailwind classes `bg-bg-primary`, `text-fg-primary`, etc. read these vars.
+4. **The 4-theme system.** `data-theme="day|dusk|night|bright"` on `<html>` set pre-paint via inline script. Cookie `eurostrip_theme` persists user choice. CSS vars come from `libs/design-tokens/src/tokens.css`. Tailwind classes `bg-bg-primary`, `text-fg-primary`, etc. read these vars.
 5. **Cookie auth + Next.js proxy.** Decision #6 explained: `/api/auth/stub-redirect` → `/api/auth/stub-callback` mints httpOnly cookie; `/api/proxy/[...path]` forwards browser requests to backend with `Authorization: Bearer <cookie>`. Walk the round-trip path of a `useListPingsQuery()` call.
-6. **Redux store layout.** `baseApi` from `@azimuth/api-client`; `authSlice`; typed hooks. Reference `apps/web/src/shared/store/index.ts`.
+6. **Redux store layout.** `baseApi` from `@eurostrip/api-client`; `authSlice`; typed hooks. Reference `apps/web/src/shared/store/index.ts`.
 7. **Adding a new feature module.** Walk the `features/<module>/` shape using Ping as the example. Steps: (a) refresh `libs/api-client` snapshot if backend added endpoints, (b) author Zod schema + RTK Query injectEndpoints, (c) author components with happy/invalid/garbage tests, (d) author per-feature i18n catalogs, (e) author the page under `[locale]/<module>/page.tsx`.
 8. **Testing patterns.** Vitest unit/component tests for libs and feature components; Playwright cross-feature happy-path E2E only. Reference `apps/web/e2e/login-and-ping.spec.ts`.
-9. **References.** Links to: `docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md` §6, the Phase 3 decision-log spec, ADR 0006, the four `libs/*/project.json` files, `docs/runbooks/local-dev.md`.
+9. **References.** Links to: `docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md` §6, the Phase 3 decision-log spec, ADR 0006, the four `libs/*/project.json` files, `docs/runbooks/local-dev.md`.
 
 - [ ] **Step 2: Author ADR 0006**
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Select } from '@azimuth/ui';
+import { Select } from '@eurostrip/ui';
 import { useTheme } from './ThemeProvider';
 
 export function ThemeSwitcher() {

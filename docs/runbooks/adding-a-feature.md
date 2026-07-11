@@ -2,7 +2,7 @@
 
 > Your step-by-step playbook for taking an idea to a green PR.
 
-This is the canonical workflow for every new feature in Azimuth. If you find yourself off-script, stop and ask why — the gates exist because shortcuts surface as production incidents.
+This is the canonical workflow for every new feature in EuroStrip. If you find yourself off-script, stop and ask why — the gates exist because shortcuts surface as production incidents.
 
 ## The 12 steps
 

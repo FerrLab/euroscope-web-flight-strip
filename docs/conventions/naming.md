@@ -1,12 +1,12 @@
 # Naming
 
-A reference for the names used across the Azimuth codebase. The
+A reference for the names used across the EuroStrip codebase. The
 discipline is consistency over cleverness — predictable names mean
 files are findable by intuition.
 
 This doc supersedes §11 of the original scaffold spec. The
 `UseCase` row from that spec is intentionally gone — see
-[ADR 0008](../adr/0008-pure-cqrs.md). In Azimuth's pure CQRS, the
+[ADR 0008](../adr/0008-pure-cqrs.md). In EuroStrip's pure CQRS, the
 **Handler is the business-logic locus**; there is no separate
 UseCase class.
 

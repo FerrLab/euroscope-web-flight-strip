@@ -99,7 +99,7 @@ PING_VIEW = 'ping.view'` cases. Rejected because it centralizes permission
 
 ## References
 
-- [Phase 2 decision log row 5.](../superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md)
-- [Original spec §5.6 — Spatie packages.](../superpowers/specs/2026-05-02-azimuth-scaffold-design.md)
+- [Phase 2 decision log row 5.](../superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md)
+- [Original spec §5.6 — Spatie packages.](../superpowers/specs/2026-05-02-eurostrip-scaffold-design.md)
 - [`docs/architecture/auth.md`](../architecture/auth.md) §5 (permission contract) and §6 (call-sites).
 - CLAUDE.md hard rule #3 — no raw permission strings.

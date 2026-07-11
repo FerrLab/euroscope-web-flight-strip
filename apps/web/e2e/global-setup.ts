@@ -24,14 +24,14 @@ export default async function globalSetup(): Promise<void> {
   // Project root is two directories up from apps/web/e2e.
   const projectRoot = join(__dirname, '..', '..', '..');
 
-  const tmpDir = mkdtempSync(join(tmpdir(), 'azimuth-e2e-'));
+  const tmpDir = mkdtempSync(join(tmpdir(), 'eurostrip-e2e-'));
   const scriptPath = join(tmpDir, 'seed.php');
   writeFileSync(scriptPath, PHP_SCRIPT, 'utf8');
 
   // CI uses infra/docker-compose.ci.yml without `.env`; dev shell uses
-  // infra/docker-compose.yml with `.env`. CI sets AZIMUTH_COMPOSE_ARGS.
+  // infra/docker-compose.yml with `.env`. CI sets EUROSTRIP_COMPOSE_ARGS.
   const composeArgs = (
-    process.env.AZIMUTH_COMPOSE_ARGS ?? '--env-file .env -f infra/docker-compose.yml'
+    process.env.EUROSTRIP_COMPOSE_ARGS ?? '--env-file .env -f infra/docker-compose.yml'
   ).split(/\s+/);
 
   try {

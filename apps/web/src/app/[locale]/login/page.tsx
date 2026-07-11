@@ -1,6 +1,6 @@
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import { Button, Card } from '@azimuth/ui';
+import { Button, Card } from '@eurostrip/ui';
 
 export default function LoginPage() {
   const t = useTranslations('auth');

@@ -77,7 +77,7 @@ class PreventRawPermissionStrings implements Rule
                     $arg->value,
                     $calleeType,
                     $methodName,
-                ))->identifier('azimuth.rawPermissionString')->build(),
+                ))->identifier('eurostrip.rawPermissionString')->build(),
             ];
         }
 

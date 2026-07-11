@@ -1,22 +1,22 @@
 # Local Development Runbook
 
-This guide takes you from a fresh `git clone` to a fully running Azimuth stack in under five minutes.
+This guide takes you from a fresh `git clone` to a fully running EuroStrip stack in under five minutes.
 
 ## Prerequisites
 
-| Tool   | Version                | Notes                                                   |
+| Tool | Version | Notes |
 | ------ | ---------------------- | ------------------------------------------------------- |
-| Node   | 22 LTS                 | `nvm install 22 && nvm use 22`                          |
-| pnpm   | 9.x                    | `corepack enable && corepack prepare pnpm@9 --activate` |
-| Docker | latest with Compose v2 | Docker Desktop, OrbStack, or Colima                     |
+| Node | 22 LTS | `nvm install 22 && nvm use 22` |
+| pnpm | 9.x | `corepack enable && corepack prepare pnpm@9 --activate` |
+| Docker | latest with Compose v2 | Docker Desktop, OrbStack, or Colima |
 
 No host PHP/Composer needed — all backend tooling runs inside the `backend` container.
 
 ## First run
 
 ```bash
-git clone <repo-url> azimuth
-cd azimuth
+git clone <repo-url> eurostrip
+cd eurostrip
 cp .env.example .env
 
 pnpm install
@@ -40,7 +40,7 @@ For frontend dev, run Next.js host-side rather than in the container (the `web` 
 pnpm nx dev web
 ```
 
-If you're on WSL2, copy `apps/web/.env.local.example` to `apps/web/.env.local` and set `AZIMUTH_BACKEND_URL=http://host.docker.internal:8000` so the Next.js route handlers can reach the backend container.
+If you're on WSL2, copy `apps/web/.env.local.example` to `apps/web/.env.local` and set `EUROSTRIP_BACKEND_URL=http://host.docker.internal:8000` so the Next.js route handlers can reach the backend container.
 
 Wait until all healthchecks pass:
 
@@ -62,17 +62,17 @@ curl -fsS http://localhost:9601/usage        # Soketi metrics
 
 ## Service endpoints
 
-| Service             | Host port   | URL / DSN                                                   | Notes                                                                                                          |
+| Service | Host port | URL / DSN | Notes |
 | ------------------- | ----------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Backend (Laravel)   | 8000 / 8443 | http://localhost:8000, https://localhost:8443               | Octane on FrankenPHP; admin at `/admin`, API docs at `/docs/api`                                               |
-| Frontend (Next.js)  | 3000        | http://localhost:3000                                       | Run host-side via `pnpm nx dev web`; compose `web` service is profile-gated                                    |
-| Postgres+PostGIS    | 5432        | `postgresql://azimuth:azimuth@localhost:5432/azimuth`       | PostGIS 3.4                                                                                                    |
-| Dragonfly (Redis)   | 6379        | `redis://localhost:6379`                                    | Wire-compatible with `redis-cli`                                                                               |
-| Typesense           | 8108        | http://localhost:8108                                       | API key in `.env`                                                                                              |
-| Typesense Dashboard | 8109        | http://localhost:8109                                       | Browser UI; on first visit add server (Host: `localhost`, Port: `8108`, Protocol: `http`, API key from `.env`) |
-| Soketi (WS)         | 6001 / 9601 | ws://localhost:6001, http://localhost:9601                  | Pusher protocol; see `docs/runbooks/inspecting-soketi.md`                                                      |
-| MinIO (S3)          | 9100 / 9101 | http://localhost:9100 (S3), http://localhost:9101 (console) | Console: `minioadmin` / `minioadmin`                                                                           |
-| Mailpit             | 1025 / 8025 | smtp://localhost:1025, http://localhost:8025                | Catches all outgoing dev mail                                                                                  |
+| Backend (Laravel) | 8000 / 8443 | http://localhost:8000, https://localhost:8443 | Octane on FrankenPHP; admin at `/admin`, API docs at `/docs/api` |
+| Frontend (Next.js) | 3000 | http://localhost:3000 | Run host-side via `pnpm nx dev web`; compose `web` service is profile-gated |
+| Postgres+PostGIS | 5432 | `postgresql://eurostrip:eurostrip@localhost:5432/eurostrip` | PostGIS 3.4 |
+| Dragonfly (Redis) | 6379 | `redis://localhost:6379` | Wire-compatible with `redis-cli` |
+| Typesense | 8108 | http://localhost:8108 | API key in `.env` |
+| Typesense Dashboard | 8109 | http://localhost:8109 | Browser UI; on first visit add server (Host: `localhost`, Port: `8108`, Protocol: `http`, API key from `.env`) |
+| Soketi (WS) | 6001 / 9601 | ws://localhost:6001, http://localhost:9601 | Pusher protocol; see `docs/runbooks/inspecting-soketi.md` |
+| MinIO (S3) | 9100 / 9101 | http://localhost:9100 (S3), http://localhost:9101 (console) | Console: `minioadmin` / `minioadmin` |
+| Mailpit | 1025 / 8025 | smtp://localhost:1025, http://localhost:8025 | Catches all outgoing dev mail |
 
 ## Common commands
 

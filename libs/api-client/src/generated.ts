@@ -21,7 +21,7 @@ const injectedRtkApi = api
     }),
     overrideExisting: false,
   });
-export { injectedRtkApi as azimuthApi };
+export { injectedRtkApi as eurostripApi };
 export type GetUserApiResponse = /** status 200 `User` */ User;
 export type GetUserApiArg = void;
 export type GetPingApiResponse = /** status 200  */ [

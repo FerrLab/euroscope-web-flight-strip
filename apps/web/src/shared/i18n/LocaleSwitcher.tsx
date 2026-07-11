@@ -2,8 +2,8 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
-import { Select } from '@azimuth/ui';
-import { LOCALES, type Locale } from '@azimuth/i18n';
+import { Select } from '@eurostrip/ui';
+import { LOCALES, type Locale } from '@eurostrip/i18n';
 
 export function LocaleSwitcher() {
   const t = useTranslations('locale');

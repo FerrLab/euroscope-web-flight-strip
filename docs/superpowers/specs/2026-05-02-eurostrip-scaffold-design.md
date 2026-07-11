@@ -1,4 +1,4 @@
-# Azimuth — Scaffold Design
+# EuroStrip — Scaffold Design
 
 **Date:** 2026-05-02
 **Status:** Approved (pending written-spec review)
@@ -8,7 +8,7 @@
 
 ## 1. Purpose
 
-Azimuth is a full PDCA application for general aviation. It will hold navigation data, flight planning, route parsing, and everything else needed to run a GA operation with one or more aircraft.
+EuroStrip is a full PDCA application for general aviation. It will hold navigation data, flight planning, route parsing, and everything else needed to run a GA operation with one or more aircraft.
 
 This document specifies the **initial scaffold** — the minimum set of code, configuration, and documentation that turns the empty repository into a working monorepo where the first real domain feature can be built without further infrastructure questions.
 
@@ -33,7 +33,7 @@ The scaffold deliberately ships a trivial `Ping` module as its end-to-end proof.
 ## 3. Workspace layout
 
 ```text
-azimuth/
+eurostrip/
 ├── apps/
 │   ├── backend/                  # Laravel 13 (Nx project via run-commands)
 │   │   ├── app/
@@ -104,7 +104,7 @@ Single `infra/docker-compose.yml` brings the whole environment up with `docker c
 
 ### 4.2 Networking, volumes, healthchecks
 
-- **Network:** one user-defined bridge `azimuth`; services reach each other by name.
+- **Network:** one user-defined bridge `eurostrip`; services reach each other by name.
 - **Volumes:** named (`pgdata`, `typesense-data`, `minio-data`) for stateful services; bind-mounts for source.
 - **Healthchecks:** every stateful service exposes one (`pg_isready`, `redis-cli ping`, `/health`, `/minio/health/live`). `backend` declares `depends_on` with `condition: service_healthy`.
 - **Env:** `.env.example` committed with safe defaults pointing at service names; real `.env` git-ignored.
@@ -227,7 +227,7 @@ Browser                   Next.js (apps/web)        Backend (Laravel)           
    │  set httpOnly cookie + redirect │                                                       │
 ```
 
-The stub driver returns a deterministic identity (`stub-user@azimuth.local`) so integration tests can assert the full chain without external dependencies. Adding Google/Apple/etc. later is a registration change, not an architecture change.
+The stub driver returns a deterministic identity (`stub-user@eurostrip.local`) so integration tests can assert the full chain without external dependencies. Adding Google/Apple/etc. later is a registration change, not an architecture change.
 
 ### 5.8 Backend testing baseline
 
@@ -612,7 +612,7 @@ None. All major decisions locked during brainstorming.
 
 ## 16. Appendix — Memory entries this spec relies on
 
-- `project_azimuth_overview.md` — full Azimuth spec (stack, UI, docs, packages)
+- `project_eurostrip_overview.md` — full EuroStrip spec (stack, UI, docs, packages)
 - `feedback_tdd.md` — TDD always with happy/invalid/garbage paths
 - `feedback_run_pint.md` — Pint after every backend task
 - `project_first_feature.md` — Aircraft CRUD as the first post-scaffold feature

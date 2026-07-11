@@ -1,9 +1,9 @@
 {
     "openapi": "3.1.0",
     "info": {
-        "title": "Azimuth API",
+        "title": "EuroStrip API",
         "version": "0.1.0",
-        "description": "Azimuth backend API"
+        "description": "EuroStrip backend API"
     },
     "servers": [
         {
