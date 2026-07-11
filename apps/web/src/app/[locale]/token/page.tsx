@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Card } from '@eurostrip/ui';
+import { ObcCard } from '@oicl/openbridge-webcomponents-react/components/card/card';
 import { TokenPanel } from '@/features/gateway/components/TokenPanel';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';
 
@@ -17,9 +17,9 @@ function TokenPageClient() {
   return (
     <main className="p-8 space-y-8">
       <h1 className="text-3xl font-semibold">{t('title')}</h1>
-      <Card>
+      <ObcCard>
         <TokenPanel />
-      </Card>
+      </ObcCard>
     </main>
   );
 }

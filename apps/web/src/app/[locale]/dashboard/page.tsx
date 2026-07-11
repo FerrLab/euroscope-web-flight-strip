@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Card } from '@eurostrip/ui';
+import { ObcCard } from '@oicl/openbridge-webcomponents-react/components/card/card';
 import { ThemeSwitcher } from '@/shared/theme/ThemeSwitcher';
 import { LocaleSwitcher } from '@/shared/i18n/LocaleSwitcher';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';
@@ -26,7 +26,7 @@ function DashboardClient() {
           <LocaleSwitcher />
         </div>
       </header>
-      <Card>
+      <ObcCard>
         <nav className="flex gap-4">
           <Link href="./ping" className="underline">
             {t('ping')}
@@ -43,7 +43,7 @@ function DashboardClient() {
             </button>
           </form>
         </nav>
-      </Card>
+      </ObcCard>
     </main>
   );
 }

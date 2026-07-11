@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { Card } from '@eurostrip/ui';
+import { ObcCard } from '@oicl/openbridge-webcomponents-react/components/card/card';
 import { PingList } from '@/features/ping/components/PingList';
 import { RecordPingForm } from '@/features/ping/components/RecordPingForm';
 import { SESSION_COOKIE_NAME } from '@/shared/auth/cookie';
@@ -18,13 +18,13 @@ function PingPageClient() {
   return (
     <main className="p-8 space-y-8">
       <h1 className="text-3xl font-semibold">{t('title')}</h1>
-      <Card>
+      <ObcCard>
         <h2 className="text-xl font-semibold mb-4">{t('create')}</h2>
         <RecordPingForm />
-      </Card>
-      <Card>
+      </ObcCard>
+      <ObcCard>
         <PingList />
-      </Card>
+      </ObcCard>
     </main>
   );
 }
