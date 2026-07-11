@@ -34,6 +34,18 @@ boundary: plugin routes `require` the `gateway` name, browser gateway routes
 `reject` it. A leaked gateway token cannot drive the web API; a web session
 token cannot impersonate the plugin.
 
+## `.wsc gateway config` encoding
+
+EuroScope's `.wsc` command line rejects `/` and `:` in arguments, so the
+token page never shows raw `.wsc gateway url`/`.wsc gateway token` lines.
+Instead it shows one line: `.wsc gateway config <blob>`, where `<blob>` is
+`base64url(<gateway base URL>:<token>)` — **base64url**, not standard
+base64, because standard base64's alphabet includes `+` and `/` and a
+JWT-length Passport token makes hitting `/` all but certain. The plugin
+must: base64url-decode `<blob>` (`-`→`+`, `_`→`/`, restore `=` padding),
+then split the result on the **last** `:` (the URL itself contains `:`,
+e.g. `http://host:8000/api/euroscope`) to recover `<url>` and `<token>`.
+
 ## Runtime state (Dragonfly)
 
 Three keys per user, nothing in Postgres (the token lives in Passport's

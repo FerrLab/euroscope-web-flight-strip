@@ -6,8 +6,7 @@ import { Button } from '@eurostrip/ui';
 import { useAppSelector } from '@/shared/store/hooks';
 import type { ConsoleMessage } from '../slice';
 
-// Envelope fields are machine-provided protocol data, not translatable
-// copy — see docs/conventions/i18n.md "What NOT to translate".
+// A neutral placeholder for envelope fields the protocol didn't provide.
 const MISSING_FIELD_PLACEHOLDER = '—';
 
 function entryTime(id: string): string {

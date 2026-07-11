@@ -52,6 +52,18 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+function fromBase64Url(encoded: string): string {
+  const padded = encoded + '='.repeat((4 - (encoded.length % 4)) % 4);
+  return atob(padded.replaceAll('-', '+').replaceAll('_', '/'));
+}
+
+// `ÿ` repeated forces a byte pattern that standard base64 always
+// renders as `/` (verified: btoa of a run of 0xFF bytes always hits the
+// alphabet's index-63 character). This reproduces the exact bug where
+// plain btoa() output re-introduces the `/` EuroScope's `.wsc` command
+// line rejects — a token like `secret-abc` never exercises this path.
+const SLASH_FORCING_TOKEN = 'ÿÿÿ-realistic-jwt-body-1234567890';
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -71,7 +83,23 @@ describe('TokenPanel', () => {
     expect(await screen.findByTestId('gateway-token-secret')).toHaveTextContent('secret-abc');
     const configLine = screen.getByText(/\.wsc gateway config /).textContent ?? '';
     const encoded = configLine.replace('.wsc gateway config ', '');
-    expect(atob(encoded)).toMatch(/^https?:\/\/.+:secret-abc$/);
+    expect(fromBase64Url(encoded)).toMatch(/^https?:\/\/.+:secret-abc$/);
+  });
+
+  it('encodes the config blob as base64url, never producing / + or = (happy)', async () => {
+    mockFetch((method) =>
+      method === 'GET'
+        ? json({ exists: false, created_at: null })
+        : json({ token: SLASH_FORCING_TOKEN, created_at: '2026-07-10T12:00:00Z' }, 201),
+    );
+    render(wrap(<TokenPanel />));
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Generate token' }));
+
+    const configLine = screen.getByText(/\.wsc gateway config /).textContent ?? '';
+    const encoded = configLine.replace('.wsc gateway config ', '');
+    expect(encoded).toMatch(/^[A-Za-z0-9_-]+$/);
+    expect(fromBase64Url(encoded)).toMatch(new RegExp(`:${SLASH_FORCING_TOKEN}$`));
   });
 
   it('requires confirmation before rotating an existing token (happy)', async () => {
