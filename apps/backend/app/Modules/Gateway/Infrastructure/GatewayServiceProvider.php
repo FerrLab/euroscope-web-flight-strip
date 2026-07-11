@@ -6,6 +6,7 @@ namespace App\Modules\Gateway\Infrastructure;
 
 use App\Modules\Gateway\Domain\CommandQueueRepository;
 use App\Modules\Gateway\Domain\GatewayStreamRepository;
+use App\Modules\Gateway\Domain\GatewayTokenRepository;
 use App\Modules\Gateway\Domain\PluginPresenceRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,6 +25,10 @@ class GatewayServiceProvider extends ServiceProvider
         $this->app->bind(
             PluginPresenceRepository::class,
             RedisPluginPresenceRepository::class,
+        );
+        $this->app->bind(
+            GatewayTokenRepository::class,
+            PassportGatewayTokenRepository::class,
         );
     }
 
