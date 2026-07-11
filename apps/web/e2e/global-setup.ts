@@ -12,7 +12,7 @@ import { join } from 'node:path';
  * run it via `php artisan tinker` redirected from stdin.
  */
 const PHP_SCRIPT = `
-$seeder = new \\Database\\Seeders\\PermissionsSeeder([\\App\\Modules\\Ping\\Domain\\PingPermission::class]);
+$seeder = new \\Database\\Seeders\\PermissionsSeeder([\\App\\Modules\\Ping\\Domain\\PingPermission::class, \\App\\Modules\\Gateway\\Domain\\GatewayPermission::class]);
 $seeder->run();
 $role = \\Spatie\\Permission\\Models\\Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
 $role->givePermissionTo(\\Spatie\\Permission\\Models\\Permission::all());
