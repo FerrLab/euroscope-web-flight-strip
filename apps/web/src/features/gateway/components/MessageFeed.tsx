@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@eurostrip/ui';
+import { ObcButton } from '@oicl/openbridge-webcomponents-react/components/button/button';
 import { useAppSelector } from '@/shared/store/hooks';
 import type { ConsoleMessage } from '../slice';
 
@@ -51,9 +51,9 @@ export function MessageFeed() {
   return (
     <section aria-label={t('title')}>
       <div className="flex justify-end pb-2">
-        <Button type="button" onClick={() => setPaused((p) => !p)}>
+        <ObcButton onClick={() => setPaused((p) => !p)}>
           {paused ? t('resume') : t('pause')}
-        </Button>
+        </ObcButton>
       </div>
       {messages.length === 0 && <p className="text-sm">{t('empty')}</p>}
       <div className="max-h-[60vh] overflow-y-auto">

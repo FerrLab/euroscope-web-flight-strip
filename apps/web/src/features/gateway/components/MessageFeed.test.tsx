@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from 'shadow-dom-testing-library';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { NextIntlClientProvider } from 'next-intl';
@@ -85,7 +86,7 @@ describe('MessageFeed', () => {
 
   it('toggles the pause label (happy)', async () => {
     renderWith(makeStore());
-    await userEvent.click(screen.getByRole('button', { name: 'Pause auto-scroll' }));
-    expect(screen.getByRole('button', { name: 'Resume auto-scroll' })).toBeInTheDocument();
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Pause auto-scroll' }));
+    expect(screen.getByShadowRole('button', { name: 'Resume auto-scroll' })).toBeInTheDocument();
   });
 });
