@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button, Spinner } from '@eurostrip/ui';
+import { ObcButton } from '@oicl/openbridge-webcomponents-react/components/button/button';
+import { ObcSequenceLoadingSpinner } from '@oicl/openbridge-webcomponents-react/components/sequence-loading-spinner/sequence-loading-spinner';
 import { useRotateTokenMutation, useTokenStatusQuery } from '../api';
 
 const GATEWAY_BASE =
@@ -32,7 +33,12 @@ export function TokenPanel() {
   const [error, setError] = useState<string | null>(null);
 
   if (isLoading) {
-    return <Spinner label={t('loading')} />;
+    return (
+      <div role="status" aria-live="polite" aria-label={t('loading')}>
+        <ObcSequenceLoadingSpinner />
+        <span className="sr-only">{t('loading')}</span>
+      </div>
+    );
   }
 
   const exists = data?.exists ?? false;
@@ -59,25 +65,22 @@ export function TokenPanel() {
       )}
 
       {!confirming && (
-        <Button
-          type="button"
+        <ObcButton
           disabled={isRotating}
           onClick={() => (exists ? setConfirming(true) : void rotate())}
         >
           {exists ? t('rotate') : t('generate')}
-        </Button>
+        </ObcButton>
       )}
 
       {confirming && (
         <div className="flex flex-col gap-2">
           <p className="text-sm">{t('confirm')}</p>
           <div className="flex gap-2">
-            <Button type="button" disabled={isRotating} onClick={() => void rotate()}>
+            <ObcButton disabled={isRotating} onClick={() => void rotate()}>
               {t('confirmYes')}
-            </Button>
-            <Button type="button" onClick={() => setConfirming(false)}>
-              {t('confirmNo')}
-            </Button>
+            </ObcButton>
+            <ObcButton onClick={() => setConfirming(false)}>{t('confirmNo')}</ObcButton>
           </div>
         </div>
       )}

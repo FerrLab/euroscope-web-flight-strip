@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from 'shadow-dom-testing-library';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { NextIntlClientProvider } from 'next-intl';
@@ -78,7 +79,7 @@ describe('TokenPanel', () => {
     render(wrap(<TokenPanel />));
 
     expect(await screen.findByText('No gateway token yet.')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Generate token' }));
+    await userEvent.click(screen.getByShadowRole('button', { name: 'Generate token' }));
 
     expect(await screen.findByTestId('gateway-token-secret')).toHaveTextContent('secret-abc');
     const configLine = screen.getByText(/\.wsc gateway config /).textContent ?? '';
@@ -94,7 +95,7 @@ describe('TokenPanel', () => {
     );
     render(wrap(<TokenPanel />));
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Generate token' }));
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Generate token' }));
 
     const configLine = screen.getByText(/\.wsc gateway config /).textContent ?? '';
     const encoded = configLine.replace('.wsc gateway config ', '');
@@ -110,12 +111,12 @@ describe('TokenPanel', () => {
     );
     render(wrap(<TokenPanel />));
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Rotate token' }));
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Rotate token' }));
     expect(
       screen.getByText('Rotating disconnects the currently connected plugin. Continue?'),
     ).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Yes, rotate' }));
+    await userEvent.click(screen.getByShadowRole('button', { name: 'Yes, rotate' }));
     expect(await screen.findByTestId('gateway-token-secret')).toHaveTextContent('secret-new');
   });
 
@@ -125,11 +126,11 @@ describe('TokenPanel', () => {
     );
     render(wrap(<TokenPanel />));
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Rotate token' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Rotate token' }));
+    await userEvent.click(screen.getByShadowRole('button', { name: 'Cancel' }));
 
     expect(screen.queryByTestId('gateway-token-secret')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Rotate token' })).toBeInTheDocument();
+    expect(screen.getByShadowRole('button', { name: 'Rotate token' })).toBeInTheDocument();
   });
 
   it('surfaces a rotate failure (garbage)', async () => {
@@ -140,7 +141,7 @@ describe('TokenPanel', () => {
     );
     render(wrap(<TokenPanel />));
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Generate token' }));
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Generate token' }));
 
     expect(await screen.findByText('Token operation failed.')).toBeInTheDocument();
   });
