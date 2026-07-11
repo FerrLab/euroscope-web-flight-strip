@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button, Card } from '@eurostrip/ui';
+import { ObcButton } from '@oicl/openbridge-webcomponents-react/components/button/button';
+import { ObcCard } from '@oicl/openbridge-webcomponents-react/components/card/card';
 import { useGatewayPoll } from '../useGatewayPoll';
 import { CommandComposer } from './CommandComposer';
 import { StructuredComposer } from './StructuredComposer';
@@ -22,25 +23,21 @@ export function ConsoleClient() {
         <h1 className="text-3xl font-semibold">{t('title')}</h1>
         <ConsoleStatusHeader />
       </header>
-      <Card>
+      <ObcCard>
         <MessageFeed />
-      </Card>
-      <Card>
+      </ObcCard>
+      <ObcCard>
         <div className="flex flex-col gap-3">
           <div className="flex justify-end">
             {mode === 'structured' ? (
-              <Button type="button" onClick={() => setMode('raw')}>
-                {t('toggle.raw')}
-              </Button>
+              <ObcButton onClick={() => setMode('raw')}>{t('toggle.raw')}</ObcButton>
             ) : (
-              <Button type="button" onClick={() => setMode('structured')}>
-                {t('toggle.structured')}
-              </Button>
+              <ObcButton onClick={() => setMode('structured')}>{t('toggle.structured')}</ObcButton>
             )}
           </div>
           {mode === 'structured' ? <StructuredComposer /> : <CommandComposer />}
         </div>
-      </Card>
+      </ObcCard>
     </main>
   );
 }
