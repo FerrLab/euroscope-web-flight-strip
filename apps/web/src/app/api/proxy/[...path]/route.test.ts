@@ -53,6 +53,24 @@ describe('/api/proxy/[...path]', () => {
     expect(res.status).toBe(201);
   });
 
+  it('pins the upstream accept-encoding to gzip/deflate/br, dropping zstd (garbage)', async () => {
+    // Caddy (fronting FrankenPHP) honors whatever encoding the browser
+    // advertises, including zstd; Node's fetch doesn't reliably
+    // auto-decompress zstd on every Node version we run, which would corrupt
+    // upstream.body before we pipe it to the client. Regression coverage for
+    // that bug: https://github.com/FerrLab/euroscope-web-flight-strip — the
+    // gateway token mutation silently "failed" in CI (Node 22) while passing
+    // locally (Node 24) because of exactly this.
+    mockFetch.mockResolvedValue(new Response('{}', { status: 200 }));
+    const req = new Request('http://localhost:3000/api/proxy/api/ping', {
+      method: 'GET',
+      headers: { cookie: 'eurostrip_session=tok123', 'accept-encoding': 'gzip, deflate, br, zstd' },
+    });
+    await GET(req, makeCtx('api/ping'));
+    const [, init] = mockFetch.mock.calls[0];
+    expect(init.headers.get('accept-encoding')).toBe('gzip, deflate, br');
+  });
+
   it('handles upstream 5xx as garbage (garbage)', async () => {
     mockFetch.mockResolvedValue(new Response('boom', { status: 503 }));
     const req = makeReq('api/ping', { cookie: 'eurostrip_session=tok123' });

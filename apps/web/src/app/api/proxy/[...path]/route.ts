@@ -23,6 +23,14 @@ async function forward(request: Request, ctx: Ctx) {
   headers.delete('cookie');
   headers.delete('host');
   headers.set('Authorization', `Bearer ${token}`);
+  // Caddy (fronting FrankenPHP) picks whatever encoding the browser's
+  // Accept-Encoding advertises, including zstd — but Node's fetch (undici)
+  // does not reliably auto-decompress zstd on every Node version we run
+  // (confirmed absent on the Node 22 CI pins vs. present on Node 24 local
+  // dev), so `upstream.body` below can still be zstd-compressed bytes that
+  // we then pipe straight to the browser with no content-encoding header,
+  // corrupting every JSON response. Pin to encodings undici always decodes.
+  headers.set('accept-encoding', 'gzip, deflate, br');
 
   const init: RequestInit = {
     method: request.method,
@@ -37,10 +45,11 @@ async function forward(request: Request, ctx: Ctx) {
   const respHeaders = new Headers(upstream.headers);
   respHeaders.delete('set-cookie');
   // Node's fetch transparently decodes the upstream content-encoding (gzip,
-  // br, zstd, …) before handing us the body. Forwarding the original
-  // content-encoding header would make the browser try to decode the already-
-  // decoded payload, surfacing as ERR_CONTENT_DECODING_FAILED. Drop the
-  // encoding-related headers so Next.js sets fresh ones for the client.
+  // deflate, br — the set we pin above) before handing us the body.
+  // Forwarding the original content-encoding header would make the browser
+  // try to decode the already-decoded payload, surfacing as
+  // ERR_CONTENT_DECODING_FAILED. Drop the encoding-related headers so
+  // Next.js sets fresh ones for the client.
   respHeaders.delete('content-encoding');
   respHeaders.delete('content-length');
   return new NextResponse(upstream.body, {
