@@ -38,11 +38,15 @@ The runtime stack:
   for cross-feature happy-path E2E. The `e2e/login-and-ping.spec.ts` smoke is
   the only Playwright spec at the close of Phase 3.
 
-The "what" lives in `apps/web/`; the reusable surface lives in the four `libs/*`
-packages described next. Anything that two features will eventually need belongs
-in a `libs/*` package, not in `apps/web/src/shared/`.
+The "what" lives in `apps/web/`; the reusable surface lives in the three
+`libs/*` packages described next. Anything that two features will eventually
+need belongs in a `libs/*` package, not in `apps/web/src/shared/`. UI
+primitives are not one of those shared things: `apps/web` imports OpenBridge
+web components (`@oicl/openbridge-webcomponents-react`) directly wherever a
+button, input, or dropdown is needed, rather than wrapping them in a local
+component library — see §7 for how a feature composes them.
 
-## 2. The four libs
+## 2. The three libs
 
 The libs are deliberately small and orthogonal. Each is a real Nx project with
 its own `project.json`, `package.json`, `vitest.config.ts`, and tests.
@@ -71,23 +75,11 @@ its own `project.json`, `package.json`, `vitest.config.ts`, and tests.
     convenience utilities like `bg-bg-primary` / `text-fg-primary`.
 - **Exports:** `colors`, `typography`, `spacing`, `tailwindPreset`, plus the
   `tokens.css` file path for app-side CSS imports.
-- **Consumers:** `libs/ui` (uses utilities at the className level),
-  `apps/web` (imports `tokens.css` once from `globals.css`; imports the
-  Tailwind preset from `tailwind.config.ts`).
-
-### `libs/ui`
-
-- **Path:** [`libs/ui/`](../../libs/ui/)
-- **Source:** eight squared-UI primitives — Button, Input, Select, Card, Table,
-  Modal, Toast, Spinner — plus a barrel `index.ts`. `Select`, `Modal`, and
-  `Toast` wrap Radix Primitives for focus traps, keyboard nav, and ARIA
-  semantics; the others are plain HTML styled with token-driven Tailwind
-  classes. Every primitive ships next to a `*.test.tsx` covering happy /
-  invalid / garbage cases.
-- **Exports:** `Button`, `Input`, `Select`, `Card`, `Table`, `Modal`, `Toast`,
-  `Spinner` and their prop types.
-- **Consumers:** every page and feature component in `apps/web`. Nothing
-  outside `libs/ui` styles primitives directly — features compose these.
+- **Consumers:** `apps/web` (imports `tokens.css` once from `globals.css`;
+  imports the Tailwind preset from `tailwind.config.ts`). The squared-UI rule
+  (no `border-radius` except `rounded-full`) is enforced here at the Tailwind
+  config level, on top of OpenBridge's own design system — not by a custom
+  Radix-based wrapper library.
 
 ### `libs/api-client`
 
@@ -334,7 +326,8 @@ end-to-end on the frontend:
    ```
 
 4. **Author components.** Put them under `features/aircraft/components/` and
-   compose `libs/ui` primitives. Each component ships with a `*.test.tsx`
+   compose OpenBridge web components directly (`@oicl/openbridge-webcomponents-react`).
+   Each component ships with a `*.test.tsx`
    covering happy / invalid / garbage paths (CLAUDE.md hard rule #1). Forms
    wrap React Hook Form's `useForm({ resolver: zodResolver(...) })`.
 5. **Author per-feature i18n.** Drop `messages/en.json` and `messages/pt.json`
@@ -355,11 +348,7 @@ Three layers, narrowing from cheap to expensive:
 
 - **Lib tests.** Each `libs/*` package owns its own `*.test.ts(x)` files
   next to the source. Vitest runs them via `pnpm nx test design-tokens`,
-  `pnpm nx test ui`, `pnpm nx test api-client`, `pnpm nx test i18n`. Every
-  `libs/ui` primitive has happy / invalid / garbage cases — e.g. `Modal`
-  asserts focus is trapped inside (happy), trapped under nested portals
-  (invalid: edge case at boundary), and that an undefined `onClose` is
-  caught with a useful error rather than a stack trace (garbage).
+  `pnpm nx test api-client`, `pnpm nx test i18n`.
 - **Feature component tests.** Live next to feature components in
   `apps/web/src/features/<module>/`. Use `@testing-library/react` and a
   fetch mock for `/api/proxy/...` calls. The Ping module's
@@ -384,7 +373,6 @@ Three layers, narrowing from cheap to expensive:
 - [ADR 0006 — Frontend Stack and Cookie-Based Auth](../adr/0006-frontend-stack-and-cookie-auth.md).
 - Lib project files:
   [`libs/design-tokens/project.json`](../../libs/design-tokens/project.json),
-  [`libs/ui/project.json`](../../libs/ui/project.json),
   [`libs/api-client/project.json`](../../libs/api-client/project.json),
   [`libs/i18n/project.json`](../../libs/i18n/project.json).
 - Local-dev runbook (how to run the frontend, codegen the API client, and

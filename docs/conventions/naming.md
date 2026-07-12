@@ -84,10 +84,9 @@ together more often than not.
 
 ### Shared libs
 
-| Lib                | Purpose                              | Example exports                                                           |
-| ------------------ | ------------------------------------ | ------------------------------------------------------------------------- |
-| `libs/ui/`         | Shared design-system components      | `Button`, `Card`, `Input`, `Modal`, `Select`, `Spinner`, `Table`, `Toast` |
-| `libs/api-client/` | Generated RTK Query base + endpoints | `baseApi`, `generated.ts`                                                 |
+| Lib                | Purpose                              | Example exports           |
+| ------------------ | ------------------------------------ | ------------------------- |
+| `libs/api-client/` | Generated RTK Query base + endpoints | `baseApi`, `generated.ts` |
 
 `libs/api-client/src/generated.ts` is regenerated from Scramble's
 `openapi.json` — do not hand-edit it.

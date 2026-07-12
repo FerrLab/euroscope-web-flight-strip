@@ -96,7 +96,6 @@ services:
       - /workspace/libs/api-client/node_modules
       - /workspace/libs/design-tokens/node_modules
       - /workspace/libs/i18n/node_modules
-      - /workspace/libs/ui/node_modules
     restart: unless-stopped
 
   postgres:

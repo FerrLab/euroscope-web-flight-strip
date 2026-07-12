@@ -9,7 +9,6 @@ function Harness({ label }: { label: string }) {
   return (
     <ObcDropdownButton
       ref={ref}
-      aria-label={label}
       value="a"
       options={[
         { value: 'a', label: 'A' },

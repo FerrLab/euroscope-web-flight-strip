@@ -9,26 +9,12 @@ import { ObcNumberInputField } from '@oicl/openbridge-webcomponents-react/compon
 import { ObcDropdownButton } from '@oicl/openbridge-webcomponents-react/components/dropdown-button/dropdown-button';
 import type { ObcDropdownButtonChangeEvent } from '@oicl/openbridge-webcomponents-react/components/dropdown-button/dropdown-button';
 import { useDropdownAriaLabel } from '@/shared/openbridge/useDropdownAriaLabel';
+import { readInputValue } from '@/shared/openbridge/readInputValue';
 import type { CommandEnvelope } from '../schema';
 import { useSendCommandMutation } from '../api';
 import { GATEWAY_ACTIONS, ALTITUDE_SPECIALS, type ActionDef } from '../actions';
 
 type AltitudeMode = 'feet' | 'special';
-
-/**
- * `ObcTextInputField`/`ObcNumberInputField` (unlike `ObcTextareaField`)
- * don't dispatch a synthetic `CustomEvent` with a `detail.value` payload —
- * they just let the shadow-DOM `<input>`'s native, composed `input` event
- * bubble out. By the time it reaches this listener (attached to the host
- * by `@lit/react`), the event has been retargeted to the host custom
- * element, whose own `.value` property the component already updated
- * internally before the event bubbled. Read the value off the event's
- * `currentTarget` (the host) rather than `e.detail`, which is `undefined`
- * for this event.
- */
-function readInputValue(e: Event): string {
-  return (e.currentTarget as unknown as { value: string }).value;
-}
 
 export function StructuredComposer() {
   const t = useTranslations('gateway.console.structured');

@@ -129,7 +129,7 @@ jobs:
       - name: Build api-client
         run: pnpm nx build api-client
       - name: Test all frontend libs and apps
-        run: pnpm nx run-many --target=test --projects=design-tokens,i18n,ui,api-client,web
+        run: pnpm nx run-many --target=test --projects=design-tokens,i18n,api-client,web
 
   e2e:
     runs-on: ubuntu-latest

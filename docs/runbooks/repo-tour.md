@@ -150,7 +150,9 @@ at `/api/proxy/*` puts the httpOnly cookie's Bearer token on every
 backend call (so the browser never sees it). RTK Query slices live in
 `libs/api-client/`, generated from the backend's `openapi.json`. UI
 primitives — squared, no `border-radius` except `rounded-full` —
-live in `libs/ui/`. See [`../architecture/frontend.md`](../architecture/frontend.md).
+come from OpenBridge web components (`@oicl/openbridge-webcomponents-react`),
+used directly inside `apps/web/src/features/` and `apps/web/src/shared/`.
+See [`../architecture/frontend.md`](../architecture/frontend.md).
 
 ### Minute 9: How to add a feature
 

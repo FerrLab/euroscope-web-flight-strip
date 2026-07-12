@@ -5,21 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ObcButton } from '@oicl/openbridge-webcomponents-react/components/button/button';
 import { ObcTextInputField } from '@oicl/openbridge-webcomponents-react/components/text-input-field/text-input-field';
 import { useRecordPingMutation } from '../api';
-
-/**
- * `ObcTextInputField` (unlike `ObcTextareaField`) doesn't dispatch a
- * synthetic `CustomEvent` with a `detail.value` payload — it just lets the
- * shadow-DOM `<input>`'s native, composed `input` event bubble out. By the
- * time it reaches this listener (attached to the host by `@lit/react`), the
- * event has been retargeted to the host custom element, whose own `.value`
- * property the component already updated internally before the event
- * bubbled. Read the value off the event's `currentTarget` (the host) rather
- * than `e.detail`, which is `undefined` for this event. See
- * StructuredComposer.tsx for the same pattern.
- */
-function readInputValue(e: Event): string {
-  return (e.currentTarget as unknown as { value: string }).value;
-}
+import { readInputValue } from '@/shared/openbridge/readInputValue';
 
 export function RecordPingForm() {
   const t = useTranslations('ping');

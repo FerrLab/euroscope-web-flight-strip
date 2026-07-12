@@ -182,7 +182,6 @@ is a Phase 5 TODO. The intended rules:
 - `type:app` projects can depend on `type:lib`; never the reverse.
 - `scope:web` and `scope:backend` projects may not depend on each other.
 - `scope:shared` libs may be consumed by anything.
-- `scope:ui` libs may only depend on `scope:shared`.
 
 ## Adding a new lib
 
@@ -194,8 +193,7 @@ is a Phase 5 TODO. The intended rules:
    ```
 
 2. Set `tags` in `libs/<name>/project.json` so the boundary rules can
-   apply once they land. Pick from the table above (`scope:shared`,
-   `scope:ui`, …).
+   apply once they land. Pick from the table above (`scope:shared`, …).
 
 3. Verify `pnpm-workspace.yaml` already covers the package via
    `libs/*` — Nx generators don't need to touch this file.
