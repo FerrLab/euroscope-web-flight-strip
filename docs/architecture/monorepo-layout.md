@@ -17,8 +17,7 @@ eurostrip/
 ├── libs/
 │   ├── api-client/     # RTK Query slice generated from openapi.json
 │   ├── design-tokens/  # 4-theme palette + Tailwind tokens (squared UI)
-│   ├── i18n/           # next-intl LOCALES + message-catalog helpers
-│   └── ui/             # squared-UI primitives over Radix
+│   └── i18n/           # next-intl LOCALES + message-catalog helpers
 ├── infra/              # docker-compose stacks + Dockerfiles + init scripts
 │   ├── docker/         # frankenphp.Dockerfile, postgres-init.sql, etc.
 │   ├── docker-compose.yml      # local dev stack
@@ -139,22 +138,6 @@ step; consumed via path alias.
 | `lint`      | `eslint src --max-warnings=0`             |
 | `typecheck` | `tsc --noEmit -p libs/i18n/tsconfig.json` |
 
-### `libs/ui`
-
-Tags: `scope:ui`, `type:lib`. Path alias: `@eurostrip/ui`.
-
-Squared-UI primitives (Button, Input, Dialog, Toast …) wrapping
-`@radix-ui/*`. Tailwind classes only — no `border-radius` other than
-`rounded-full`. Tested with vitest + Testing Library; integration tests
-live under `libs/ui/tests/`.
-
-| Target       | What it runs                            |
-| ------------ | --------------------------------------- |
-| `test`       | `vitest run`                            |
-| `test:watch` | `vitest`                                |
-| `lint`       | `eslint src --max-warnings=0`           |
-| `typecheck`  | `tsc --noEmit -p libs/ui/tsconfig.json` |
-
 ## Project graph
 
 The dependency direction is one-way: apps depend on libs; libs may
@@ -162,7 +145,6 @@ depend on other libs; nothing depends on an app.
 
 ```text
 apps/web ──┬──► libs/api-client ──► (apps/backend openapi.json snapshot)
-           ├──► libs/ui ─────────► libs/design-tokens
            ├──► libs/i18n
            └──► libs/design-tokens
 
@@ -191,7 +173,6 @@ Each `project.json` declares Nx tags so module-boundary rules can apply:
 | `api-client`    | `scope:shared`, `type:lib`  |
 | `design-tokens` | `scope:shared`, `type:lib`  |
 | `i18n`          | `scope:shared`, `type:lib`  |
-| `ui`            | `scope:ui`, `type:lib`      |
 
 The `@nx/enforce-module-boundaries` ESLint rule is **not yet configured**
 in `eslint.config.mjs` — tags exist but nothing currently fails a build
