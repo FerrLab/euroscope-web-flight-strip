@@ -44,6 +44,7 @@
           "state": "Estado no solo",
           "sid": "SID",
           "star": "STAR",
+          "controller": "Controlador de destino",
           "message": "Mensagem"
         },
         "errors": {

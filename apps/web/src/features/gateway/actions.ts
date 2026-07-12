@@ -57,6 +57,11 @@ export const GATEWAY_ACTIONS: readonly ActionDef[] = [
     needsCallsign: false,
     fields: [{ name: 'filter', kind: 'text', optional: true }],
   },
+  {
+    action: 'list_controllers',
+    needsCallsign: false,
+    fields: [{ name: 'filter', kind: 'text', optional: true }],
+  },
 
   // Flight-scoped read.
   { action: 'get_flight', needsCallsign: true, fields: [] },
@@ -121,6 +126,25 @@ export const GATEWAY_ACTIONS: readonly ActionDef[] = [
     action: 'set_star',
     needsCallsign: true,
     fields: [{ name: 'star', kind: 'text' }],
+  },
+  {
+    // Accepts an offered handoff if one is pending, otherwise starts
+    // tracking (mirrors EuroScope's ASSUME).
+    action: 'assume',
+    needsCallsign: true,
+    fields: [],
+  },
+  {
+    // Refuses an offered handoff if one is pending, otherwise stops
+    // tracking.
+    action: 'release',
+    needsCallsign: true,
+    fields: [],
+  },
+  {
+    action: 'transfer',
+    needsCallsign: true,
+    fields: [{ name: 'controller', kind: 'text' }],
   },
   {
     action: 'send_private_message',

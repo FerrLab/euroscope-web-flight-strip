@@ -9,20 +9,22 @@ import { useRotateTokenMutation, useTokenStatusQuery } from '../api';
 const GATEWAY_BASE =
   process.env.NEXT_PUBLIC_GATEWAY_BASE_URL ?? 'http://127.0.0.1:8000/api/euroscope';
 
-// EuroScope's `.wsc` command line does not accept `/` or `:` in arguments,
-// so the URL and token are packed into one blob instead of the raw
-// `.wsc gateway url`/`.wsc gateway token` pair. Standard base64 (btoa) still
-// emits `+` and `/` in its alphabet — for a JWT-length Passport token that's
-// nearly certain — so this encodes base64url instead (RFC 4648 §5: `+`→`-`,
-// `/`→`_`, padding stripped), leaving only [A-Za-z0-9_-]. The plugin must
-// decode base64url and split the payload on the LAST `:` (the URL itself
-// contains `:`); see docs/architecture/gateway.md. Not translatable copy —
-// see docs/conventions/i18n.md "What NOT to translate".
+// EuroScope's `.lpc` command line (the euroscope-longpolling-connector
+// plugin, formerly euroscope-websocket-connector / `.wsc`) does not accept
+// `/` or `:` in arguments, so the URL and token are packed into one blob
+// instead of separate `.lpc gateway url`/`.lpc gateway token` lines.
+// Standard base64 (btoa) still emits `+` and `/` in its alphabet — for a
+// JWT-length Passport token that's nearly certain — so this encodes
+// base64url instead (RFC 4648 §5: `+`→`-`, `/`→`_`, padding stripped),
+// leaving only [A-Za-z0-9_-]. The plugin decodes base64url and splits the
+// payload on the LAST `:` (the URL itself contains `:`); see
+// docs/architecture/gateway.md. Not translatable copy — see
+// docs/conventions/i18n.md "What NOT to translate".
 function toBase64Url(raw: string): string {
   return btoa(raw).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 }
-const wscConfigLine = (token: string) =>
-  `.wsc gateway config ${toBase64Url(`${GATEWAY_BASE}:${token}`)}`;
+const lpcConfigLine = (token: string) =>
+  `.lpc gateway config ${toBase64Url(`${GATEWAY_BASE}:${token}`)}`;
 
 export function TokenPanel() {
   const t = useTranslations('gateway.token');
@@ -93,7 +95,7 @@ export function TokenPanel() {
           <code data-testid="gateway-token-secret" className="break-all font-mono text-xs">
             {secret}
           </code>
-          <code className="break-all font-mono text-xs">{wscConfigLine(secret)}</code>
+          <code className="break-all font-mono text-xs">{lpcConfigLine(secret)}</code>
         </div>
       )}
     </div>

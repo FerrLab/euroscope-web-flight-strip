@@ -35,6 +35,7 @@ const messages = {
           state: 'Ground state',
           sid: 'SID',
           star: 'STAR',
+          controller: 'Target controller',
           message: 'Message',
         },
         errors: {
@@ -273,6 +274,58 @@ describe('StructuredComposer', () => {
       action: 'set_cleared_altitude',
       callsign: 'ABC1234',
       payload: { special: 'ils' },
+    });
+  });
+
+  it('sends list_controllers with an empty filter and no payload key (garbage)', async () => {
+    const fetchSpy = stubFetch();
+    render(wrap(<StructuredComposer />));
+
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'list_controllers',
+    );
+    expect(screen.queryByShadowLabelText('Callsign')).not.toBeInTheDocument();
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
+
+    const body = await lastRequestBody(fetchSpy);
+    expect(body).toEqual({ action: 'list_controllers' });
+    expect(body).not.toHaveProperty('payload');
+  });
+
+  it('sends assume with a callsign and no payload key (happy)', async () => {
+    const fetchSpy = stubFetch();
+    render(wrap(<StructuredComposer />));
+
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'assume',
+    );
+    await userEvent.type(await screen.findByShadowLabelText('Callsign'), 'ABC1234');
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
+
+    const body = await lastRequestBody(fetchSpy);
+    expect(body).toEqual({ action: 'assume', callsign: 'ABC1234' });
+    expect(body).not.toHaveProperty('payload');
+  });
+
+  it('sends transfer with callsign and controller payload (happy)', async () => {
+    const fetchSpy = stubFetch();
+    render(wrap(<StructuredComposer />));
+
+    await userEvent.selectOptions(
+      await screen.findByShadowRole('combobox', { name: 'Action' }),
+      'transfer',
+    );
+    await userEvent.type(await screen.findByShadowLabelText('Callsign'), 'ABC1234');
+    await userEvent.type(await screen.findByShadowLabelText('Target controller'), 'EDDM_TWR');
+    await userEvent.click(await screen.findByShadowRole('button', { name: 'Send' }));
+
+    const body = await lastRequestBody(fetchSpy);
+    expect(body).toEqual({
+      action: 'transfer',
+      callsign: 'ABC1234',
+      payload: { controller: 'EDDM_TWR' },
     });
   });
 

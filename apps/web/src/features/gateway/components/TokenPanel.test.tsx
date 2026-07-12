@@ -61,7 +61,7 @@ function fromBase64Url(encoded: string): string {
 // `ÿ` repeated forces a byte pattern that standard base64 always
 // renders as `/` (verified: btoa of a run of 0xFF bytes always hits the
 // alphabet's index-63 character). This reproduces the exact bug where
-// plain btoa() output re-introduces the `/` EuroScope's `.wsc` command
+// plain btoa() output re-introduces the `/` EuroScope's `.lpc` command
 // line rejects — a token like `secret-abc` never exercises this path.
 const SLASH_FORCING_TOKEN = 'ÿÿÿ-realistic-jwt-body-1234567890';
 
@@ -82,8 +82,8 @@ describe('TokenPanel', () => {
     await userEvent.click(screen.getByShadowRole('button', { name: 'Generate token' }));
 
     expect(await screen.findByTestId('gateway-token-secret')).toHaveTextContent('secret-abc');
-    const configLine = screen.getByText(/\.wsc gateway config /).textContent ?? '';
-    const encoded = configLine.replace('.wsc gateway config ', '');
+    const configLine = screen.getByText(/\.lpc gateway config /).textContent ?? '';
+    const encoded = configLine.replace('.lpc gateway config ', '');
     expect(fromBase64Url(encoded)).toMatch(/^https?:\/\/.+:secret-abc$/);
   });
 
@@ -97,8 +97,8 @@ describe('TokenPanel', () => {
 
     await userEvent.click(await screen.findByShadowRole('button', { name: 'Generate token' }));
 
-    const configLine = screen.getByText(/\.wsc gateway config /).textContent ?? '';
-    const encoded = configLine.replace('.wsc gateway config ', '');
+    const configLine = screen.getByText(/\.lpc gateway config /).textContent ?? '';
+    const encoded = configLine.replace('.lpc gateway config ', '');
     expect(encoded).toMatch(/^[A-Za-z0-9_-]+$/);
     expect(fromBase64Url(encoded)).toMatch(new RegExp(`:${SLASH_FORCING_TOKEN}$`));
   });

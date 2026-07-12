@@ -2,14 +2,16 @@
 
 The Gateway module (`apps/backend/app/Modules/Gateway/`) connects a running
 EuroScope instance to the web app through the
-[euroscope-websocket-connector](https://github.com/FerrLab/euroscope-websocket-connector)
-plugin, speaking [JSON Contract Protocol v1](https://github.com/FerrLab/euroscope-websocket-connector/blob/main/docs/PROTOCOL.md).
+[euroscope-longpolling-connector](https://github.com/FerrLab/euroscope-longpolling-connector)
+plugin (formerly `euroscope-websocket-connector`, `.wsc`), speaking
+[JSON Contract Protocol v1](https://github.com/FerrLab/euroscope-longpolling-connector/blob/main/docs/PROTOCOL.md)
+via its `.lpc` command line.
 Design spec: `docs/superpowers/specs/2026-07-10-gateway-console-design.md`;
 transport decision: [ADR 0009](../adr/0009-long-poll-gateway-transport.md).
 
 ## Endpoints
 
-Plugin-facing (Bearer = the user's `gateway` token; `.wsc gateway url`
+Plugin-facing (Bearer = the user's `gateway` token; `.lpc gateway url`
 points at `/api/euroscope`):
 
 | Route                                | Behavior                                                                                                                           |
@@ -34,11 +36,11 @@ boundary: plugin routes `require` the `gateway` name, browser gateway routes
 `reject` it. A leaked gateway token cannot drive the web API; a web session
 token cannot impersonate the plugin.
 
-## `.wsc gateway config` encoding
+## `.lpc gateway config` encoding
 
-EuroScope's `.wsc` command line rejects `/` and `:` in arguments, so the
-token page never shows raw `.wsc gateway url`/`.wsc gateway token` lines.
-Instead it shows one line: `.wsc gateway config <blob>`, where `<blob>` is
+EuroScope's `.lpc` command line rejects `/` and `:` in arguments, so the
+token page never shows raw `.lpc gateway url`/`.lpc gateway token` lines.
+Instead it shows one line: `.lpc gateway config <blob>`, where `<blob>` is
 `base64url(<gateway base URL>:<token>)` — **base64url**, not standard
 base64, because standard base64's alphabet includes `+` and `/` and a
 JWT-length Passport token makes hitting `/` all but certain. The plugin
@@ -67,6 +69,20 @@ Every held long-poll occupies one FrankenPHP worker: 1 per connected plugin
 accordingly; a handful of users is fine on defaults, dozens of concurrent
 consoles is not. If that ceiling nears, drop the console hold to 0 and let
 the client poll every ~2 s — same endpoint, same cursor semantics.
+
+## Protocol surface
+
+The backend stores/queues any JSON envelope verbatim — no action allowlist —
+so protocol growth needs zero backend changes. The frontend's structured
+command form (`apps/web/src/features/gateway/actions.ts`) tracks the
+plugin's `PROTOCOL.md` action table by hand; when the plugin adds actions,
+add an `ActionDef` entry there. Currently covers session-level (`ping`,
+`list_flights`, `list_controllers`), flight-scoped read (`get_flight`),
+flight-scoped write (altitude/heading/speed/squawk/route/ground-state/SID/
+STAR setters, plus `assume`/`release`/`transfer` for handoffs), and messaging
+(`send_private_message`, `send_frequency_message`). Events
+(`controller_updated`, `controller_removed`, `session_snapshot`, etc.)
+render generically in `MessageFeed.tsx` with no per-event code.
 
 ## Testing without EuroScope
 

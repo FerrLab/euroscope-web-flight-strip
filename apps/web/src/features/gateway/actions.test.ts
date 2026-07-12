@@ -4,6 +4,7 @@ import { GATEWAY_ACTIONS, GROUND_STATES, ALTITUDE_SPECIALS } from './actions';
 const ALL_ACTIONS = [
   'ping',
   'list_flights',
+  'list_controllers',
   'get_flight',
   'set_cleared_altitude',
   'set_final_altitude',
@@ -17,12 +18,19 @@ const ALL_ACTIONS = [
   'set_ground_state',
   'set_sid',
   'set_star',
+  'assume',
+  'release',
+  'transfer',
   'send_private_message',
   'send_frequency_message',
 ];
 
 const FLIGHT_SCOPED_WITH_CALLSIGN = ALL_ACTIONS.filter(
-  (a) => a !== 'ping' && a !== 'list_flights' && a !== 'send_frequency_message',
+  (a) =>
+    a !== 'ping' &&
+    a !== 'list_flights' &&
+    a !== 'list_controllers' &&
+    a !== 'send_frequency_message',
 );
 
 function find(action: string) {
@@ -96,5 +104,26 @@ describe('GATEWAY_ACTIONS registry', () => {
   it('marks list_flights filter as optional so an empty value sends no payload', () => {
     const def = find('list_flights');
     expect(def.fields[0].optional).toBe(true);
+  });
+
+  it('marks list_controllers as session-level with an optional filter field, mirroring list_flights', () => {
+    const def = find('list_controllers');
+    expect(def.needsCallsign).toBe(false);
+    expect(def.fields).toHaveLength(1);
+    expect(def.fields[0]).toEqual({ name: 'filter', kind: 'text', optional: true });
+  });
+
+  it('gives assume and release no fields (no payload) but require a callsign', () => {
+    for (const action of ['assume', 'release']) {
+      const def = find(action);
+      expect(def.needsCallsign).toBe(true);
+      expect(def.fields).toHaveLength(0);
+    }
+  });
+
+  it('gives transfer a required text field for the target controller', () => {
+    const def = find('transfer');
+    expect(def.needsCallsign).toBe(true);
+    expect(def.fields).toEqual([{ name: 'controller', kind: 'text' }]);
   });
 });
