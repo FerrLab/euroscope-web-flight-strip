@@ -1,3 +1,5 @@
+'use client';
+
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { ObcButton } from '@oicl/openbridge-webcomponents-react/components/button/button';

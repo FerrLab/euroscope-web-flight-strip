@@ -138,7 +138,6 @@ export function StructuredComposer() {
           docs/conventions/i18n.md "What NOT to translate"). */}
       <ObcDropdownButton
         ref={actionAriaRef}
-        aria-label={t('actionLabel')}
         value={actionKey}
         onDropdownChange={(e: ObcDropdownButtonChangeEvent) => handleActionChange(e.detail.value)}
         options={GATEWAY_ACTIONS.map((a) => ({ value: a.action, label: a.action }))}
@@ -185,7 +184,6 @@ export function StructuredComposer() {
               {altitudeMode === 'special' && (
                 <ObcDropdownButton
                   ref={specialAriaRef}
-                  aria-label={t('fields.special')}
                   value={values.special ?? ALTITUDE_SPECIALS[0]}
                   onDropdownChange={(e: ObcDropdownButtonChangeEvent) =>
                     setFieldValue('special', e.detail.value)
@@ -246,7 +244,6 @@ function SelectField({
       <span className="text-sm">{label}</span>
       <ObcDropdownButton
         ref={ariaRef}
-        aria-label={label}
         value={value}
         onDropdownChange={(e: ObcDropdownButtonChangeEvent) => onChange(e.detail.value)}
         options={options.map((opt) => ({ value: opt, label: opt }))}

@@ -19,7 +19,6 @@ export function LocaleSwitcher() {
   return (
     <ObcDropdownButton
       ref={ref}
-      aria-label={label}
       value={current}
       onDropdownChange={(e: ObcDropdownButtonChangeEvent) => {
         const next = e.detail.value;

@@ -16,7 +16,6 @@ export function ThemeSwitcher() {
   return (
     <ObcDropdownButton
       ref={ref}
-      aria-label={label}
       value={theme}
       onDropdownChange={(e: ObcDropdownButtonChangeEvent) =>
         void setTheme(e.detail.value as 'day' | 'dusk' | 'night' | 'bright')

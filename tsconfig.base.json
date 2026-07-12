@@ -28,7 +28,6 @@
     "resolveJsonModule": true,
     "paths": {
       "@eurostrip/design-tokens": ["libs/design-tokens/src/index.ts"],
-      "@eurostrip/ui": ["libs/ui/src/index.ts"],
       "@eurostrip/api-client": ["libs/api-client/src/index.ts"],
       "@eurostrip/i18n": ["libs/i18n/src/index.ts"]
     }

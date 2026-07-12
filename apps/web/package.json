@@ -12,7 +12,6 @@
     "@eurostrip/api-client": "workspace:*",
     "@eurostrip/design-tokens": "workspace:*",
     "@eurostrip/i18n": "workspace:*",
-    "@eurostrip/ui": "workspace:*",
     "@oicl/openbridge-webcomponents": "^1.0.1",
     "@oicl/openbridge-webcomponents-react": "^1.0.1",
     "next": "^15.0.3",

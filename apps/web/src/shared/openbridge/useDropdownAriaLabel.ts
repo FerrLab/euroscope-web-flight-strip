@@ -10,8 +10,15 @@ import type { ObcDropdownButton as ObcDropdownButtonElement } from '@oicl/openbr
  * the label in manually so screen readers (and role-based test queries) can
  * find the control.
  *
- * Attach the returned ref to an `ObcDropdownButton` and pass the same
- * `label` as its `aria-label` prop.
+ * Attach the returned ref to an `ObcDropdownButton`. Do not also pass
+ * `aria-label` on the host element itself — the host is a plain custom
+ * element (no ARIA role), but Playwright's shadow-piercing `getByLabel`
+ * still matches elements by `aria-label` attribute regardless of role, so
+ * setting it on both the host and the shadow `<select>` this hook labels
+ * creates a strict-mode ambiguity (two matches for one accessible name) in
+ * real-browser e2e tests, even though jsdom-based Testing Library queries
+ * (which target the shadow `<select>`'s `combobox` role specifically)
+ * don't surface it.
  */
 export function useDropdownAriaLabel(label: string): RefObject<ObcDropdownButtonElement | null> {
   const ref = useRef<ObcDropdownButtonElement | null>(null);

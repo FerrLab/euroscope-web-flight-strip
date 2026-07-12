@@ -1,3 +1,4 @@
 .next/
 tsconfig.tsbuildinfo
 out/
+test-results/
