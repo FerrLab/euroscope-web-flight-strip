@@ -1,9 +1,9 @@
 {
     "openapi": "3.1.0",
     "info": {
-        "title": "Azimuth API",
+        "title": "EuroStrip API",
         "version": "0.1.0",
-        "description": "Azimuth backend API"
+        "description": "EuroStrip backend API"
     },
     "servers": [
         {
@@ -20,6 +20,82 @@
                             "application\/json": {
                                 "schema": {
                                     "$ref": "#\/components\/schemas\/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/gateway\/commands": {
+            "post": {
+                "operationId": "gateway.commands",
+                "summary": "Queue a protocol command for the connected EuroScope plugin",
+                "tags": [
+                    "Console"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/EnqueuePluginCommandRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "const": 202
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#\/components\/responses\/AuthorizationException"
+                    }
+                }
+            }
+        },
+        "\/gateway\/console\/poll": {
+            "get": {
+                "operationId": "gateway.console.poll",
+                "description": "Without `after`, returns the ring buffer immediately (backfill). With a\ncursor, holds up to `timeout` seconds (max 15) for newer messages.",
+                "summary": "Long-poll the console message feed",
+                "tags": [
+                    "Console"
+                ],
+                "parameters": [
+                    {
+                        "name": "after",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "const": 200
                                 }
                             }
                         }
@@ -134,10 +210,181 @@
                     }
                 }
             }
+        },
+        "\/euroscope\/messages": {
+            "post": {
+                "operationId": "euroscope.messages",
+                "summary": "Ingest a batch of protocol messages from the EuroScope plugin",
+                "tags": [
+                    "PluginTransport"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/RecordPluginMessagesRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "const": 204
+                                }
+                            }
+                        }
+                    },
+                    "413": {
+                        "description": "An error",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    },
+                    "403": {
+                        "$ref": "#\/components\/responses\/AuthorizationException"
+                    }
+                }
+            }
+        },
+        "\/euroscope\/poll": {
+            "get": {
+                "operationId": "euroscope.poll",
+                "description": "Holds the request up to `timeout` seconds (max 25) waiting for commands.",
+                "summary": "Long-poll for commands queued for the EuroScope plugin",
+                "tags": [
+                    "PluginTransport"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "const": 200
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/gateway\/token": {
+            "post": {
+                "operationId": "gateway.token.rotate",
+                "description": "Revokes any previous gateway token. The plaintext secret is returned\nexactly once and never retrievable again.",
+                "summary": "Create (or rotate) the gateway token",
+                "tags": [
+                    "Token"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "const": 201
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "gateway.token.status",
+                "summary": "Gateway token metadata (never the secret)",
+                "tags": [
+                    "Token"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "integer",
+                                    "const": 200
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
         }
     },
     "components": {
         "schemas": {
+            "EnqueuePluginCommandRequest": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "callsign": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 16
+                    },
+                    "payload": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "action"
+                ],
+                "title": "EnqueuePluginCommandRequest"
+            },
             "RecordPingRequest": {
                 "type": "object",
                 "properties": {
@@ -155,6 +402,23 @@
                     "note"
                 ],
                 "title": "RecordPingRequest"
+            },
+            "RecordPluginMessagesRequest": {
+                "type": "object",
+                "properties": {
+                    "messages": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "maxItems": 200
+                    }
+                },
+                "required": [
+                    "messages"
+                ],
+                "title": "RecordPluginMessagesRequest"
             },
             "User": {
                 "type": "object",

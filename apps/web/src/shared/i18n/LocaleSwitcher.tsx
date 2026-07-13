@@ -2,21 +2,26 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
-import { Select } from '@azimuth/ui';
-import { LOCALES, type Locale } from '@azimuth/i18n';
+import { ObcDropdownButton } from '@oicl/openbridge-webcomponents-react/components/dropdown-button/dropdown-button';
+import type { ObcDropdownButtonChangeEvent } from '@oicl/openbridge-webcomponents-react/components/dropdown-button/dropdown-button';
+import { LOCALES, type Locale } from '@eurostrip/i18n';
+import { useDropdownAriaLabel } from '@/shared/openbridge/useDropdownAriaLabel';
 
 export function LocaleSwitcher() {
   const t = useTranslations('locale');
   const current = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const label = t('label');
+
+  const ref = useDropdownAriaLabel(label);
 
   return (
-    <Select
-      aria-label={t('label')}
-      placeholder={t('label')}
+    <ObcDropdownButton
+      ref={ref}
       value={current}
-      onValueChange={(next) => {
+      onDropdownChange={(e: ObcDropdownButtonChangeEvent) => {
+        const next = e.detail.value;
         const newPath = pathname.replace(new RegExp(`^/(${LOCALES.join('|')})`), `/${next}`);
         router.replace(newPath);
       }}

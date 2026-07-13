@@ -1,12 +1,12 @@
-# Azimuth — Architecture overview
+# EuroStrip — Architecture overview
 
-> Your companion from A to Z.
+> Web flight strips for EuroScope.
 
-Azimuth is a general-aviation PDCA companion: pilots and small ops teams
-record observations (Plan), execute checklists and flights (Do),
-review what happened (Check), and adjust their playbooks (Act). The
-codebase is built to make that loop short and the audit trail
-complete.
+EuroStrip is a web companion for EuroScope: controllers point the
+euroscope-websocket-connector plugin at this backend (JSON Contract
+Protocol v1 over HTTPS long-poll) and interact with their session from
+the browser — live flight data, protocol commands, and eventually
+flight strips.
 
 This doc orients you in 2 minutes. Each box below has its own deep-dive.
 
@@ -66,6 +66,7 @@ flowchart LR
 | API docs    | Scramble at `/docs/api` (regenerated on every boot)    | `apps/backend/` (auto)                                 |
 | Auth        | Passport (Bearer) + Socialite (stub provider in dev)   | `apps/backend/app/Auth/`, `apps/web/src/app/api/auth/` |
 | Realtime    | Soketi (Pusher protocol)                               | `infra/docker-compose.yml`                             |
+| Gateway     | EuroScope plugin ⇄ HTTPS long-poll (protocol v1)       | `apps/backend/app/Modules/Gateway/`                    |
 | Search      | Typesense via Laravel Scout                            | `apps/backend/config/scout.php`                        |
 | Queue/Cache | Dragonfly (Redis-compatible) + Horizon                 | `infra/docker-compose.yml`                             |
 | Storage     | MinIO (S3-compatible)                                  | `infra/docker-compose.yml`                             |
@@ -131,6 +132,7 @@ event listener → Pusher → Soketi → connected browsers.
 
 - **CQRS layer specifics** — [`cqrs.md`](./cqrs.md)
 - **Auth (Passport + Socialite + permissions)** — [`auth.md`](./auth.md)
+- **Gateway (EuroScope transport + console)** — [`gateway.md`](./gateway.md)
 - **Data stores** — [`data-stores.md`](./data-stores.md)
 - **Frontend (Next.js + Redux + theming)** — [`frontend.md`](./frontend.md)
 - **Monorepo layout (apps, libs, Nx graph)** — [`monorepo-layout.md`](./monorepo-layout.md)

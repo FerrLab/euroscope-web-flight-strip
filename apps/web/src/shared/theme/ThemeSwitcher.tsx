@@ -1,18 +1,25 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Select } from '@azimuth/ui';
+import { ObcDropdownButton } from '@oicl/openbridge-webcomponents-react/components/dropdown-button/dropdown-button';
+import type { ObcDropdownButtonChangeEvent } from '@oicl/openbridge-webcomponents-react/components/dropdown-button/dropdown-button';
+import { useDropdownAriaLabel } from '@/shared/openbridge/useDropdownAriaLabel';
 import { useTheme } from './ThemeProvider';
 
 export function ThemeSwitcher() {
   const t = useTranslations('theme');
   const { theme, setTheme } = useTheme();
+  const label = t('label');
+
+  const ref = useDropdownAriaLabel(label);
+
   return (
-    <Select
-      aria-label={t('label')}
-      placeholder={t('label')}
+    <ObcDropdownButton
+      ref={ref}
       value={theme}
-      onValueChange={(v) => void setTheme(v as 'day' | 'dusk' | 'night' | 'bright')}
+      onDropdownChange={(e: ObcDropdownButtonChangeEvent) =>
+        void setTheme(e.detail.value as 'day' | 'dusk' | 'night' | 'bright')
+      }
       options={[
         { value: 'day', label: t('day') },
         { value: 'dusk', label: t('dusk') },

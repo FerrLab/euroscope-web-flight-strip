@@ -1,12 +1,12 @@
 # Naming
 
-A reference for the names used across the Azimuth codebase. The
+A reference for the names used across the EuroStrip codebase. The
 discipline is consistency over cleverness — predictable names mean
 files are findable by intuition.
 
 This doc supersedes §11 of the original scaffold spec. The
 `UseCase` row from that spec is intentionally gone — see
-[ADR 0008](../adr/0008-pure-cqrs.md). In Azimuth's pure CQRS, the
+[ADR 0008](../adr/0008-pure-cqrs.md). In EuroStrip's pure CQRS, the
 **Handler is the business-logic locus**; there is no separate
 UseCase class.
 
@@ -84,10 +84,9 @@ together more often than not.
 
 ### Shared libs
 
-| Lib                | Purpose                              | Example exports                                                           |
-| ------------------ | ------------------------------------ | ------------------------------------------------------------------------- |
-| `libs/ui/`         | Shared design-system components      | `Button`, `Card`, `Input`, `Modal`, `Select`, `Spinner`, `Table`, `Toast` |
-| `libs/api-client/` | Generated RTK Query base + endpoints | `baseApi`, `generated.ts`                                                 |
+| Lib                | Purpose                              | Example exports           |
+| ------------------ | ------------------------------------ | ------------------------- |
+| `libs/api-client/` | Generated RTK Query base + endpoints | `baseApi`, `generated.ts` |
 
 `libs/api-client/src/generated.ts` is regenerated from Scramble's
 `openapi.json` — do not hand-edit it.

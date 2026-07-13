@@ -1,4 +1,4 @@
-# Azimuth — Phase 3 Handoff
+# EuroStrip — Phase 3 Handoff
 
 > Pickup point for another machine / another session continuing the scaffold.
 

@@ -1,7 +1,7 @@
 {
   "common": {
-    "appName": "Azimuth",
-    "tagline": "Seu companheiro de A a Z",
+    "appName": "EuroStrip",
+    "tagline": "Flight strips na web para o EuroScope",
     "loading": "Carregando…",
     "error": "Algo deu errado",
     "retry": "Tentar novamente",
@@ -14,6 +14,8 @@
   "nav": {
     "dashboard": "Painel",
     "ping": "Pings",
+    "console": "Console",
+    "gatewayToken": "Token do gateway",
     "logout": "Sair"
   },
   "theme": {

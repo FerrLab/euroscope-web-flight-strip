@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from 'shadow-dom-testing-library';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { LocaleSwitcher } from './LocaleSwitcher';
@@ -19,9 +20,9 @@ describe('LocaleSwitcher', () => {
         <LocaleSwitcher />
       </NextIntlClientProvider>,
     );
-    await userEvent.click(screen.getByRole('combobox', { name: 'Language' }));
-    expect(await screen.findByRole('option', { name: 'English' })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: 'Portuguese' })).toBeInTheDocument();
+    await userEvent.click(await screen.findByShadowRole('combobox', { name: 'Language' }));
+    expect(await screen.findByShadowRole('option', { name: 'English' })).toBeInTheDocument();
+    expect(await screen.findByShadowRole('option', { name: 'Portuguese' })).toBeInTheDocument();
   });
 
   it('navigates on selection (happy)', async () => {
@@ -31,17 +32,20 @@ describe('LocaleSwitcher', () => {
         <LocaleSwitcher />
       </NextIntlClientProvider>,
     );
-    await userEvent.click(screen.getByRole('combobox', { name: 'Language' }));
-    await userEvent.click(await screen.findByRole('option', { name: 'Portuguese' }));
+    const combobox = await screen.findByShadowRole('combobox', { name: 'Language' });
+    await userEvent.selectOptions(
+      combobox,
+      await screen.findByShadowRole('option', { name: 'Portuguese' }),
+    );
     expect(replaceMock).toHaveBeenCalledWith('/pt/dashboard');
   });
 
-  it('handles current=pt path correctly (happy)', () => {
+  it('handles current=pt path correctly (happy)', async () => {
     render(
       <NextIntlClientProvider locale="pt" messages={messages}>
         <LocaleSwitcher />
       </NextIntlClientProvider>,
     );
-    expect(screen.getByRole('combobox', { name: 'Language' })).toBeInTheDocument();
+    expect(await screen.findByShadowRole('combobox', { name: 'Language' })).toBeInTheDocument();
   });
 });

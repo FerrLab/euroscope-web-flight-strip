@@ -1,6 +1,6 @@
-# Azimuth — Internal Documentation
+# EuroStrip — Internal Documentation
 
-Evergreen reference material for the Azimuth codebase.
+Evergreen reference material for the EuroStrip codebase.
 
 ## Sections
 

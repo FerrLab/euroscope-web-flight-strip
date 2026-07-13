@@ -10,3 +10,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 require app_path('Modules/Ping/Presentation/Http/routes.php');
+require app_path('Modules/Gateway/Presentation/Http/routes.php');

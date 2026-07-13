@@ -1,8 +1,11 @@
-# Azimuth
+# EuroStrip
 
-> Your companion from A to Z.
+> Web flight strips for EuroScope.
 
-A full PDCA application for general aviation — navigation data, flight planning, route parsing, and operations management.
+A web companion for EuroScope: controllers point the
+[euroscope-websocket-connector](https://github.com/FerrLab/euroscope-websocket-connector)
+plugin at this backend and interact with their session from the browser —
+live flight data, protocol commands, and (soon) flight strips.
 
 This is an Nx monorepo:
 

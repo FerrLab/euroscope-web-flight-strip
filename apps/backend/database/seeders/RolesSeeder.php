@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Gateway\Domain\GatewayPermission;
 use App\Modules\Ping\Domain\PingPermission;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission as PermissionModel;
@@ -28,6 +29,9 @@ class RolesSeeder extends Seeder
         $memberPermissionNames = [
             PingPermission::View->value,
             PingPermission::Create->value,
+            GatewayPermission::UseGateway->value,
+            GatewayPermission::UseConsole->value,
+            GatewayPermission::ManageToken->value,
         ];
 
         $memberPermissions = PermissionModel::whereIn('name', $memberPermissionNames)

@@ -20,10 +20,10 @@ const OPENAPI_PATH = 'apps/backend/openapi.json';
 const EXCLUDED_PREFIXES = ['api/oauth/', 'api/_debugbar/'];
 
 // CI uses infra/docker-compose.ci.yml without `.env`; dev shell uses
-// infra/docker-compose.yml with `.env`. CI sets AZIMUTH_COMPOSE_ARGS to
+// infra/docker-compose.yml with `.env`. CI sets EUROSTRIP_COMPOSE_ARGS to
 // override the default.
 const COMPOSE_ARGS =
-  process.env.AZIMUTH_COMPOSE_ARGS ?? '--env-file .env -f infra/docker-compose.yml';
+  process.env.EUROSTRIP_COMPOSE_ARGS ?? '--env-file .env -f infra/docker-compose.yml';
 
 function getLaravelRoutes() {
   const out = execSync(

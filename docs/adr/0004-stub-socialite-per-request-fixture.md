@@ -25,7 +25,7 @@ the dev/test side of this flow:
 Implement a Socialite driver named `'stub'`
 ([`app/Authentication/Socialite/StubProvider.php`](../../apps/backend/app/Authentication/Socialite/StubProvider.php))
 that accepts a per-request `?identity=<email>` query parameter and defaults
-to `stub-user@azimuth.local` when absent. The stub builds a Socialite user
+to `stub-user@eurostrip.local` when absent. The stub builds a Socialite user
 deterministically from this query parameter without any external network
 call. The shared callback controller
 ([`SocialiteStubController`](../../apps/backend/app/Http/Controllers/Auth/SocialiteStubController.php))
@@ -50,8 +50,8 @@ This decision imposes the following constraints:
 **Positive:**
 
 - Multi-role tests are written without touching production code:
-  `?identity=admin@azimuth.local` for one assertion,
-  `?identity=member@azimuth.local` for the next.
+  `?identity=admin@eurostrip.local` for one assertion,
+  `?identity=member@eurostrip.local` for the next.
 - The login flow exercised in dev and CI is the same flow real users will
   follow — no test-only short-circuit, no `Auth::loginAs($user)` shortcut
   that bypasses the OAuth-shaped path.
@@ -91,8 +91,8 @@ clone` + `compose up` produces a working login at
 
 ## References
 
-- [Phase 2 decision log row 7.](../superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md)
-- [Original spec §5.6 — Socialite + stub driver.](../superpowers/specs/2026-05-02-azimuth-scaffold-design.md)
+- [Phase 2 decision log row 7.](../superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md)
+- [Original spec §5.6 — Socialite + stub driver.](../superpowers/specs/2026-05-02-eurostrip-scaffold-design.md)
 - [`docs/architecture/auth.md`](../architecture/auth.md) §3 (the stub flow) and §4 (adding a real provider).
 - Coverage:
   [`tests/Feature/Auth/SocialiteStubTest.php`](../../apps/backend/tests/Feature/Auth/SocialiteStubTest.php),

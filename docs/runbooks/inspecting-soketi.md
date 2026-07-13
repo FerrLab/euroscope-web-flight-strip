@@ -25,7 +25,7 @@ The default app config (in compose):
 | Metrics port | `9601` (host)          |
 
 Replace `<APP_ID>` in the recipes below with your actual app ID
-(check `apps/backend/.env` — defaults to `azimuth-local`).
+(check `apps/backend/.env` — defaults to `eurostrip-local`).
 
 ## The recipes
 

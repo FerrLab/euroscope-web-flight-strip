@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateTokensCss } from './build';
-import { azimuthPreset } from './tailwind-preset';
+import { eurostripPreset } from './tailwind-preset';
 
 describe('generateTokensCss', () => {
   it('emits four [data-theme] blocks (happy)', () => {
@@ -29,16 +29,16 @@ describe('generateTokensCss', () => {
   });
 });
 
-describe('azimuthPreset', () => {
+describe('eurostripPreset', () => {
   it('exposes only `none` and `full` border radii (happy — squared UI rule)', () => {
-    const radii = (azimuthPreset.theme?.borderRadius ?? {}) as Record<string, string>;
+    const radii = (eurostripPreset.theme?.borderRadius ?? {}) as Record<string, string>;
     expect(Object.keys(radii).sort()).toEqual(['full', 'none']);
     expect(radii.none).toBe('0');
     expect(radii.full).toBe('9999px');
   });
 
   it('rejects any other radius keys (invalid path — regression check)', () => {
-    const radii = (azimuthPreset.theme?.borderRadius ?? {}) as Record<string, string>;
+    const radii = (eurostripPreset.theme?.borderRadius ?? {}) as Record<string, string>;
     expect(radii).not.toHaveProperty('sm');
     expect(radii).not.toHaveProperty('md');
     expect(radii).not.toHaveProperty('lg');

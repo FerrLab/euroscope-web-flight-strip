@@ -1,4 +1,4 @@
-import { baseApi } from '@azimuth/api-client';
+import { baseApi } from '@eurostrip/api-client';
 import type { RecordPingPayload } from './schema';
 
 export interface PingDto {

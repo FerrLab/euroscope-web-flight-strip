@@ -9,5 +9,5 @@ export const baseApi = createApi({
     credentials: 'include',
   }),
   endpoints: () => ({}),
-  tagTypes: ['Ping'],
+  tagTypes: ['Ping', 'GatewayToken'],
 });

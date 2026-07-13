@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 use Typesense\Client as TypesenseClient;
@@ -65,5 +68,9 @@ class AppServiceProvider extends ServiceProvider
         // production this gate falls through to abort(403) until a future
         // policy explicitly grants access.
         Gate::define('viewApiDocs', static fn ($user = null): bool => app()->environment(['local', 'testing']));
+
+        RateLimiter::for('gateway-send', function (Request $request): Limit {
+            return Limit::perMinute(60)->by('gateway-send:'.($request->user()->id ?? $request->ip()));
+        });
     }
 }

@@ -6,10 +6,10 @@ until /usr/bin/mc alias set local http://minio:9000 "${MINIO_ROOT_USER}" "${MINI
   sleep 1
 done
 
-if ! /usr/bin/mc ls local/"${AZIMUTH_S3_BUCKET}" >/dev/null 2>&1; then
-  /usr/bin/mc mb local/"${AZIMUTH_S3_BUCKET}"
-  /usr/bin/mc anonymous set download local/"${AZIMUTH_S3_BUCKET}"
-  echo "Bucket ${AZIMUTH_S3_BUCKET} created"
+if ! /usr/bin/mc ls local/"${EUROSTRIP_S3_BUCKET}" >/dev/null 2>&1; then
+  /usr/bin/mc mb local/"${EUROSTRIP_S3_BUCKET}"
+  /usr/bin/mc anonymous set download local/"${EUROSTRIP_S3_BUCKET}"
+  echo "Bucket ${EUROSTRIP_S3_BUCKET} created"
 else
-  echo "Bucket ${AZIMUTH_S3_BUCKET} already exists"
+  echo "Bucket ${EUROSTRIP_S3_BUCKET} already exists"
 fi

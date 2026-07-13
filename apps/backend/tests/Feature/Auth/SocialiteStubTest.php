@@ -23,10 +23,10 @@ it('mints a Passport token for the default stub identity (happy)', function (): 
 
     $response->assertStatus(200);
     $response->assertJsonStructure(['access_token', 'token_type', 'user' => ['id', 'email']]);
-    expect($response->json('user.email'))->toBe('stub-user@azimuth.local');
+    expect($response->json('user.email'))->toBe('stub-user@eurostrip.local');
     expect($response->json('access_token'))->toBeString();
 
-    $this->assertDatabaseHas('users', ['email' => 'stub-user@azimuth.local']);
+    $this->assertDatabaseHas('users', ['email' => 'stub-user@eurostrip.local']);
 });
 
 it('honors ?identity=<email> for fixture identities (happy)', function (): void {
@@ -41,7 +41,7 @@ it('honors ?identity=<email> for fixture identities (happy)', function (): void 
 it('mints valid tokens that authenticate against api guard (happy)', function (): void {
     $login = $this->getJson('/auth/socialite/stub/callback')->json();
 
-    $userId = User::query()->where('email', 'stub-user@azimuth.local')->value('id');
+    $userId = User::query()->where('email', 'stub-user@eurostrip.local')->value('id');
 
     $auth = $this
         ->withToken($login['access_token'])

@@ -25,6 +25,7 @@ export function ThemeProvider({
 
   async function setTheme(t: Theme): Promise<void> {
     document.documentElement.dataset.theme = t;
+    document.documentElement.dataset.obcTheme = t;
     setThemeState(t);
     await fetch('/api/theme', {
       method: 'POST',

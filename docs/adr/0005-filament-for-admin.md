@@ -5,7 +5,7 @@
 
 ## Context
 
-Every bounded module in Azimuth needs a CRUD-shaped admin UI gated by Spatie
+Every bounded module in EuroStrip needs a CRUD-shaped admin UI gated by Spatie
 permissions. Building this from scratch — even with a generic CRUD generator
 — costs time we'd rather spend on domain features. The forces in play:
 
@@ -93,8 +93,8 @@ here to avoid future confusion when reading older planning docs.
 
 ## References
 
-- [Phase 2 decision log — Filament for admin (no row; locked in spec).](../superpowers/specs/2026-05-05-azimuth-scaffold-phase-2-decisions.md)
-- [Original spec §5.6 — Filament admin at `/admin`.](../superpowers/specs/2026-05-02-azimuth-scaffold-design.md)
+- [Phase 2 decision log — Filament for admin (no row; locked in spec).](../superpowers/specs/2026-05-05-eurostrip-scaffold-phase-2-decisions.md)
+- [Original spec §5.6 — Filament admin at `/admin`.](../superpowers/specs/2026-05-02-eurostrip-scaffold-design.md)
 - [`docs/architecture/auth.md`](../architecture/auth.md) §7 — Filament admin gate.
 - Coverage:
   [`tests/Feature/Filament/AdminPanelGateTest.php`](../../apps/backend/tests/Feature/Filament/AdminPanelGateTest.php),

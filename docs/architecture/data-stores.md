@@ -1,6 +1,6 @@
 # Data Stores
 
-Azimuth runs six data-plane services in development, defined in
+EuroStrip runs six data-plane services in development, defined in
 [`infra/docker-compose.yml`](../../infra/docker-compose.yml) and a slimmer set
 of three in CI ([`infra/docker-compose.ci.yml`](../../infra/docker-compose.ci.yml)).
 This document is the canonical reference for which store does what, the exact
@@ -9,7 +9,7 @@ images and ports, and how the application reaches them.
 ## 1. Postgres + PostGIS
 
 - **Image:** `postgis/postgis:16-3.4`
-- **Container:** `azimuth-postgres`
+- **Container:** `eurostrip-postgres`
 - **Port (host → container):** `5432 → 5432`
 - **Volume:** `pgdata` (persisted across `compose down`)
 - **Init script:** [`infra/docker/postgres-init.sql`](../../infra/docker/postgres-init.sql) (runs once on first boot)
@@ -35,7 +35,7 @@ the database is ready.
 ## 2. Dragonfly (Redis-compatible)
 
 - **Image:** `docker.dragonflydb.io/dragonflydb/dragonfly:latest`
-- **Container:** `azimuth-dragonfly`
+- **Container:** `eurostrip-dragonfly`
 - **Port:** `6379 → 6379`
 - **Command flags:** `--logtostderr --cluster_mode=emulated`
 - **Healthcheck:** `redis-cli ping`
@@ -62,7 +62,7 @@ us, swapping the image to `redis:7-alpine` is a one-line change.
 ## 3. Typesense
 
 - **Image:** `typesense/typesense:29.1`
-- **Container:** `azimuth-typesense`
+- **Container:** `eurostrip-typesense`
 - **Port:** `8108 → 8108`
 - **Volume:** `typesense-data`
 - **Driver:** Laravel Scout (`SCOUT_DRIVER=typesense`)
@@ -88,14 +88,14 @@ Coverage:
 ## 4. MinIO (S3-compatible)
 
 - **Image:** `minio/minio:latest`
-- **Container:** `azimuth-minio`
-- **Companion init container:** `azimuth-minio-init` (image `minio/mc:latest`,
+- **Container:** `eurostrip-minio`
+- **Companion init container:** `eurostrip-minio-init` (image `minio/mc:latest`,
   runs the bucket-bootstrap script and exits)
 - **Ports:** `9100 → 9000` (S3 API), `9101 → 9001` (web console)
 - **Volume:** `minio-data`
 - **Healthcheck:** `curl -fsS http://localhost:9000/minio/health/live`
 
-**Bucket:** `azimuth-dev` (configurable via `AZIMUTH_S3_BUCKET`). Created on
+**Bucket:** `eurostrip-dev` (configurable via `EUROSTRIP_S3_BUCKET`). Created on
 first boot by `infra/docker/minio-init.sh` running inside the init container.
 
 **Used by:** any `Storage::disk('s3')->put(...)` call. The S3 driver is
@@ -110,7 +110,7 @@ exercised against the local driver only.
 ## 5. Soketi
 
 - **Image:** `quay.io/soketi/soketi:latest-16-alpine`
-- **Container:** `azimuth-soketi`
+- **Container:** `eurostrip-soketi`
 - **Ports:** `6001 → 6001` (WebSocket), `9601 → 9601` (Prometheus metrics)
 - **Healthcheck:** `wget -qO- http://127.0.0.1:9601/usage`
 
@@ -134,7 +134,7 @@ Coverage:
 ## 6. Mailpit
 
 - **Image:** `axllent/mailpit:latest`
-- **Container:** `azimuth-mailpit`
+- **Container:** `eurostrip-mailpit`
 - **Ports:** `1025 → 1025` (SMTP), `8025 → 8025` (web UI)
 - **Volumes:** none (in-memory, capped at `MP_MAX_MESSAGES=5000`)
 
@@ -187,7 +187,7 @@ For one-shot top-to-bottom validation, see
 - [`infra/docker-compose.ci.yml`](../../infra/docker-compose.ci.yml) — slim CI
   stack (Postgres + Dragonfly + Typesense + backend; no MinIO, Soketi, or
   Mailpit).
-- [`docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md`](../superpowers/specs/2026-05-02-azimuth-scaffold-design.md)
+- [`docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md`](../superpowers/specs/2026-05-02-eurostrip-scaffold-design.md)
   §13.1 — Phase 1 deviation notes (e.g. why the `backend` and `horizon`
   services disable the upstream FrankenPHP HEALTHCHECK; why Typesense lacks
   one entirely).

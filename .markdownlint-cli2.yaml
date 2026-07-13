@@ -41,3 +41,4 @@ ignores:
   - '.next/**'
   - 'apps/web/.next/**'
   - 'apps/web/test-results/**'
+  - '.superpowers/**'

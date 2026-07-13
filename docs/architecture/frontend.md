@@ -1,13 +1,13 @@
 # Frontend Architecture
 
-Azimuth's frontend is a Next.js 15 App Router application that talks to the
+EuroStrip's frontend is a Next.js 15 App Router application that talks to the
 Laravel backend through a Next.js-side proxy. State and HTTP live in Redux
 Toolkit; styling rides on a four-theme Openbridge-derived design-token system;
 and authentication is carried in an httpOnly cookie that the browser never
 reads. This document is the canonical reference for adding new modules. For the
 locked decisions see [ADR 0006](../adr/0006-frontend-stack-and-cookie-auth.md)
 and the
-[Phase 3 decision log](../superpowers/specs/2026-05-06-azimuth-scaffold-phase-3-decisions.md).
+[Phase 3 decision log](../superpowers/specs/2026-05-06-eurostrip-scaffold-phase-3-decisions.md).
 
 ## 1. Overview
 
@@ -38,11 +38,15 @@ The runtime stack:
   for cross-feature happy-path E2E. The `e2e/login-and-ping.spec.ts` smoke is
   the only Playwright spec at the close of Phase 3.
 
-The "what" lives in `apps/web/`; the reusable surface lives in the four `libs/*`
-packages described next. Anything that two features will eventually need belongs
-in a `libs/*` package, not in `apps/web/src/shared/`.
+The "what" lives in `apps/web/`; the reusable surface lives in the three
+`libs/*` packages described next. Anything that two features will eventually
+need belongs in a `libs/*` package, not in `apps/web/src/shared/`. UI
+primitives are not one of those shared things: `apps/web` imports OpenBridge
+web components (`@oicl/openbridge-webcomponents-react`) directly wherever a
+button, input, or dropdown is needed, rather than wrapping them in a local
+component library — see §7 for how a feature composes them.
 
-## 2. The four libs
+## 2. The three libs
 
 The libs are deliberately small and orthogonal. Each is a real Nx project with
 its own `project.json`, `package.json`, `vitest.config.ts`, and tests.
@@ -71,23 +75,11 @@ its own `project.json`, `package.json`, `vitest.config.ts`, and tests.
     convenience utilities like `bg-bg-primary` / `text-fg-primary`.
 - **Exports:** `colors`, `typography`, `spacing`, `tailwindPreset`, plus the
   `tokens.css` file path for app-side CSS imports.
-- **Consumers:** `libs/ui` (uses utilities at the className level),
-  `apps/web` (imports `tokens.css` once from `globals.css`; imports the
-  Tailwind preset from `tailwind.config.ts`).
-
-### `libs/ui`
-
-- **Path:** [`libs/ui/`](../../libs/ui/)
-- **Source:** eight squared-UI primitives — Button, Input, Select, Card, Table,
-  Modal, Toast, Spinner — plus a barrel `index.ts`. `Select`, `Modal`, and
-  `Toast` wrap Radix Primitives for focus traps, keyboard nav, and ARIA
-  semantics; the others are plain HTML styled with token-driven Tailwind
-  classes. Every primitive ships next to a `*.test.tsx` covering happy /
-  invalid / garbage cases.
-- **Exports:** `Button`, `Input`, `Select`, `Card`, `Table`, `Modal`, `Toast`,
-  `Spinner` and their prop types.
-- **Consumers:** every page and feature component in `apps/web`. Nothing
-  outside `libs/ui` styles primitives directly — features compose these.
+- **Consumers:** `apps/web` (imports `tokens.css` once from `globals.css`;
+  imports the Tailwind preset from `tailwind.config.ts`). The squared-UI rule
+  (no `border-radius` except `rounded-full`) is enforced here at the Tailwind
+  config level, on top of OpenBridge's own design system — not by a custom
+  Radix-based wrapper library.
 
 ### `libs/api-client`
 
@@ -151,7 +143,7 @@ apps/web/src/
 │       │   ├── stub-callback/route.ts      # GET ?code=... → exchanges, mints httpOnly cookie, 302 /dashboard
 │       │   └── logout/route.ts             # POST → clears cookie, 302 /login
 │       ├── proxy/[...path]/route.ts        # generic forwarder; reads cookie, attaches Authorization header
-│       └── theme/route.ts                  # POST → persists azimuth_theme cookie
+│       └── theme/route.ts                  # POST → persists eurostrip_theme cookie
 ├── middleware.ts                           # next-intl locale prefixing + auth-page redirects
 ├── shared/
 │   ├── auth/cookie.ts                      # cookie name, get/set/clear helpers (server-only)
@@ -199,14 +191,14 @@ The mechanism is intentionally boring:
    [`shared/theme/set-theme-pre-paint.ts`](../../apps/web/src/shared/theme/set-theme-pre-paint.ts)
    is a stringified IIFE that the root layout injects as
    `<script dangerouslySetInnerHTML={...}>` before any React mounts. It reads
-   the `azimuth_theme` cookie, validates it against the four allowed values,
+   the `eurostrip_theme` cookie, validates it against the four allowed values,
    and sets `document.documentElement.dataset.theme` synchronously. No flash
    on first paint; SSR sees the same attribute the client picked because the
    cookie was on the request.
 4. **Persistence via cookie.**
    [`shared/theme/ThemeSwitcher.tsx`](../../apps/web/src/shared/theme/ThemeSwitcher.tsx)
    posts to `/api/theme/route.ts`, which writes a non-httpOnly
-   `azimuth_theme` cookie (`SameSite=Lax`, ~1 year). The cookie is readable
+   `eurostrip_theme` cookie (`SameSite=Lax`, ~1 year). The cookie is readable
    by the pre-paint script and by `ThemeProvider`, which keeps React state
    in sync for the switcher UI itself.
 5. **No client-only theme state.** Because the source of truth is the cookie
@@ -267,7 +259,7 @@ The store is small; most state lives inside RTK Query's cache.
 ```ts
 // apps/web/src/shared/store/index.ts
 import { configureStore } from '@reduxjs/toolkit';
-import { baseApi } from '@azimuth/api-client';
+import { baseApi } from '@eurostrip/api-client';
 import { authSlice } from './slices/auth';
 
 export const makeStore = () =>
@@ -317,7 +309,7 @@ end-to-end on the frontend:
    `apps/web/src/features/aircraft/api.ts`:
 
    ```ts
-   import { baseApi } from '@azimuth/api-client';
+   import { baseApi } from '@eurostrip/api-client';
    import { z } from 'zod';
    import { aircraftPayloadSchema } from './schema';
 
@@ -334,7 +326,8 @@ end-to-end on the frontend:
    ```
 
 4. **Author components.** Put them under `features/aircraft/components/` and
-   compose `libs/ui` primitives. Each component ships with a `*.test.tsx`
+   compose OpenBridge web components directly (`@oicl/openbridge-webcomponents-react`).
+   Each component ships with a `*.test.tsx`
    covering happy / invalid / garbage paths (CLAUDE.md hard rule #1). Forms
    wrap React Hook Form's `useForm({ resolver: zodResolver(...) })`.
 5. **Author per-feature i18n.** Drop `messages/en.json` and `messages/pt.json`
@@ -355,11 +348,7 @@ Three layers, narrowing from cheap to expensive:
 
 - **Lib tests.** Each `libs/*` package owns its own `*.test.ts(x)` files
   next to the source. Vitest runs them via `pnpm nx test design-tokens`,
-  `pnpm nx test ui`, `pnpm nx test api-client`, `pnpm nx test i18n`. Every
-  `libs/ui` primitive has happy / invalid / garbage cases — e.g. `Modal`
-  asserts focus is trapped inside (happy), trapped under nested portals
-  (invalid: edge case at boundary), and that an undefined `onClose` is
-  caught with a useful error rather than a stack trace (garbage).
+  `pnpm nx test api-client`, `pnpm nx test i18n`.
 - **Feature component tests.** Live next to feature components in
   `apps/web/src/features/<module>/`. Use `@testing-library/react` and a
   fetch mock for `/api/proxy/...` calls. The Ping module's
@@ -377,14 +366,13 @@ Three layers, narrowing from cheap to expensive:
 ## 9. References
 
 - Original scaffold spec — frontend architecture:
-  [`docs/superpowers/specs/2026-05-02-azimuth-scaffold-design.md`](../superpowers/specs/2026-05-02-azimuth-scaffold-design.md)
+  [`docs/superpowers/specs/2026-05-02-eurostrip-scaffold-design.md`](../superpowers/specs/2026-05-02-eurostrip-scaffold-design.md)
   §6.
 - Phase 3 decision log:
-  [`docs/superpowers/specs/2026-05-06-azimuth-scaffold-phase-3-decisions.md`](../superpowers/specs/2026-05-06-azimuth-scaffold-phase-3-decisions.md).
+  [`docs/superpowers/specs/2026-05-06-eurostrip-scaffold-phase-3-decisions.md`](../superpowers/specs/2026-05-06-eurostrip-scaffold-phase-3-decisions.md).
 - [ADR 0006 — Frontend Stack and Cookie-Based Auth](../adr/0006-frontend-stack-and-cookie-auth.md).
 - Lib project files:
   [`libs/design-tokens/project.json`](../../libs/design-tokens/project.json),
-  [`libs/ui/project.json`](../../libs/ui/project.json),
   [`libs/api-client/project.json`](../../libs/api-client/project.json),
   [`libs/i18n/project.json`](../../libs/i18n/project.json).
 - Local-dev runbook (how to run the frontend, codegen the API client, and
