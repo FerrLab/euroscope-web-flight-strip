@@ -162,3 +162,12 @@ it('rejects unauthenticated console requests (garbage)', function (): void {
     $this->postJson('/api/gateway/commands', ['action' => 'ping'])->assertStatus(401);
     $this->getJson('/api/gateway/console/poll')->assertStatus(401);
 });
+
+it('returns a JSON 401 without an Accept header (garbage — proxied browser request)', function (): void {
+    // The Next proxy forwards browser requests without Accept:
+    // application/json. An expired or missing token must yield a clean
+    // 401, never an attempted redirect to a nonexistent login route.
+    $this->get('/api/gateway/console/poll')
+        ->assertStatus(401)
+        ->assertHeader('content-type', 'application/json');
+});

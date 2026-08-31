@@ -50,6 +50,13 @@ export function useGatewayPoll(enabled = true) {
             signal: controller.signal,
             credentials: 'include',
           });
+          if (res.status === 401) {
+            // Session expired: stop the loop and return to login
+            // instead of hammering the backend with doomed polls.
+            const locale = window.location.pathname.split('/')[1] || 'en';
+            window.location.assign(`/${locale}/login`);
+            return;
+          }
           if (!res.ok) {
             throw new Error(`poll failed with ${res.status}`);
           }

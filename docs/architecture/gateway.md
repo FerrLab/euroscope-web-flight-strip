@@ -14,10 +14,10 @@ transport decision: [ADR 0009](../adr/0009-long-poll-gateway-transport.md).
 Plugin-facing (Bearer = the user's `gateway` token; `.lpc gateway url`
 points at `/api/euroscope`):
 
-| Route                                | Behavior                                                                                                                           |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `POST /api/euroscope/messages`       | Batch ingest (≤200 msgs / 512 KB). Object entries stored verbatim; garbage entries dropped + logged, never a batch failure. `204`. |
-| `GET /api/euroscope/poll?timeout=25` | Blocks ≤25 s on the command queue. `200 {"commands":[…]}` or `204`. Refreshes presence.                                            |
+| Route                                | Behavior                                                                                                                         |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/euroscope/messages`       | Batch ingest (≤200 msgs / 5 MB). Object entries stored verbatim; garbage entries dropped + logged, never a batch failure. `204`. |
+| `GET /api/euroscope/poll?timeout=25` | Blocks ≤25 s on the command queue. `200 {"commands":[…]}` or `204`. Refreshes presence.                                          |
 
 Browser-facing (cookie → Next proxy → Bearer):
 

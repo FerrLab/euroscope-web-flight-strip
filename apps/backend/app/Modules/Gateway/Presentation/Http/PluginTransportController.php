@@ -18,7 +18,12 @@ use Illuminate\Support\Facades\Log;
 
 class PluginTransportController
 {
-    private const MAX_BODY_BYTES = 524_288;
+    /**
+     * 5 MB: a list_flights / session_snapshot response for a busy
+     * session is one large envelope — 512 KB stalled real plugins
+     * (the failed batch blocks their outbox and retries forever).
+     */
+    private const MAX_BODY_BYTES = 5_242_880;
 
     private const MAX_POLL_SECONDS = 25;
 

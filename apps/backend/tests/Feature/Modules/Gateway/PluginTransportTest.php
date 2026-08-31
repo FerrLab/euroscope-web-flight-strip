@@ -91,10 +91,24 @@ it('rejects a batch of more than 200 messages (invalid)', function (): void {
         ->assertStatus(422);
 });
 
-it('rejects a batch body over 512 KB (garbage volume)', function (): void {
+it('accepts a large session-scan batch under 5 MB (happy — busy session)', function (): void {
+    // A list_flights response for a busy session is one big envelope;
+    // 512 KB proved too small in the field (GRU evening traffic).
+    [$user, $token] = gatewayAuthenticatedAs();
+
+    $messages = [['type' => 'response', 'action' => 'list_flights', 'ok' => true, 'payload' => ['blob' => str_repeat('a', 600_000)]]];
+
+    $this->withToken($token)
+        ->postJson('/api/euroscope/messages', ['messages' => $messages])
+        ->assertNoContent();
+
+    expect(app(GatewayStreamRepository::class)->tail($user->id, null, 0)->messages)->toHaveCount(1);
+});
+
+it('rejects a batch body over 5 MB (garbage volume)', function (): void {
     [, $token] = gatewayAuthenticatedAs();
 
-    $messages = [['type' => 'event', 'action' => 'x', 'payload' => ['blob' => str_repeat('a', 600_000)]]];
+    $messages = [['type' => 'event', 'action' => 'x', 'payload' => ['blob' => str_repeat('a', 5_300_000)]]];
 
     $this->withToken($token)
         ->postJson('/api/euroscope/messages', ['messages' => $messages])
