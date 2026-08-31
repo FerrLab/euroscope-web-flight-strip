@@ -1,0 +1,309 @@
+{
+  "strips": {
+    "appTitle": "Azimuth",
+    "pageName": "Flight strips — {icao} {name}",
+    "topbar": {
+      "euroscope": "EuroScope",
+      "offline": "Plugin offline — reconnect .lpc in EuroScope"
+    },
+    "palette": {
+      "title": "Brilliance",
+      "active": "ACTIVE",
+      "bright": "Bright",
+      "day": "Day",
+      "dusk": "Dusk",
+      "night": "Night"
+    },
+    "awos": {
+      "title": "AWOS — {station}",
+      "atis": "ATIS",
+      "rwy": "RWY",
+      "wind": "WIND",
+      "qnh": "QNH",
+      "tdp": "T / DP",
+      "vis": "VIS",
+      "ceiling": "CEILING",
+      "rwyHdg": "RWY {id} HDG",
+      "headwind": "HEADWIND",
+      "tailwind": "TAILWIND",
+      "crosswind": "CROSSWIND",
+      "north": "N",
+      "kt": "kt",
+      "hpa": "hPa",
+      "celsius": "°C",
+      "cat": {
+        "visual": "Visual",
+        "marginal": "Marginal VFR",
+        "instrument": "Instrument",
+        "lowInstrument": "Low IFR"
+      }
+    },
+    "activity": {
+      "title": "Activity — {icao}",
+      "live": "Live",
+      "empty": "No events yet",
+      "archived": "Archived strips",
+      "restore": "Restore",
+      "utc": "UTC"
+    },
+    "feed": {
+      "src": {
+        "you": "You",
+        "euroscope": "EuroScope",
+        "auto": "Auto",
+        "guard": "Guard rail"
+      },
+      "events": {
+        "moved": "{cs} → {bay}",
+        "clearedByMove": "{cs} clearance marked (manual move)",
+        "clearanceIssued": "{cs} IFR clearance issued",
+        "archived": "{cs} strip archived",
+        "deleted": "{cs} strip deleted",
+        "handoffOffered": "{cs} handoff offered to {to}",
+        "handoffAccepted": "{to} accepted {cs}",
+        "handoffCancelled": "{cs} handoff to {to} cancelled",
+        "archivedAfterHandoff": "{cs} strip archived after handoff",
+        "pdcSent": "PDC sent to {cs} via private message",
+        "pdcAcked": "{cs} replied WILCO — PDC acknowledged",
+        "fplAmended": "{cs} flight plan amended",
+        "sessionOpened": "Session opened — {icao}",
+        "moveRejected": "Rejected — {cs} to {bay}",
+        "baySplit": "{bay} split — new bay {title}",
+        "bayRemoved": "{bay} removed",
+        "bayLockedLog": "{bay} locked",
+        "bayUnlockedLog": "{bay} unlocked",
+        "fplReceived": "Flight plan received — {cs} to {ades}",
+        "flightRemoved": "{cs} left the session — strip archived",
+        "inbound": "Inbound — {cs}",
+        "squawkVerified": "{cs} transponder {code} verified — ready",
+        "apronMovement": "{cs} moving on apron — Taxi suggested",
+        "airborne": "{cs} airborne RWY {rwy} — strip archived",
+        "towerHandoff": "Handoff accepted — {cs} to TWR",
+        "squawkConflict": "{cs} squawking {set} — assigned {assigned}, duplicate with {dupWith}",
+        "onFinal": "{cs} {dist} NM final RWY {rwy}"
+      }
+    },
+    "toasts": {
+      "unknownBay": {
+        "title": "Move rejected",
+        "text": "{cs} cannot go there."
+      },
+      "bayLocked": {
+        "title": "Bay locked",
+        "text": "{bay} is locked — unlock it to accept strips."
+      },
+      "flowGuard": {
+        "title": "Flow guard",
+        "text": "{cs} is {dir}. {dir, select, ARR {Arrivals use Approach, Runway and Taxi.} other {Departures flow Pending through Runway.}}"
+      },
+      "occupancy": {
+        "title": "Occupancy limit",
+        "text": "{bay} allows {cap, plural, one {# aircraft} other {# aircraft}}. Vacate it first."
+      },
+      "noClearance": {
+        "title": "Clearance not issued",
+        "text": "{cs} has no CLR. Issue clearance before moving past Cleared."
+      },
+      "bayNotEmpty": {
+        "title": "Bay not empty",
+        "text": "Move the {count, plural, one {# strip} other {# strips}} out of {bay} before removing it."
+      },
+      "handoffOffered": {
+        "title": "Handoff offered",
+        "text": "{cs} → {to}. Awaiting acceptance."
+      },
+      "handoffAccepted": {
+        "title": "Handoff accepted",
+        "text": "{cs} is now with {to}. Strip archives shortly."
+      },
+      "pdcSent": {
+        "title": "PDC sent",
+        "text": "{cs} — clearance delivered as private message."
+      },
+      "pdcAcked": {
+        "title": "PDC acknowledged",
+        "text": "{cs} replied WILCO."
+      },
+      "fplReceived": {
+        "title": "New flight plan",
+        "text": "{cs} → {ades} filed. Strip added to Pending."
+      },
+      "inbound": {
+        "title": "{icao} inbound",
+        "text": "{cs} added to {icao} Approach."
+      },
+      "airborne": {
+        "title": "Departure airborne",
+        "text": "{cs} airborne. Strip archived automatically."
+      },
+      "handoffHeld": {
+        "title": "Handoff pending",
+        "text": "Runway occupied or locked — {cs} held at Taxi."
+      },
+      "squawkConflict": {
+        "title": "Squawk conflict",
+        "text": "{cs} set {set}: mismatch with assigned {assigned} and duplicate of {dupWith}."
+      }
+    },
+    "bays": {
+      "kinds": {
+        "PENDING": "Pending",
+        "CLEARED": "Cleared",
+        "PUSHBACK": "Pushback",
+        "TAXI": "Taxi",
+        "RUNWAY": "Runway",
+        "APPROACH": "Approach"
+      },
+      "empty": {
+        "PENDING": "New flight plans land here",
+        "CLEARED": "Drop strips after CLR",
+        "PUSHBACK": "No pushback in progress",
+        "TAXI": "No aircraft taxiing",
+        "RUNWAY": "Runway vacant",
+        "APPROACH": "No inbound traffic"
+      },
+      "emptyLocked": "Locked — drops rejected",
+      "lockedBadge": "LOCKED",
+      "renameTitle": "Double-click to rename bay",
+      "lockTitle": "Lock bay — reject all drops",
+      "menuTitle": "Bay actions — rename, split, lock, remove",
+      "countCap": "{n} / {cap}"
+    },
+    "strip": {
+      "routeLocal": "LOCAL",
+      "routeFrom": "FROM",
+      "routeTo": "TO",
+      "procLabel": "{kind} · RWY",
+      "sqk": "SQK A/S",
+      "cfl": "CFL",
+      "stand": "STAND",
+      "freeText": "free text",
+      "freeTextTitle": "Free text — click to edit",
+      "suggest": "→ {bay}?",
+      "suggestTitle": "Automatic action suggested from EuroScope events — click to accept",
+      "dirTip": "{type} wake {wake} — {dir, select, DEP {Departure} ARR {Arrival} other {VFR}}",
+      "chips": {
+        "dup": "DUP",
+        "dupTip": "Duplicate squawk on frequency",
+        "rdy": "RDY",
+        "rdyTip": "Cleared and squawk verified",
+        "pdc": "PDC",
+        "pdcTip": "PDC sent — awaiting acknowledge",
+        "pdcOk": "PDC OK",
+        "pdcOkTip": "PDC sent — traffic fully cleared",
+        "noClr": "NO CLR",
+        "noClrTip": "Clearance not issued",
+        "xfrPending": "→ {pos}",
+        "xfrPendingTip": "Handoff offered to {to} — awaiting acceptance",
+        "xfrOk": "{pos} OK",
+        "xfrOkTip": "Handoff accepted by {to}"
+      }
+    },
+    "ctx": {
+      "sub": "{adep}–{ades} · {type}",
+      "cancelHandoff": "Cancel handoff ({to})",
+      "issueClearance": "Issue clearance",
+      "pdc": "Datalink clearance (PDC)",
+      "transfer": "Transfer to station",
+      "editFpl": "Edit flight plan",
+      "archive": "Archive strip",
+      "delete": "Delete strip",
+      "moveTo": "MOVE TO"
+    },
+    "bayCtx": {
+      "sub": "{count, plural, one {# strip} other {# strips}} · {locked, select, true {locked} other {open}}",
+      "rename": "Rename bay",
+      "split": "Split vertically",
+      "lock": "Lock bay",
+      "unlock": "Unlock bay",
+      "remove": "Remove bay"
+    },
+    "modals": {
+      "cancel": "Cancel",
+      "close": "Close",
+      "fpl": {
+        "title": "Flight plan",
+        "icaoSection": "ICAO flight plan",
+        "atcSection": "ATC assignment — EuroScope",
+        "apply": "Apply to EuroScope",
+        "note": "Changes are written back to the EuroScope flight plan on apply.",
+        "fields": {
+          "ident": "Aircraft ident",
+          "rules": "Flight rules",
+          "ftype": "Type of flight",
+          "num": "Number",
+          "actype": "Type of aircraft",
+          "wake": "Wake",
+          "equip": "Equipment",
+          "adep": "Departure",
+          "eobt": "EOBT",
+          "tas": "Cruising speed",
+          "rfl": "Level",
+          "route": "Route",
+          "ades": "Destination",
+          "eet": "Total EET",
+          "altn": "Alternate",
+          "altn2": "2nd alternate",
+          "other": "Other information",
+          "sqkA": "Assigned squawk",
+          "proc": "SID / STAR",
+          "rwy": "Runway",
+          "cfl": "CFL",
+          "gate": "Stand",
+          "freeText": "Strip free text"
+        },
+        "rules": {
+          "I": "IFR",
+          "V": "VFR",
+          "Y": "IFR then VFR",
+          "Z": "VFR then IFR"
+        },
+        "ftypes": {
+          "S": "Scheduled",
+          "N": "Non-scheduled",
+          "G": "General aviation",
+          "M": "Military",
+          "X": "Other"
+        },
+        "wakes": {
+          "L": "Light",
+          "M": "Medium",
+          "H": "Heavy",
+          "J": "Super"
+        }
+      },
+      "dcl": {
+        "title": "Datalink clearance",
+        "header": "Datalink clearance — private message",
+        "statusNone": "NOT SENT",
+        "statusSent": "SENT — AWAITING",
+        "statusAck": "SENT — CLEARED",
+        "remarkLabel": "Appended remark (optional)",
+        "remarkPlaceholder": "e.g. EXPECT DELAY 5 MIN",
+        "note": "Sent to the pilot as an EuroScope private message. Acknowledgement is detected from the reply.",
+        "send": "Send private message",
+        "resend": "Resend"
+      },
+      "confirm": {
+        "title": "Confirm delete",
+        "text": "Remove strip {cs} ({adep}–{ades})?",
+        "note": "The flight plan remains in EuroScope. Only the strip is removed.",
+        "delete": "Delete strip"
+      },
+      "xfr": {
+        "title": "Transfer — handoff",
+        "cancelPending": "Cancel handoff to {to}",
+        "note": "Stations online for this sector. Handoff is offered via EuroScope — the strip archives automatically once accepted."
+      },
+      "addTab": {
+        "title": "Open airport",
+        "open": "Open",
+        "name": "{name} — {pos}",
+        "custom": "Open by ICAO",
+        "customPlaceholder": "e.g. SBGR",
+        "fromSession": "Seen in the live session",
+        "note": "Airports visible to the active EuroScope session."
+      }
+    }
+  }
+}

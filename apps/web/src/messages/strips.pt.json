@@ -1,0 +1,309 @@
+{
+  "strips": {
+    "appTitle": "Azimuth",
+    "pageName": "Fichas de progressão — {icao} {name}",
+    "topbar": {
+      "euroscope": "EuroScope",
+      "offline": "Plugin offline — reconecte o .lpc no EuroScope"
+    },
+    "palette": {
+      "title": "Brilho",
+      "active": "ATIVO",
+      "bright": "Sol",
+      "day": "Dia",
+      "dusk": "Crepúsculo",
+      "night": "Noite"
+    },
+    "awos": {
+      "title": "AWOS — {station}",
+      "atis": "ATIS",
+      "rwy": "RWY",
+      "wind": "VENTO",
+      "qnh": "QNH",
+      "tdp": "T / DP",
+      "vis": "VIS",
+      "ceiling": "TETO",
+      "rwyHdg": "RWY {id} HDG",
+      "headwind": "VENTO DE PROA",
+      "tailwind": "VENTO DE CAUDA",
+      "crosswind": "VENTO CRUZADO",
+      "north": "N",
+      "kt": "kt",
+      "hpa": "hPa",
+      "celsius": "°C",
+      "cat": {
+        "visual": "Visual",
+        "marginal": "VFR marginal",
+        "instrument": "Instrumentos",
+        "lowInstrument": "IFR baixo"
+      }
+    },
+    "activity": {
+      "title": "Atividade — {icao}",
+      "live": "Ao vivo",
+      "empty": "Ainda sem eventos",
+      "archived": "Fichas arquivadas",
+      "restore": "Restaurar",
+      "utc": "UTC"
+    },
+    "feed": {
+      "src": {
+        "you": "Você",
+        "euroscope": "EuroScope",
+        "auto": "Auto",
+        "guard": "Proteção"
+      },
+      "events": {
+        "moved": "{cs} → {bay}",
+        "clearedByMove": "{cs} autorização marcada (movimento manual)",
+        "clearanceIssued": "{cs} autorização IFR emitida",
+        "archived": "Ficha de {cs} arquivada",
+        "deleted": "Ficha de {cs} apagada",
+        "handoffOffered": "{cs} transferência oferecida a {to}",
+        "handoffAccepted": "{to} aceitou {cs}",
+        "handoffCancelled": "{cs} transferência para {to} cancelada",
+        "archivedAfterHandoff": "Ficha de {cs} arquivada após transferência",
+        "pdcSent": "PDC enviado a {cs} por mensagem privada",
+        "pdcAcked": "{cs} respondeu WILCO — PDC confirmado",
+        "fplAmended": "Plano de voo de {cs} alterado",
+        "sessionOpened": "Sessão aberta — {icao}",
+        "moveRejected": "Rejeitado — {cs} para {bay}",
+        "baySplit": "{bay} dividida — nova baia {title}",
+        "bayRemoved": "{bay} removida",
+        "bayLockedLog": "{bay} bloqueada",
+        "bayUnlockedLog": "{bay} desbloqueada",
+        "fplReceived": "Plano de voo recebido — {cs} para {ades}",
+        "flightRemoved": "{cs} saiu da sessão — ficha arquivada",
+        "inbound": "Chegada — {cs}",
+        "squawkVerified": "{cs} transponder {code} verificado — pronto",
+        "apronMovement": "{cs} em movimento no pátio — Taxi sugerido",
+        "airborne": "{cs} no ar RWY {rwy} — ficha arquivada",
+        "towerHandoff": "Transferência aceite — {cs} para TWR",
+        "squawkConflict": "{cs} a transmitir {set} — atribuído {assigned}, duplicado com {dupWith}",
+        "onFinal": "{cs} final de {dist} NM RWY {rwy}"
+      }
+    },
+    "toasts": {
+      "unknownBay": {
+        "title": "Movimento rejeitado",
+        "text": "{cs} não pode ir para aí."
+      },
+      "bayLocked": {
+        "title": "Baia bloqueada",
+        "text": "{bay} está bloqueada — desbloqueie para aceitar fichas."
+      },
+      "flowGuard": {
+        "title": "Proteção de fluxo",
+        "text": "{cs} é {dir}. {dir, select, ARR {Chegadas usam Aproximação, Pista e Taxi.} other {Partidas fluem de Pendente até Pista.}}"
+      },
+      "occupancy": {
+        "title": "Limite de ocupação",
+        "text": "{bay} permite {cap, plural, one {# aeronave} other {# aeronaves}}. Liberte-a primeiro."
+      },
+      "noClearance": {
+        "title": "Autorização não emitida",
+        "text": "{cs} não tem CLR. Emita a autorização antes de passar de Autorizado."
+      },
+      "bayNotEmpty": {
+        "title": "Baia não vazia",
+        "text": "Mova {count, plural, one {# ficha} other {# fichas}} de {bay} antes de a remover."
+      },
+      "handoffOffered": {
+        "title": "Transferência oferecida",
+        "text": "{cs} → {to}. A aguardar aceitação."
+      },
+      "handoffAccepted": {
+        "title": "Transferência aceite",
+        "text": "{cs} está agora com {to}. A ficha arquiva em breve."
+      },
+      "pdcSent": {
+        "title": "PDC enviado",
+        "text": "{cs} — autorização entregue por mensagem privada."
+      },
+      "pdcAcked": {
+        "title": "PDC confirmado",
+        "text": "{cs} respondeu WILCO."
+      },
+      "fplReceived": {
+        "title": "Novo plano de voo",
+        "text": "{cs} → {ades} depositado. Ficha adicionada a Pendente."
+      },
+      "inbound": {
+        "title": "Chegada {icao}",
+        "text": "{cs} adicionado à Aproximação de {icao}."
+      },
+      "airborne": {
+        "title": "Partida no ar",
+        "text": "{cs} no ar. Ficha arquivada automaticamente."
+      },
+      "handoffHeld": {
+        "title": "Transferência pendente",
+        "text": "Pista ocupada ou bloqueada — {cs} retido no Taxi."
+      },
+      "squawkConflict": {
+        "title": "Conflito de squawk",
+        "text": "{cs} ajustou {set}: difere do atribuído {assigned} e duplica {dupWith}."
+      }
+    },
+    "bays": {
+      "kinds": {
+        "PENDING": "Pendente",
+        "CLEARED": "Autorizado",
+        "PUSHBACK": "Pushback",
+        "TAXI": "Taxi",
+        "RUNWAY": "Pista",
+        "APPROACH": "Aproximação"
+      },
+      "empty": {
+        "PENDING": "Novos planos de voo chegam aqui",
+        "CLEARED": "Largue fichas após CLR",
+        "PUSHBACK": "Sem pushback em curso",
+        "TAXI": "Sem aeronaves em taxi",
+        "RUNWAY": "Pista livre",
+        "APPROACH": "Sem tráfego a chegar"
+      },
+      "emptyLocked": "Bloqueada — largadas rejeitadas",
+      "lockedBadge": "BLOQUEADA",
+      "renameTitle": "Duplo clique para renomear a baia",
+      "lockTitle": "Bloquear baia — rejeitar largadas",
+      "menuTitle": "Ações da baia — renomear, dividir, bloquear, remover",
+      "countCap": "{n} / {cap}"
+    },
+    "strip": {
+      "routeLocal": "LOCAL",
+      "routeFrom": "DE",
+      "routeTo": "PARA",
+      "procLabel": "{kind} · RWY",
+      "sqk": "SQK A/S",
+      "cfl": "CFL",
+      "stand": "STAND",
+      "freeText": "texto livre",
+      "freeTextTitle": "Texto livre — clique para editar",
+      "suggest": "→ {bay}?",
+      "suggestTitle": "Ação automática sugerida por eventos do EuroScope — clique para aceitar",
+      "dirTip": "{type} esteira {wake} — {dir, select, DEP {Partida} ARR {Chegada} other {VFR}}",
+      "chips": {
+        "dup": "DUP",
+        "dupTip": "Squawk duplicado na frequência",
+        "rdy": "RDY",
+        "rdyTip": "Autorizado e squawk verificado",
+        "pdc": "PDC",
+        "pdcTip": "PDC enviado — a aguardar confirmação",
+        "pdcOk": "PDC OK",
+        "pdcOkTip": "PDC enviado — tráfego totalmente autorizado",
+        "noClr": "NO CLR",
+        "noClrTip": "Autorização não emitida",
+        "xfrPending": "→ {pos}",
+        "xfrPendingTip": "Transferência oferecida a {to} — a aguardar aceitação",
+        "xfrOk": "{pos} OK",
+        "xfrOkTip": "Transferência aceite por {to}"
+      }
+    },
+    "ctx": {
+      "sub": "{adep}–{ades} · {type}",
+      "cancelHandoff": "Cancelar transferência ({to})",
+      "issueClearance": "Emitir autorização",
+      "pdc": "Autorização datalink (PDC)",
+      "transfer": "Transferir para estação",
+      "editFpl": "Editar plano de voo",
+      "archive": "Arquivar ficha",
+      "delete": "Apagar ficha",
+      "moveTo": "MOVER PARA"
+    },
+    "bayCtx": {
+      "sub": "{count, plural, one {# ficha} other {# fichas}} · {locked, select, true {bloqueada} other {aberta}}",
+      "rename": "Renomear baia",
+      "split": "Dividir verticalmente",
+      "lock": "Bloquear baia",
+      "unlock": "Desbloquear baia",
+      "remove": "Remover baia"
+    },
+    "modals": {
+      "cancel": "Cancelar",
+      "close": "Fechar",
+      "fpl": {
+        "title": "Plano de voo",
+        "icaoSection": "Plano de voo ICAO",
+        "atcSection": "Atribuição ATC — EuroScope",
+        "apply": "Aplicar ao EuroScope",
+        "note": "As alterações são escritas no plano de voo do EuroScope ao aplicar.",
+        "fields": {
+          "ident": "Identificação",
+          "rules": "Regras de voo",
+          "ftype": "Tipo de voo",
+          "num": "Número",
+          "actype": "Tipo de aeronave",
+          "wake": "Esteira",
+          "equip": "Equipamento",
+          "adep": "Partida",
+          "eobt": "EOBT",
+          "tas": "Velocidade de cruzeiro",
+          "rfl": "Nível",
+          "route": "Rota",
+          "ades": "Destino",
+          "eet": "EET total",
+          "altn": "Alternante",
+          "altn2": "2.º alternante",
+          "other": "Outras informações",
+          "sqkA": "Squawk atribuído",
+          "proc": "SID / STAR",
+          "rwy": "Pista",
+          "cfl": "CFL",
+          "gate": "Stand",
+          "freeText": "Texto livre da ficha"
+        },
+        "rules": {
+          "I": "IFR",
+          "V": "VFR",
+          "Y": "IFR depois VFR",
+          "Z": "VFR depois IFR"
+        },
+        "ftypes": {
+          "S": "Regular",
+          "N": "Não regular",
+          "G": "Aviação geral",
+          "M": "Militar",
+          "X": "Outro"
+        },
+        "wakes": {
+          "L": "Leve",
+          "M": "Média",
+          "H": "Pesada",
+          "J": "Super"
+        }
+      },
+      "dcl": {
+        "title": "Autorização datalink",
+        "header": "Autorização datalink — mensagem privada",
+        "statusNone": "NÃO ENVIADO",
+        "statusSent": "ENVIADO — A AGUARDAR",
+        "statusAck": "ENVIADO — AUTORIZADO",
+        "remarkLabel": "Observação anexada (opcional)",
+        "remarkPlaceholder": "ex.: EXPECT DELAY 5 MIN",
+        "note": "Enviado ao piloto como mensagem privada do EuroScope. A confirmação é detetada na resposta.",
+        "send": "Enviar mensagem privada",
+        "resend": "Reenviar"
+      },
+      "confirm": {
+        "title": "Confirmar remoção",
+        "text": "Remover a ficha {cs} ({adep}–{ades})?",
+        "note": "O plano de voo permanece no EuroScope. Apenas a ficha é removida.",
+        "delete": "Apagar ficha"
+      },
+      "xfr": {
+        "title": "Transferência — handoff",
+        "cancelPending": "Cancelar transferência para {to}",
+        "note": "Estações online neste setor. A transferência é oferecida via EuroScope — a ficha arquiva automaticamente após aceitação."
+      },
+      "addTab": {
+        "title": "Abrir aeroporto",
+        "open": "Abrir",
+        "name": "{name} — {pos}",
+        "custom": "Abrir por ICAO",
+        "customPlaceholder": "ex.: SBGR",
+        "fromSession": "Visto na sessão ao vivo",
+        "note": "Aeroportos visíveis na sessão ativa do EuroScope."
+      }
+    }
+  }
+}

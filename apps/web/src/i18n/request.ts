@@ -8,10 +8,12 @@ import pingEn from '@/messages/ping.en.json';
 import pingPt from '@/messages/ping.pt.json';
 import gatewayEn from '@/messages/gateway.en.json';
 import gatewayPt from '@/messages/gateway.pt.json';
+import stripsEn from '@/messages/strips.en.json';
+import stripsPt from '@/messages/strips.pt.json';
 
 const PER_FEATURE: Record<string, Record<string, unknown>> = {
-  en: { ...authEn, ...pingEn, ...gatewayEn },
-  pt: { ...authPt, ...pingPt, ...gatewayPt },
+  en: { ...authEn, ...pingEn, ...gatewayEn, ...stripsEn },
+  pt: { ...authPt, ...pingPt, ...gatewayPt, ...stripsPt },
 };
 
 export default getRequestConfig(async ({ requestLocale }) => {
