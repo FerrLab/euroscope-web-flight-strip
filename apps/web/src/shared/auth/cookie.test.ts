@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { buildSessionCookie, buildLogoutCookie, SESSION_COOKIE_NAME } from './cookie';
 
 describe('cookie helpers', () => {
-  it('emits HttpOnly + SameSite=Strict + Max-Age (happy)', () => {
+  it('emits HttpOnly + SameSite=Lax + Max-Age (happy)', () => {
     const c = buildSessionCookie('tok', { secure: true });
     expect(c).toContain(`${SESSION_COOKIE_NAME}=tok`);
     expect(c).toContain('HttpOnly');
-    expect(c).toContain('SameSite=Strict');
+    expect(c).toContain('SameSite=Lax');
     expect(c).toContain('Max-Age=');
     expect(c).toContain('Secure');
   });

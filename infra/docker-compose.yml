@@ -57,6 +57,14 @@ services:
       PUSHER_PORT: 6001
       PUSHER_SCHEME: http
       PUSHER_APP_CLUSTER: mt1
+      VATSIM_CLIENT_ID: ${VATSIM_CLIENT_ID}
+      VATSIM_CLIENT_SECRET: ${VATSIM_CLIENT_SECRET}
+      VATSIM_REDIRECT_URI: ${VATSIM_REDIRECT_URI}
+      # Defaults to the sandbox (auth-dev.vatsim.net) so a fresh
+      # `cp .env.example .env` never points at VATSIM production by accident —
+      # an unset value would otherwise arrive empty, i.e. falsy.
+      VATSIM_TEST: ${VATSIM_TEST:-true}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     volumes:
       - ../apps/backend:/app
       - composer-cache:/root/.composer/cache

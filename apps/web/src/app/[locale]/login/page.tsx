@@ -12,9 +12,14 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-bg-secondary p-4">
       <ObcCard className="w-full max-w-md">
         <h1 className="text-2xl font-semibold mb-4">{t('loginTitle')}</h1>
-        <Link href={`/api/auth/stub-redirect?locale=${locale}`}>
-          <ObcButton fullWidth>{t('continueWithStub')}</ObcButton>
+        <Link href={`/api/auth/vatsim-redirect?locale=${locale}`}>
+          <ObcButton fullWidth>{t('continueWithVatsim')}</ObcButton>
         </Link>
+        {process.env.NODE_ENV !== 'production' && (
+          <Link href={`/api/auth/stub-redirect?locale=${locale}`} className="block mt-2">
+            <ObcButton fullWidth>{t('continueWithStub')}</ObcButton>
+          </Link>
+        )}
       </ObcCard>
     </main>
   );

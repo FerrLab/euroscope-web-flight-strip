@@ -2,15 +2,18 @@
 
 This document is the canonical reference for how EuroStrip authenticates users
 and authorizes their actions. For the rationale on the unusual pieces (the
-permission marker interface, the stub Socialite driver) see
-[ADR 0003](../adr/0003-permission-marker-interface.md) and
-[ADR 0004](../adr/0004-stub-socialite-per-request-fixture.md).
+permission marker interface, the stub Socialite driver, VATSIM Connect as
+the production identity provider) see
+[ADR 0003](../adr/0003-permission-marker-interface.md),
+[ADR 0004](../adr/0004-stub-socialite-per-request-fixture.md), and
+[ADR 0010](../adr/0010-vatsim-connect-oauth.md).
 
 ## 1. Overview
 
 EuroStrip uses **Passport** for OAuth2 access tokens (the API surface),
-**Socialite** with a stub driver for IdP-shaped login flows (real providers
-plug in later without changing call-sites), and **spatie/laravel-permission v7**
+**Socialite** for IdP-shaped login flows — **VATSIM Connect** is the production
+driver (§4) and a deterministic **stub** driver stands in outside production
+(§3) — and **spatie/laravel-permission v7**
 for the role/permission model. The Filament admin panel and Laravel Horizon
 are gated by Spatie roles. Authorization checks throughout the codebase route
 through a marker interface — `App\Authorization\Contracts\Permission` — that
@@ -75,8 +78,10 @@ into production code.
    `SocialiteUser` from the `identity` query param — id, email, name (the
    local part of the email), and a fixed access/refresh-token pair — without
    ever hitting an external endpoint.
-5. The controller upserts the user (`User::firstOrCreate`) and mints a
-   Passport personal access token via `$user->createToken('stub-login')`.
+5. The controller resolves the user through the shared
+   [`ResolveSocialiteUser`](../../apps/backend/app/Authentication/ResolveSocialiteUser.php)
+   (the same code path §4 documents for VATSIM, called with a `null` CID) and
+   mints a Passport personal access token via `$user->createToken('stub-login')`.
 6. JSON response: `{ "access_token": "...", "token_type": "Bearer",
 "user": { ... } }`.
 
@@ -89,40 +94,98 @@ End-to-end coverage:
 and
 [`tests/Feature/Auth/SocialiteStubToPingFlowTest.php`](../../apps/backend/tests/Feature/Auth/SocialiteStubToPingFlowTest.php).
 
-## 4. Adding a real OAuth provider (future)
+## 4. VATSIM Connect (production)
 
-The stub establishes the controller pattern; adding a real provider is
-mechanical. Steps for, e.g., Google:
+VATSIM members sign in with their real VATSIM account via
+`socialiteproviders/vatsim`, registered the same way the stub is (a
+`ServiceProvider::boot()` calling `SocialiteManager::buildProvider()` —
+see [`app/Providers/VatsimSocialiteServiceProvider.php`](../../apps/backend/app/Providers/VatsimSocialiteServiceProvider.php)).
+Scopes requested: `full_name`, `email` (required) — nothing else is
+requested or stored.
 
-1. Install the SocialiteProviders package:
+### Files
 
-   ```bash
-   composer require socialiteproviders/google
-   ```
+- [`app/Http/Controllers/Auth/VatsimAuthController.php`](../../apps/backend/app/Http/Controllers/Auth/VatsimAuthController.php) —
+  redirect + callback.
+- [`app/Http/Controllers/Auth/AuthExchangeController.php`](../../apps/backend/app/Http/Controllers/Auth/AuthExchangeController.php) —
+  redeems the one-time exchange code for the Bearer.
+- [`app/Authentication/ResolveSocialiteUser.php`](../../apps/backend/app/Authentication/ResolveSocialiteUser.php) —
+  identity resolution shared with the stub callback.
+- [`app/Authentication/ExchangeCodeStore.php`](../../apps/backend/app/Authentication/ExchangeCodeStore.php) —
+  the single-use, Dragonfly-backed token handoff.
+- Routes: `GET /auth/socialite/vatsim/redirect`, `GET /auth/socialite/vatsim/callback`,
+  `POST /auth/socialite/exchange` (rate-limited, `throttle:socialite-exchange`).
 
-2. Register the driver. Either subscribe the package's event listener as the
-   socialiteproviders docs prescribe, or follow the `SocialiteStubServiceProvider`
-   shape and call `Socialite::extend('google', ...)` in your own provider.
+### Flow
 
-3. Add config to `config/services.php`:
+1. Browser hits `GET /api/auth/vatsim-redirect` (Next.js), which 302s the
+   **browser** to Laravel's `GET /auth/socialite/vatsim/redirect`. That
+   handler builds its target from `NEXT_PUBLIC_API_URL`, not
+   `EUROSTRIP_BACKEND_URL` like its server-side siblings: the browser
+   follows this hop itself, and it must land on the same origin as
+   `VATSIM_REDIRECT_URI` or the Laravel session cookie carrying Socialite's
+   OAuth `state` will not come back on the callback.
+2. `redirect()` stores the requested locale in the Laravel session
+   (`vatsim_oauth_locale`) and redirects to VATSIM Connect for consent,
+   requesting `full_name` + `email` with `email` marked as a
+   _required_ scope (`Provider::requiredScopes()`, which VATSIM enforces at
+   the consent screen). The session stash exists because VATSIM's redirect
+   back is plain OAuth2 — only `code` and `state`, never an app-specific
+   `locale`.
+3. VATSIM redirects back to `GET /auth/socialite/vatsim/callback`. The
+   controller reads CID/name/email off the Socialite user with
+   `getId()`/`getName()`/`getEmail()` (the provider maps nothing else —
+   see ADR 0010), `pull()`s the locale back out of the session, resolves
+   the user via `ResolveSocialiteUser` (CID first, then email-adopt, then
+   create), mints a Passport personal access token, and stores it under a
+   random 64-character code with a 60-second TTL via
+   `ExchangeCodeStore::put()`.
+4. Laravel redirects to `{FRONTEND_URL}/api/auth/vatsim-callback?code=...&locale=...`
+   — the Bearer itself is never in this URL.
+5. Next.js POSTs the code to `POST /auth/socialite/exchange`, which
+   redeems it exactly once (`ExchangeCodeStore::redeem()`, an atomic
+   `GETDEL`) and returns the Bearer. That route is excepted from CSRF
+   verification in `bootstrap/app.php` — it is a server-to-server POST with
+   no session cookie and no `_token`, so the `web` group would otherwise
+   answer 419.
+6. Next.js sets the existing httpOnly `eurostrip_session` cookie (ADR 0006) and redirects to `/{locale}/dashboard`.
 
-   ```php
-   'google' => [
-       'client_id'     => env('GOOGLE_CLIENT_ID'),
-       'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-       'redirect'      => env('GOOGLE_REDIRECT_URI'),
-   ],
-   ```
+Any failure — consent denied, state mismatch, a profile missing CID or
+email, an email already linked to a different CID, an expired or replayed
+exchange code — redirects to `/{locale}/login?error=oauth`. The whole
+callback body is wrapped, so an unexpected failure during resolution or
+token minting degrades the same way instead of surfacing a 500. No partial
+session is ever written.
 
-4. Add controller methods or a new controller mirroring
-   `SocialiteStubController` — one redirect, one callback. The callback's
-   user-upsert + Passport token-mint code is identical regardless of provider;
-   only the driver name (`'google'` vs `'stub'`) changes.
-5. Add the routes alongside the stub routes.
+### Identity resolution
 
-The stub controller and a real-provider controller can coexist; gate the stub
-behind `APP_ENV === 'local'` or `'testing'` if you want it disabled in
-production environments.
+`ResolveSocialiteUser::resolve(?string $cid, string $email, string $name)`:
+match on `vatsim_cid` when given; else match on `email` and adopt the row
+(setting its CID); else create. First login assigns the `member` role —
+any VATSIM account may sign in; there is no rating gate or allowlist.
+
+The email-adopt branch refuses rather than adopts when the matched row
+already carries a **different**, non-null `vatsim_cid` — that row belongs to
+another VATSIM member, and returning it would mint a Bearer for the wrong
+account. It throws
+[`ConflictingSocialiteIdentity`](../../apps/backend/app/Authentication/Exceptions/ConflictingSocialiteIdentity.php),
+which the VATSIM callback turns into the usual `?error=oauth` redirect.
+
+### Production gating of the stub
+
+Both stub HTTP endpoints (`SocialiteStubController::redirect`/`callback`)
+`abort_if(app()->isProduction(), 404)`. The frontend's stub route
+handlers make the same check against `NODE_ENV`, and the login page hides
+its stub button under the same condition. The stub driver's registration
+is left unconditional — an unreachable extra Socialite driver has no
+security exposure on its own.
+
+Coverage: [`tests/Feature/Auth/VatsimAuthTest.php`](../../apps/backend/tests/Feature/Auth/VatsimAuthTest.php),
+[`tests/Feature/Auth/AuthExchangeTest.php`](../../apps/backend/tests/Feature/Auth/AuthExchangeTest.php),
+[`tests/Feature/Auth/AuthExchangeCsrfExemptionTest.php`](../../apps/backend/tests/Feature/Auth/AuthExchangeCsrfExemptionTest.php),
+[`tests/Feature/Auth/SocialiteStubProductionGateTest.php`](../../apps/backend/tests/Feature/Auth/SocialiteStubProductionGateTest.php),
+[`tests/Feature/Authentication/ResolveSocialiteUserTest.php`](../../apps/backend/tests/Feature/Authentication/ResolveSocialiteUserTest.php),
+[`tests/Feature/Authentication/ExchangeCodeStoreTest.php`](../../apps/backend/tests/Feature/Authentication/ExchangeCodeStoreTest.php).
 
 ## 5. Permissions and roles
 

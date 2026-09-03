@@ -1,7 +1,9 @@
 {
   "auth": {
     "loginTitle": "Entrar em EuroStrip",
+    "continueWithVatsim": "Continuar com VATSIM",
     "continueWithStub": "Continuar com Stub",
-    "logoutLabel": "Sair"
+    "logoutLabel": "Sair",
+    "loginError": "Falha ao entrar. Tente novamente."
   }
 }

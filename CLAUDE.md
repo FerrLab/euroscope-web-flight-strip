@@ -107,7 +107,8 @@ If you've never touched the repo, read
   (0001 Nx + Laravel, 0002 CQRS three-layer (superseded by 0008),
   0003 permission marker interface, 0004 stub Socialite,
   0005 Filament for admin, 0006 frontend stack & cookie auth,
-  0007 bus middleware order, 0008 pure CQRS).
+  0007 bus middleware order, 0008 pure CQRS, 0009 long-poll gateway
+  transport, 0010 VATSIM Connect OAuth).
 - **Specs + plans:** [`docs/superpowers/`](./docs/superpowers/) —
   brainstorming output and execution plans.
 

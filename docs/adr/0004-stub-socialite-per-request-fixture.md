@@ -1,7 +1,7 @@
 # ADR 0004 — Stub Socialite Driver with Per-Request Fixture Identity
 
 **Date:** 2026-05-05
-**Status:** Accepted
+**Status:** Superseded by [ADR 0010](0010-vatsim-connect-oauth.md) for production. The stub described here remains in force for local dev, tests, and e2e.
 
 ## Context
 

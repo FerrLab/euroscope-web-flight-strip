@@ -15,6 +15,9 @@ function pickLocale(value: string | null): Locale {
 }
 
 export async function GET(request: Request) {
+  if (process.env.NODE_ENV === 'production') {
+    return new NextResponse(null, { status: 404 });
+  }
   const url = new URL(request.url);
   const identity = url.searchParams.get('identity') ?? 'stub-user@eurostrip.local';
   const locale = pickLocale(url.searchParams.get('locale'));
@@ -36,8 +39,9 @@ export async function GET(request: Request) {
     return new NextResponse('missing token', { status: 502 });
   }
 
-  const secure = process.env.NODE_ENV === 'production';
-  const cookie = buildSessionCookie(body.access_token, { secure });
+  // This handler already returned 404 above when NODE_ENV === 'production',
+  // so it can never reach this point there — the Secure flag never applies.
+  const cookie = buildSessionCookie(body.access_token, { secure: false });
 
   const dashboard = new URL(`/${locale}/dashboard`, url);
   const res = NextResponse.redirect(dashboard, 302);

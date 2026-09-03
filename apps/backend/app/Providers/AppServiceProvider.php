@@ -72,5 +72,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('gateway-send', function (Request $request): Limit {
             return Limit::perMinute(60)->by('gateway-send:'.($request->user()->id ?? $request->ip()));
         });
+
+        RateLimiter::for('socialite-exchange', function (Request $request): Limit {
+            return Limit::perMinute(20)->by($request->ip());
+        });
     }
 }

@@ -13,16 +13,35 @@ abstract class TestCase extends BaseTestCase
 {
     protected function setUp(): void
     {
-        // The container ships with APP_ENV=local at the OS level, which would
-        // otherwise leak into tests and break security checks that key off the
-        // "local" shortcut (e.g. Horizon's Horizon::auth bypass). Pin the
-        // container env back to "testing" before Laravel boots so feature
-        // tests run against a non-local environment.
-        $_ENV['APP_ENV'] = 'testing';
-        $_SERVER['APP_ENV'] = 'testing';
-        putenv('APP_ENV=testing');
+        // The container ships with APP_ENV=local and a real DB_CONNECTION at
+        // the OS level (docker-compose exports them for the running app).
+        // PHPUnit's <env force="true"> only writes $_ENV + putenv(), not
+        // $_SERVER — and Laravel's env() reads $_SERVER first — so those
+        // real values would otherwise silently win over phpunit.xml and
+        // point RefreshDatabase at the real Postgres database instead of
+        // sqlite :memory:. Mirror every phpunit.xml-forced key into
+        // $_SERVER too, before Laravel boots. Do not remove this.
+        foreach ([
+            'APP_ENV' => 'testing',
+            'DB_CONNECTION' => 'sqlite',
+            'DB_DATABASE' => ':memory:',
+            'DB_URL' => '',
+        ] as $key => $value) {
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+            putenv("{$key}={$value}");
+        }
 
         parent::setUp();
+
+        // Belt-and-braces: hard-fail rather than silently run a Feature
+        // test's RefreshDatabase against a real database.
+        if (config('database.default') !== 'sqlite') {
+            throw new \RuntimeException(
+                'Refusing to run tests: database.default is "'.config('database.default').'", not "sqlite". '.
+                'This guards against RefreshDatabase running against a real Postgres database — see [[backend-test-isolation]].',
+            );
+        }
     }
 
     /**

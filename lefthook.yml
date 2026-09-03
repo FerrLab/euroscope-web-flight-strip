@@ -10,4 +10,4 @@ pre-commit:
     pint:
       root: 'apps/backend/'
       glob: '**/*.php'
-      run: docker compose --env-file ../../.env -f ../../infra/docker-compose.yml --project-directory ../.. exec -T backend ./vendor/bin/pint {staged_files} && git add {staged_files}
+      run: docker compose --env-file ../../.env -f ../../infra/docker-compose.yml --project-directory ../.. exec -T backend ./vendor/bin/pint {staged_files} && env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git add {staged_files}

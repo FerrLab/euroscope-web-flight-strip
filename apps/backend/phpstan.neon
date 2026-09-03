@@ -22,6 +22,16 @@ parameters:
       message: '#Call to an undefined method Pest\\PendingCalls\\TestCall::#'
     - identifier: property.notFound
       message: '#(Access to|access)( an)? undefined property Pest\\PendingCalls\\TestCall::#'
+    # Mockery's fluent `shouldReceive(...)->once()`-style expectation chains —
+    # Larastan's Mockery stubs don't fully resolve the return type of chained
+    # expectation-builder methods, so calls like ->once() on the result read
+    # as undefined even though they work correctly at runtime.
+    - identifier: method.notFound
+      message: '#Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage::#'
+    # Pest's `expect(...)->not->toX()` negation syntax — `Pest\Mixins\Expectation::$not`
+    # is a real, working runtime property that Larastan's Pest stubs don't declare.
+    - identifier: property.notFound
+      message: '#(Access to|access)( an)? undefined property Pest\\Mixins\\Expectation<.*>::\$not#'
 
 services:
   - class: App\Static\PreventRawPermissionStrings
