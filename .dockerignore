@@ -21,6 +21,13 @@ apps/backend/.env.*
 node_modules
 **/node_modules
 apps/backend/vendor
+
+# Locally generated, gitignored artifacts — never baked into the image.
+# bootstrap/cache in particular can hold a stale package-discovery
+# manifest from a dev `composer install` (with --dev packages present)
+# that fatals on boot once a --no-dev build excludes those packages.
+apps/backend/bootstrap/cache/*
+!apps/backend/bootstrap/cache/.gitignore
 apps/backend/storage/framework/cache
 apps/backend/storage/framework/sessions
 apps/backend/storage/framework/testing

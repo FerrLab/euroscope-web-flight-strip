@@ -95,3 +95,37 @@ jobs:
 
       - name: Push SHA tag
         run: docker push ${{ matrix.image }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy to eurostrip-production-app
+    runs-on: ubuntu-latest
+    needs: push
+    steps:
+      - name: Write kubeconfig
+        run: |
+          umask 077
+          echo "${{ secrets.KUBECTL_B64 }}" | base64 -d > "$RUNNER_TEMP/kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_ENV"
+
+      # Deliberately the SHA tag, not :latest — the image reference has to
+      # actually change for Kubernetes to roll the pods. Re-pushing :latest
+      # leaves the spec byte-identical and nothing would restart.
+      # *= sets every container in the pod spec, so this doesn't need to
+      # know each deployment's container name.
+      - name: Set backend image (api, queue, scheduler)
+        run: |
+          for dep in api queue scheduler; do
+            kubectl -n eurostrip-production-app set image "deployment/$dep" \
+              "*=registry.ferrlab.com/eurostrip-backend:${{ github.sha }}"
+          done
+
+      - name: Set frontend image
+        run: |
+          kubectl -n eurostrip-production-app set image deployment/frontend \
+            "*=registry.ferrlab.com/eurostrip-frontend:${{ github.sha }}"
+
+      - name: Wait for rollouts
+        run: |
+          for dep in api queue scheduler frontend; do
+            kubectl -n eurostrip-production-app rollout status "deployment/$dep" --timeout=5m
+          done

@@ -46,9 +46,20 @@ RUN composer install --no-dev --no-interaction --no-progress --no-scripts --opti
 # image) — package discovery happens naturally the first time the app
 # actually boots at runtime instead.
 COPY apps/backend/ ./
-RUN mkdir -p storage/framework/{cache/data,sessions,testing,views} storage/logs bootstrap/cache \
+# Bash brace expansion ({a,b,c}) does NOT work here — Docker's shell-form
+# RUN uses /bin/sh (BusyBox ash on this base image), not bash, regardless
+# of bash being installed above; write every path out explicitly instead
+# of relying on it (a {a,b,c}-literal directory silently getting created
+# instead of the real ones is exactly what broke this the first time).
+RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache \
     && composer dump-autoload --optimize --no-dev --no-scripts
+
+# Filament ships its CSS/JS/fonts as vendor assets that composer's
+# post-autoload-dump hook (filament:upgrade) normally publishes into
+# public/ — skipped above along with the rest of that hook. Publish them
+# explicitly instead, now that storage/framework exists to boot against.
+RUN php artisan filament:assets --no-interaction
 
 COPY infra/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
