@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 
@@ -24,7 +25,7 @@ it('rejects a duplicate CID across two users (invalid)', function (): void {
     User::factory()->create(['vatsim_cid' => '1234567']);
 
     expect(fn () => User::factory()->create(['vatsim_cid' => '1234567']))
-        ->toThrow(\Illuminate\Database\QueryException::class);
+        ->toThrow(QueryException::class);
 });
 
 it('allows many users with a null CID — null is not unique-constrained (garbage)', function (): void {
