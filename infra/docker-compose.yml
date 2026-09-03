@@ -57,6 +57,10 @@ services:
       PUSHER_PORT: 6001
       PUSHER_SCHEME: http
       PUSHER_APP_CLUSTER: mt1
+      VATSIM_CLIENT_ID: ${VATSIM_CLIENT_ID}
+      VATSIM_CLIENT_SECRET: ${VATSIM_CLIENT_SECRET}
+      VATSIM_REDIRECT_URI: ${VATSIM_REDIRECT_URI}
+      VATSIM_TEST: ${VATSIM_TEST}
     volumes:
       - ../apps/backend:/app
       - composer-cache:/root/.composer/cache

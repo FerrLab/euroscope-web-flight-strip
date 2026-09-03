@@ -23,6 +23,7 @@
     "laravel/socialite": "^5.27",
     "laravel/tinker": "^3.0",
     "pusher/pusher-php-server": "^7.2",
+    "socialiteproviders/vatsim": "^5.0",
     "spatie/browsershot": "^5.3",
     "spatie/laravel-data": "^4.22",
     "spatie/laravel-permission": "^7.0",

@@ -50,4 +50,11 @@ return [
         'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
     ],
 
+    'vatsim' => [
+        'client_id' => env('VATSIM_CLIENT_ID'),
+        'client_secret' => env('VATSIM_CLIENT_SECRET'),
+        'redirect' => env('VATSIM_REDIRECT_URI', 'http://localhost:8000/auth/socialite/vatsim/callback'),
+        'test' => env('VATSIM_TEST', false),
+    ],
+
 ];
