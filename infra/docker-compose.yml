@@ -61,6 +61,7 @@ services:
       VATSIM_CLIENT_SECRET: ${VATSIM_CLIENT_SECRET}
       VATSIM_REDIRECT_URI: ${VATSIM_REDIRECT_URI}
       VATSIM_TEST: ${VATSIM_TEST}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     volumes:
       - ../apps/backend:/app
       - composer-cache:/root/.composer/cache
