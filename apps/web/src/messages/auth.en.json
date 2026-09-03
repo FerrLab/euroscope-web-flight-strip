@@ -1,7 +1,9 @@
 {
   "auth": {
     "loginTitle": "Sign in to EuroStrip",
+    "continueWithVatsim": "Continue with VATSIM",
     "continueWithStub": "Continue with Stub",
-    "logoutLabel": "Log out"
+    "logoutLabel": "Log out",
+    "loginError": "Sign-in failed. Please try again."
   }
 }

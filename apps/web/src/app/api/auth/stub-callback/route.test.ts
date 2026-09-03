@@ -53,4 +53,11 @@ describe('/api/auth/stub-callback', () => {
     const res = await GET(makeReq('?identity=a@b'));
     expect(res.status).toBe(502);
   });
+
+  it('404s in production (invalid — must never reach real users)', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const res = await GET(makeReq('?identity=a@b'));
+    expect(res.status).toBe(404);
+    vi.unstubAllEnvs();
+  });
 });

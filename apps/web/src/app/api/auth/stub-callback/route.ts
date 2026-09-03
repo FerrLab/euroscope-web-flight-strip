@@ -15,6 +15,9 @@ function pickLocale(value: string | null): Locale {
 }
 
 export async function GET(request: Request) {
+  if (process.env.NODE_ENV === 'production') {
+    return new NextResponse(null, { status: 404 });
+  }
   const url = new URL(request.url);
   const identity = url.searchParams.get('identity') ?? 'stub-user@eurostrip.local';
   const locale = pickLocale(url.searchParams.get('locale'));
