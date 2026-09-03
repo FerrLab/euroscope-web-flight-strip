@@ -14,11 +14,15 @@ class SocialiteStubController
 {
     public function redirect(Request $request): SymfonyRedirectResponse
     {
+        abort_if(app()->isProduction(), 404);
+
         return Socialite::driver('stub')->redirect();
     }
 
     public function callback(Request $request, ResolveSocialiteUser $resolver): JsonResponse
     {
+        abort_if(app()->isProduction(), 404);
+
         $stubUser = Socialite::driver('stub')->user();
 
         $user = $resolver->resolve(null, (string) $stubUser->getEmail(), (string) $stubUser->getName());
