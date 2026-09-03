@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 use Throwable;
@@ -18,7 +19,10 @@ class VatsimAuthController
 {
     public function redirect(Request $request): SymfonyRedirectResponse
     {
-        return Socialite::driver('vatsim')->scopes(['full_name', 'email'])->redirect();
+        /** @var AbstractProvider $provider */
+        $provider = Socialite::driver('vatsim');
+
+        return $provider->scopes(['full_name', 'email'])->redirect();
     }
 
     public function callback(Request $request, ResolveSocialiteUser $resolver, ExchangeCodeStore $codes): RedirectResponse
@@ -26,7 +30,10 @@ class VatsimAuthController
         $locale = $this->pickLocale($request->query('locale'));
 
         try {
-            $vatsimUser = Socialite::driver('vatsim')->user();
+            /** @var AbstractProvider $provider */
+            $provider = Socialite::driver('vatsim');
+            /** @var SocialiteUser $vatsimUser */
+            $vatsimUser = $provider->user();
         } catch (Throwable) {
             return $this->toLoginError($locale);
         }

@@ -82,7 +82,7 @@ it('the exchange code redeems to a working Bearer token (happy — end to end)',
     $response = $this->get('/auth/socialite/vatsim/callback?locale=en');
     parse_str((string) parse_url((string) $response->headers->get('Location'), PHP_URL_QUERY), $query);
 
-    $exchanged = app(ExchangeCodeStore::class)->redeem($query['code']);
+    $exchanged = app(ExchangeCodeStore::class)->redeem(is_string($query['code']) ? $query['code'] : '');
     expect($exchanged)->toBeString();
 
     $user = User::query()->where('email', 'alice@vatsim.local')->firstOrFail();

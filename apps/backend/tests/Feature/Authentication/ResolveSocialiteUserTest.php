@@ -37,7 +37,7 @@ it('adopts an existing row by email when no CID matches yet (happy — links a p
     $resolved = app(ResolveSocialiteUser::class)->resolve('7654321', 'bob@vatsim.local', 'Bob');
 
     expect($resolved->id)->toBe($existing->id);
-    expect($resolved->fresh()->vatsim_cid)->toBe('7654321');
+    expect($resolved->fresh()?->vatsim_cid)->toBe('7654321');
     $this->assertDatabaseCount('users', 1);
 });
 
@@ -45,7 +45,7 @@ it('does not re-assign member if the user already has it (invalid — no duplica
     $user = app(ResolveSocialiteUser::class)->resolve('1234567', 'alice@vatsim.local', 'Alice');
     app(ResolveSocialiteUser::class)->resolve('1234567', 'alice@vatsim.local', 'Alice');
 
-    expect($user->fresh()->roles()->count())->toBe(1);
+    expect($user->fresh()?->roles()->count())->toBe(1);
 });
 
 it('creates a user with no CID when none is supplied — the stub path (garbage — cid absent by design)', function (): void {

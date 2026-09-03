@@ -13,12 +13,12 @@ it('has a nullable vatsim_cid column (happy)', function (): void {
     expect(Schema::hasColumn('users', 'vatsim_cid'))->toBeTrue();
 
     $user = User::factory()->create(['vatsim_cid' => null]);
-    expect($user->fresh()->vatsim_cid)->toBeNull();
+    expect($user->fresh()?->vatsim_cid)->toBeNull();
 });
 
 it('accepts a numeric CID string (happy)', function (): void {
     $user = User::factory()->create(['vatsim_cid' => '1234567']);
-    expect($user->fresh()->vatsim_cid)->toBe('1234567');
+    expect($user->fresh()?->vatsim_cid)->toBe('1234567');
 });
 
 it('rejects a duplicate CID across two users (invalid)', function (): void {
