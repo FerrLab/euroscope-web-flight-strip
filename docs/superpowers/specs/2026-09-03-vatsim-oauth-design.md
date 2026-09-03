@@ -34,7 +34,7 @@ without VATSIM credentials.
 
 ## Flow
 
-```
+```text
 login page → GET  :3000/api/auth/vatsim-redirect?locale=en   (Next, thin)
            → 302  :8000/auth/socialite/vatsim/redirect        (Laravel)
            → 302  auth.vatsim.net/oauth/authorize             (consent)
@@ -91,7 +91,7 @@ posture is unchanged in practice.
 
 ## Components
 
-**Backend**
+### Backend
 
 - `socialiteproviders/vatsim` registered by a new
   `VatsimSocialiteServiceProvider` (mirrors the stub provider).
@@ -104,7 +104,7 @@ posture is unchanged in practice.
   semantics rather than duplicating them.
 - Migration: `add_vatsim_cid_to_users`.
 
-**Frontend**
+### Frontend
 
 - `/api/auth/vatsim-redirect` and `/api/auth/vatsim-callback` route
   handlers; existing stub handlers gated behind the dev flag.
