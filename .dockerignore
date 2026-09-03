@@ -1,0 +1,38 @@
+# Keeps production image build contexts small and avoids leaking local/dev
+# state into the image. Applies to every Dockerfile in this repo (build
+# context is always the repo root).
+
+.git
+.github
+.claude
+.superpowers
+.worktrees
+worktrees
+
+# Local env files — never bake secrets into an image; production containers
+# get their config from the deploy environment instead.
+.env
+.env.*
+!.env.example
+apps/backend/.env
+apps/backend/.env.*
+!apps/backend/.env.example
+
+node_modules
+**/node_modules
+apps/backend/vendor
+apps/backend/storage/framework/cache
+apps/backend/storage/framework/sessions
+apps/backend/storage/framework/testing
+apps/backend/storage/framework/views
+apps/backend/storage/logs
+apps/backend/storage/passport
+
+.next
+**/.next
+apps/web/test-results
+apps/web/playwright-report
+apps/web/e2e/.auth
+
+*.log
+.DS_Store
