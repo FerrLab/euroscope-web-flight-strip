@@ -47,3 +47,7 @@ apps/web/.env
 
 # Docker
 infra/docker/.data/
+
+# Local Docker Compose overrides for host-machine port/mount conflicts
+infra/docker-compose.local-*.yml
+infra/docker-compose.worktree-*.yml
