@@ -39,8 +39,9 @@ export async function GET(request: Request) {
     return new NextResponse('missing token', { status: 502 });
   }
 
-  const secure = process.env.NODE_ENV === 'production';
-  const cookie = buildSessionCookie(body.access_token, { secure });
+  // This handler already returned 404 above when NODE_ENV === 'production',
+  // so it can never reach this point there — the Secure flag never applies.
+  const cookie = buildSessionCookie(body.access_token, { secure: false });
 
   const dashboard = new URL(`/${locale}/dashboard`, url);
   const res = NextResponse.redirect(dashboard, 302);
