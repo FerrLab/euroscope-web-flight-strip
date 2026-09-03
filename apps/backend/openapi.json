@@ -476,6 +476,12 @@
                             "string",
                             "null"
                         ]
+                    },
+                    "vatsim_cid": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     }
                 },
                 "required": [
@@ -488,7 +494,8 @@
                     "stripe_id",
                     "pm_type",
                     "pm_last_four",
-                    "trial_ends_at"
+                    "trial_ends_at",
+                    "vatsim_cid"
                 ],
                 "title": "User"
             }
