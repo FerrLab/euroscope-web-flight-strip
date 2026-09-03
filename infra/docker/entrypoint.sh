@@ -31,18 +31,32 @@ php artisan migrate --force --no-interaction --isolated || true
 # stub-login users land without the `member` role and hit 403 on /api/ping.
 php artisan db:seed --force --no-interaction || true
 
-# Ensure Passport encryption keys exist; idempotent.
-# Keys persist across container recreates via the passport-keys named volume
-# mounted at /app/storage/passport. AppServiceProvider::boot() calls
-# Passport::loadKeysFrom(storage_path('passport')) so they are loaded from here.
-if [ ! -f storage/passport/oauth-private.key ] || [ ! -f storage/passport/oauth-public.key ]; then
-  mkdir -p storage/passport
-  php artisan passport:keys --force --no-interaction || true
+# Passport encryption keys.
+#
+# When PASSPORT_PRIVATE_KEY/PASSPORT_PUBLIC_KEY are set (Kubernetes secrets,
+# say), Passport reads them straight from config — PassportServiceProvider::
+# makeCryptKey() prefers config("passport.{$type}_key") and only falls back
+# to a file:// path when that is empty — so there is nothing to generate and
+# nothing on disk to chmod. This is also the only way multiple replicas end
+# up with the SAME keypair: generating per-pod would mint tokens one pod
+# can't validate for another.
+#
+# Otherwise (local docker-compose) generate them once and persist them via
+# the passport-keys named volume mounted at /app/storage/passport, which
+# AppServiceProvider::boot() points Passport::loadKeysFrom() at.
+if [ -n "${PASSPORT_PRIVATE_KEY:-}" ] && [ -n "${PASSPORT_PUBLIC_KEY:-}" ]; then
+  echo "Passport keys supplied via environment; skipping key generation"
+else
+  if [ ! -f storage/passport/oauth-private.key ] || [ ! -f storage/passport/oauth-public.key ]; then
+    mkdir -p storage/passport
+    php artisan passport:keys --force --no-interaction || true
+  fi
+  # League\OAuth2\Server requires private key perms in {400,440,600,640,660};
+  # the earlier chmod 775 on storage/ leaves them at 0775 which trips the
+  # validator.
+  chmod 600 storage/passport/oauth-private.key 2>/dev/null || true
+  chmod 660 storage/passport/oauth-public.key 2>/dev/null || true
 fi
-# League\OAuth2\Server requires private key perms in {400,440,600,640,660}; the
-# earlier chmod 775 on storage/ leaves them at 0775 which trips the validator.
-chmod 600 storage/passport/oauth-private.key 2>/dev/null || true
-chmod 660 storage/passport/oauth-public.key 2>/dev/null || true
 
 # Ensure a personal-access Passport client exists. Passport 13's
 # `passport:install` re-publishes migrations on every run (creating duplicate
