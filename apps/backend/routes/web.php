@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\AuthExchangeController;
 use App\Http\Controllers\Auth\SocialiteStubController;
 use App\Http\Controllers\Auth\VatsimAuthController;
 use Illuminate\Support\Facades\Route;
@@ -19,3 +20,7 @@ Route::get('/auth/socialite/vatsim/redirect', [VatsimAuthController::class, 'red
     ->name('auth.socialite.vatsim.redirect');
 Route::get('/auth/socialite/vatsim/callback', [VatsimAuthController::class, 'callback'])
     ->name('auth.socialite.vatsim.callback');
+
+Route::post('/auth/socialite/exchange', [AuthExchangeController::class, 'exchange'])
+    ->middleware('throttle:socialite-exchange')
+    ->name('auth.socialite.exchange');
