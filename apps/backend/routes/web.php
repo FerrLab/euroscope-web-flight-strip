@@ -18,6 +18,8 @@ Route::get('/auth/socialite/stub/callback', [SocialiteStubController::class, 'ca
 
 Route::get('/auth/socialite/vatsim/redirect', [VatsimAuthController::class, 'redirect'])
     ->name('auth.socialite.vatsim.redirect');
+Route::get('/auth/socialite/vatsim/admin/redirect', [VatsimAuthController::class, 'adminRedirect'])
+    ->name('auth.socialite.vatsim.admin.redirect');
 Route::get('/auth/socialite/vatsim/callback', [VatsimAuthController::class, 'callback'])
     ->name('auth.socialite.vatsim.callback');
 
