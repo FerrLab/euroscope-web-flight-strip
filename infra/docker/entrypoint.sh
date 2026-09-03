@@ -19,8 +19,11 @@ until pg_isready -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USERNA
 done
 echo "Postgres is ready"
 
-# Run migrations (idempotent)
-php artisan migrate --force --no-interaction || true
+# Run migrations (idempotent). --isolated: only one process actually runs
+# the migration when multiple container instances boot at once (guards a
+# real race now that this image can be deployed as more than one replica);
+# the rest skip it via an atomic cache lock instead of racing Postgres.
+php artisan migrate --force --no-interaction --isolated || true
 
 # Seed permissions + baseline roles. PermissionsSeeder uses firstOrCreate;
 # RolesSeeder uses syncPermissions; Test User uses firstOrCreate. All three
