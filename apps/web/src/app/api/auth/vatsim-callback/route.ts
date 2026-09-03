@@ -24,17 +24,27 @@ export async function GET(request: Request) {
     return loginError(url, locale);
   }
 
-  const upstream = await fetch(`${BACKEND_URL}/auth/socialite/exchange`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ code }),
-  });
+  let body: { access_token?: string };
+  try {
+    const upstream = await fetch(`${BACKEND_URL}/auth/socialite/exchange`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ code }),
+    });
 
-  if (!upstream.ok) {
+    if (!upstream.ok) {
+      return loginError(url, locale);
+    }
+
+    body = (await upstream.json()) as { access_token?: string };
+  } catch {
+    // Network failure (connection refused, DNS, timeout) or a non-JSON /
+    // unparseable upstream body — route handlers have no page-level error
+    // boundary, so an uncaught throw here would surface as a generic
+    // framework 500 instead of the graceful login-error redirect.
     return loginError(url, locale);
   }
 
-  const body = (await upstream.json()) as { access_token?: string };
   if (!body.access_token) {
     return loginError(url, locale);
   }

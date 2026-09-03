@@ -73,4 +73,13 @@ describe('/api/auth/vatsim-callback', () => {
 
     expect(res.headers.get('Location')).toContain('/en/login?error=oauth');
   });
+
+  it('redirects to login with an error when the fetch itself throws (garbage)', async () => {
+    mockFetch.mockRejectedValue(new Error('network error'));
+
+    const res = await GET(makeReq('?code=abc123&locale=en'));
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toContain('/en/login?error=oauth');
+  });
 });
