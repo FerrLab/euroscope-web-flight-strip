@@ -1,0 +1,97 @@
+name: Docker Publish
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: docker-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }} image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: backend
+            dockerfile: infra/docker/frankenphp.prod.Dockerfile
+            image: registry.ferrlab.com/eurostrip-backend
+            build_args: ''
+          - name: frontend
+            dockerfile: infra/docker/nextjs.Dockerfile
+            image: registry.ferrlab.com/eurostrip-frontend
+            build_args: |
+              NEXT_PUBLIC_API_URL=https://api.eurostrip.ferrlab.com
+              NEXT_PUBLIC_GATEWAY_BASE_URL=https://api.eurostrip.ferrlab.com/api/euroscope
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # push: false here on purpose — this job only produces a local image
+      # (saved to a tar and handed to the push job below). Build failures
+      # and push failures show up as separate, independently re-runnable
+      # jobs in the Actions UI instead of one job hiding which half broke.
+      - name: Build ${{ matrix.name }} (not pushed yet)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          build-args: ${{ matrix.build_args }}
+          tags: |
+            ${{ matrix.image }}:latest
+            ${{ matrix.image }}:${{ github.sha }}
+          push: false
+          outputs: type=docker,dest=/tmp/${{ matrix.name }}.tar
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+      - name: Upload built image
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}-image
+          path: /tmp/${{ matrix.name }}.tar
+          retention-days: 1
+
+  push:
+    name: Push ${{ matrix.name }} image
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: backend
+            image: registry.ferrlab.com/eurostrip-backend
+          - name: frontend
+            image: registry.ferrlab.com/eurostrip-frontend
+    steps:
+      - name: Download built image
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.name }}-image
+          path: /tmp
+
+      - name: Load image
+        run: docker load -i /tmp/${{ matrix.name }}.tar
+
+      - name: Log in to registry.ferrlab.com
+        uses: docker/login-action@v3
+        with:
+          registry: registry.ferrlab.com
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push latest
+        run: docker push ${{ matrix.image }}:latest
+
+      - name: Push SHA tag
+        run: docker push ${{ matrix.image }}:${{ github.sha }}
