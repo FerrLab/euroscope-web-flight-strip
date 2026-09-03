@@ -69,7 +69,9 @@ class VatsimAuthController
             $callback = rtrim((string) config('app.frontend_url'), '/').'/api/auth/vatsim-callback';
 
             return redirect()->away($callback.'?'.http_build_query(['code' => $code, 'locale' => $locale]));
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            report($e);
+
             return $this->toLoginError($locale);
         }
     }
