@@ -717,7 +717,9 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 - Consumes: `App\Authentication\ResolveSocialiteUser::resolve()` (Task 3), `App\Authentication\ExchangeCodeStore::put()` (Task 2).
 - Produces: `GET /auth/socialite/vatsim/redirect` (name `auth.socialite.vatsim.redirect`) and `GET /auth/socialite/vatsim/callback` (name `auth.socialite.vatsim.callback`). On success the callback redirects to `{FRONTEND_URL}/api/auth/vatsim-callback?code=<exchange-code>&locale=<locale>`; on any failure it redirects to `{FRONTEND_URL}/{locale}/login?error=oauth`. `FRONTEND_URL` reads from `config('app.frontend_url')`, added in Step 3 below. Task 9 depends on the `code` and `error` query param names exactly as given here.
 
-VATSIM's raw `/api/user` payload nests email under `data.personal.email` (the library maps the sibling `name_first`/`name_last`/`name_full` fields from that same `data.personal.*` branch — see `SocialiteProviders\Vatsim\Provider::mapUserToObject()`, which does not map `email` itself, so the raw payload must be read directly). If a live account ever shows this assumption wrong, the entire extraction lives in the one `emailFromRaw()` method below — a one-line fix.
+Reading the CID and name from the mapped Socialite user needs the exact right accessor, verified directly against `vendor/laravel/socialite/src/AbstractUser.php`: `map(array $attributes)` only copies a key onto a real typed property (`$this->id`, `$this->email`, ...) when `property_exists($this, $key)` — neither `cid` nor `full_name` is a declared property, so `SocialiteProviders\Vatsim\Provider::mapUserToObject()`'s `->map(['cid' => ..., 'full_name' => ..., ...])` call leaves them reachable only through `AbstractUser::__get()`, i.e. `$vatsimUser->cid` and `$vatsimUser->full_name` (magic property access on the _mapped_ attributes) — **not** `$vatsimUser->getId()` (reads the untouched, always-null `$id` property) and **not** `$vatsimUser->user['full_name']` (`->user` is `getRaw()`'s backing array — the _unmapped_ provider response, where a top-level `full_name` key never existed; the real key nests at `data.personal.name_full`).
+
+`email` is the one field the library's `mapUserToObject()` never maps at all (not even into the magic attributes) — see `SocialiteProviders\Vatsim\Provider::mapUserToObject()`, which the library's own name-field mapping (`name_first`/`name_last`/`name_full`, all read from that same `data.personal.*` raw branch) confirms the raw shape for. Reading it demands `getRaw()` and the deep path `data.personal.email`, which is what `emailFromRaw()` below does. If a live account ever shows this specific path wrong, the extraction lives in that one method — a one-line fix.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -902,9 +904,9 @@ class VatsimAuthController
             return $this->toLoginError($locale);
         }
 
-        $cid = $this->stringOrNull($vatsimUser->getId());
+        $cid = $this->stringOrNull($vatsimUser->cid);
         $email = $this->emailFromRaw($vatsimUser);
-        $name = $this->stringOrNull($vatsimUser->user['full_name'] ?? null) ?? 'VATSIM Member';
+        $name = $this->stringOrNull($vatsimUser->full_name) ?? 'VATSIM Member';
 
         if ($cid === null || $email === null) {
             return $this->toLoginError($locale);
