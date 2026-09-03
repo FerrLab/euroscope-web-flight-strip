@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Configuration\ProductionConfigGuard;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -58,6 +59,12 @@ class AppServiceProvider extends ServiceProvider
         if (is_file($publicKey)) {
             @chmod($publicKey, 0o660);
         }
+
+        // Surfaces a production deploy that is still holding local-dev
+        // defaults (an unset FRONTEND_URL redirecting real users to
+        // localhost, say) in the logs rather than leaving it to be inferred
+        // from a broken redirect.
+        ProductionConfigGuard::report();
 
         Passport::tokensExpireIn(Carbon::now()->addDays(15));
         Passport::refreshTokensExpireIn(Carbon::now()->addDays(30));

@@ -23,7 +23,14 @@ echo "Postgres is ready"
 # the migration when multiple container instances boot at once (guards a
 # real race now that this image can be deployed as more than one replica);
 # the rest skip it via an atomic cache lock instead of racing Postgres.
-php artisan migrate --force --no-interaction --isolated || true
+#
+# CACHE_STORE=redis is scoped to this one command on purpose. The lock
+# would otherwise land in the default `database` store, whose cache_locks
+# table is itself created by the migrations being run — on a fresh
+# database that fails, migrations never run, and the app boots against an
+# empty schema. Dragonfly needs no table and is present in every
+# environment, so the lock works even on the very first boot.
+CACHE_STORE=redis php artisan migrate --force --no-interaction --isolated || true
 
 # Seed permissions + baseline roles. PermissionsSeeder uses firstOrCreate;
 # RolesSeeder uses syncPermissions; Test User uses firstOrCreate. All three
