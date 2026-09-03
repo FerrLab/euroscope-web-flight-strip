@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Authentication\Exceptions\ConflictingSocialiteIdentity;
 use App\Authentication\ResolveSocialiteUser;
 use App\Authorization\Roles\Role;
 use App\Models\User;
@@ -39,6 +40,16 @@ it('adopts an existing row by email when no CID matches yet (happy — links a p
     expect($resolved->id)->toBe($existing->id);
     expect($resolved->fresh()?->vatsim_cid)->toBe('7654321');
     $this->assertDatabaseCount('users', 1);
+});
+
+it('refuses to adopt an email whose existing CID differs from the incoming one (invalid — prevents cross-account takeover)', function (): void {
+    User::factory()->create(['email' => 'carol@vatsim.local', 'vatsim_cid' => '1111111']);
+
+    expect(fn () => app(ResolveSocialiteUser::class)->resolve('2222222', 'carol@vatsim.local', 'Carol'))
+        ->toThrow(ConflictingSocialiteIdentity::class);
+
+    $this->assertDatabaseCount('users', 1);
+    $this->assertDatabaseHas('users', ['email' => 'carol@vatsim.local', 'vatsim_cid' => '1111111']);
 });
 
 it('does not re-assign member if the user already has it (invalid — no duplicate pivot row)', function (): void {

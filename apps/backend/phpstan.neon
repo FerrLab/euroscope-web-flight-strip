@@ -32,12 +32,6 @@ parameters:
     # is a real, working runtime property that Larastan's Pest stubs don't declare.
     - identifier: property.notFound
       message: '#(Access to|access)( an)? undefined property Pest\\Mixins\\Expectation<.*>::\$not#'
-    # Laravel\Socialite\Two\User (and its AbstractUser parent) resolves
-    # provider-specific attributes like `cid`/`full_name` dynamically via
-    # __get() from the raw OAuth payload — they are never declared as real
-    # class properties, so PHPStan can't see them even on the concrete class.
-    - identifier: property.notFound
-      message: '#Access to an undefined property Laravel\\Socialite\\Two\\User::\$(cid|full_name)\b#'
 
 services:
   - class: App\Static\PreventRawPermissionStrings

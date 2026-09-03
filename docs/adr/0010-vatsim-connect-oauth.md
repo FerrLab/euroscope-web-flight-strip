@@ -59,13 +59,41 @@ one.
 
 **Negative:**
 
-- VATSIM's `/api/user` payload does not map `email` through the
-  provider's own `mapUserToObject()` — `App\Http\Controllers\Auth\VatsimAuthController::emailFromRaw()`
-  reads it from the raw response at `data.personal.email`, an assumption
-  inferred from the library's sibling `name_first`/`name_last`/`name_full`
-  fields (which do live at that path) rather than from a captured live
-  response. If a real account ever proves this path wrong, the fix is
-  confined to that one method.
+- The profile fields are reachable only through Socialite's
+  `Contracts\User` interface methods. `SocialiteProviders\Vatsim\Provider::mapUserToObject()`
+  maps exactly three keys — `id` (from `data.cid`), `name` (from
+  `data.personal.name_full`) and `email` (from `data.personal.email`) — and
+  `AbstractUser::map()` replaces the attribute bag with precisely those,
+  so `$user->cid` / `$user->full_name` resolve to `null` via `__get()`.
+  `VatsimAuthController::callback()` therefore uses `getId()`/`getName()`/`getEmail()`,
+  and `tests/Feature/Auth/VatsimAuthTest.php`'s `fakeVatsimUser()` mirrors
+  that vendor mapping verbatim so the fixture cannot drift from the
+  library again.
+- `getId()` has no declared return type and simply hands back whatever
+  `data.cid` decoded to — VATSIM may serialise the CID as a JSON number
+  rather than a string, so the controller casts defensively (`is_int()` →
+  `(string)`) before the null/empty check. `users.vatsim_cid` stays a
+  string column.
+- `POST /auth/socialite/exchange` must be excepted from CSRF verification
+  in `bootstrap/app.php` (`Middleware::preventRequestForgery`): the Next.js
+  server redeems the code with a server-to-server POST that carries no
+  session cookie and no `_token`, so the default `web` group would answer 419. Laravel's CSRF middleware short-circuits under
+  `runningUnitTests()`, so `tests/Feature/Auth/AuthExchangeCsrfExemptionTest.php`
+  flips `app['env']` away from `testing` to exercise the real check.
 - The exchange endpoint is necessarily unauthenticated (rate-limited to
   20/min/IP); its security rests on the code's 64-character entropy and
   60-second TTL rather than a session check.
+- The locale cannot survive the VATSIM hop in the query string (OAuth2
+  gives the provider nothing app-specific to echo back), so `redirect()`
+  stashes it in the Laravel session and `callback()` `pull()`s it back.
+  This adds a session dependency to `callback()` — already unavoidable,
+  since Socialite's `state` CSRF check needs the same session — and means
+  the browser must reach Laravel on the same origin as
+  `VATSIM_REDIRECT_URI`. The Next.js `/api/auth/vatsim-redirect` handler
+  consequently uses `NEXT_PUBLIC_API_URL` (browser-facing), not
+  `EUROSTRIP_BACKEND_URL` (Docker-internal) like its sibling handlers.
+- An email that already belongs to a row carrying a _different_ VATSIM CID
+  is refused (`App\Authentication\Exceptions\ConflictingSocialiteIdentity`)
+  rather than adopted, and surfaces as the same `?error=oauth` redirect.
+  Recovering such an account is a manual, admin-side operation; there is
+  deliberately no self-service merge.

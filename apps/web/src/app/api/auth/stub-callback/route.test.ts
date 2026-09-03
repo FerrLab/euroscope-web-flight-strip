@@ -1,10 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GET } from './route';
 
 const mockFetch = vi.fn();
 beforeEach(() => {
   vi.stubGlobal('fetch', mockFetch);
   mockFetch.mockReset();
+});
+
+// Unconditional teardown (matching stub-redirect/route.test.ts): an inline
+// unstub at the end of a test body leaks the env stub into the next test
+// whenever an assertion above it throws.
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 function makeReq(query: string) {
@@ -58,6 +65,5 @@ describe('/api/auth/stub-callback', () => {
     vi.stubEnv('NODE_ENV', 'production');
     const res = await GET(makeReq('?identity=a@b'));
     expect(res.status).toBe(404);
-    vi.unstubAllEnvs();
   });
 });

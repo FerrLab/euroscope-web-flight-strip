@@ -23,6 +23,7 @@ beforeEach(function (): void {
     );
 });
 
+// Mirrors SocialiteProviders\Vatsim\Provider::mapUserToObject() — vendor/socialiteproviders/vatsim/Provider.php
 function fakeVatsimUser(?string $cid, ?string $email, ?string $fullName = 'Alice Example'): SocialiteUser
 {
     $raw = [
@@ -38,8 +39,9 @@ function fakeVatsimUser(?string $cid, ?string $email, ?string $fullName = 'Alice
     ];
 
     return (new SocialiteUser)->setRaw($raw)->map([
-        'cid' => $cid,
-        'full_name' => $fullName,
+        'id' => $cid,
+        'name' => $fullName,
+        'email' => $email,
     ]);
 }
 
@@ -49,12 +51,27 @@ it('redirects to the provider (happy)', function (): void {
     // the concrete AbstractProvider, so the interface mock needs an explicit
     // expectation for it before it can answer the controller's ->scopes()->redirect() chain.
     $fake->shouldReceive('scopes')->once()->with(['full_name', 'email'])->andReturnSelf();
+    // requiredScopes() is SocialiteProviders\Vatsim\Provider's own API (it adds
+    // `required_scopes` to the authorization URL); like scopes(), it is absent
+    // from Contracts\Provider so the interface mock needs it spelled out.
+    $fake->shouldReceive('requiredScopes')->once()->with(['email'])->andReturnSelf();
     $fake->shouldReceive('redirect')->once()->andReturn(redirect('https://auth.vatsim.net/oauth/authorize'));
     Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
 
     $response = $this->get('/auth/socialite/vatsim/redirect');
 
     $response->assertRedirect('https://auth.vatsim.net/oauth/authorize');
+});
+
+it('stashes the requested locale in the session before leaving for VATSIM (happy)', function (): void {
+    $fake = Mockery::mock(Provider::class);
+    $fake->shouldReceive('scopes')->once()->andReturnSelf();
+    $fake->shouldReceive('requiredScopes')->once()->andReturnSelf();
+    $fake->shouldReceive('redirect')->once()->andReturn(redirect('https://auth.vatsim.net/oauth/authorize'));
+    Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
+
+    $this->get('/auth/socialite/vatsim/redirect?locale=pt')
+        ->assertSessionHas('vatsim_oauth_locale', 'pt');
 });
 
 it('creates a user, mints a token, and redirects with an exchange code (happy)', function (): void {
@@ -132,4 +149,61 @@ it('falls back to English when locale is missing (garbage)', function (): void {
     $response = $this->get('/auth/socialite/vatsim/callback');
 
     expect($response->headers->get('Location'))->toContain('/en/login?error=oauth');
+});
+
+it('carries the locale across the real VATSIM round trip via the session (happy)', function (): void {
+    $fake = Mockery::mock(Provider::class);
+    $fake->shouldReceive('scopes')->once()->andReturnSelf();
+    $fake->shouldReceive('requiredScopes')->once()->andReturnSelf();
+    $fake->shouldReceive('redirect')->once()->andReturn(redirect('https://auth.vatsim.net/oauth/authorize'));
+    $fake->shouldReceive('user')->once()->andReturn(fakeVatsimUser('1234567', 'alice@vatsim.local'));
+    Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
+
+    $this->get('/auth/socialite/vatsim/redirect?locale=pt');
+
+    // VATSIM's redirect back carries only `code` and `state` — never `locale`.
+    $response = $this->get('/auth/socialite/vatsim/callback');
+
+    expect($response->headers->get('Location'))->toContain('locale=pt');
+});
+
+it('forgets the stashed locale after one callback (invalid — no stale locale on a later login)', function (): void {
+    $fake = Mockery::mock(Provider::class);
+    $fake->shouldReceive('user')->twice()->andReturn(fakeVatsimUser('1234567', 'alice@vatsim.local'));
+    Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
+
+    $first = $this->withSession(['vatsim_oauth_locale' => 'pt'])->get('/auth/socialite/vatsim/callback');
+    expect($first->headers->get('Location'))->toContain('locale=pt');
+
+    $second = $this->get('/auth/socialite/vatsim/callback');
+    expect($second->headers->get('Location'))->toContain('locale=en');
+});
+
+it('never puts the Bearer token itself in the redirect URL (happy — security property)', function (): void {
+    $fake = Mockery::mock(Provider::class);
+    $fake->shouldReceive('user')->once()->andReturn(fakeVatsimUser('1234567', 'alice@vatsim.local'));
+    Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
+
+    $response = $this->get('/auth/socialite/vatsim/callback');
+    $location = (string) $response->headers->get('Location');
+
+    parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
+    $token = app(ExchangeCodeStore::class)->redeem(is_string($query['code'] ?? null) ? $query['code'] : '');
+
+    expect($token)->toBeString();
+    expect($location)->not->toContain((string) $token);
+});
+
+it('redirects to login with an error when the email belongs to a different CID (invalid — cross-account takeover)', function (): void {
+    User::factory()->create(['email' => 'alice@vatsim.local', 'vatsim_cid' => '9999999']);
+
+    $fake = Mockery::mock(Provider::class);
+    $fake->shouldReceive('user')->once()->andReturn(fakeVatsimUser('1234567', 'alice@vatsim.local'));
+    Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
+
+    $response = $this->get('/auth/socialite/vatsim/callback');
+
+    expect($response->headers->get('Location'))->toContain('/en/login?error=oauth');
+    $this->assertDatabaseCount('users', 1);
+    $this->assertDatabaseHas('users', ['email' => 'alice@vatsim.local', 'vatsim_cid' => '9999999']);
 });
