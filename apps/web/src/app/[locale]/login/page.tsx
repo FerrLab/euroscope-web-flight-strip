@@ -3,7 +3,6 @@
 import { Suspense } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { ObcButton } from '@oicl/openbridge-webcomponents-react/components/button/button';
 import { ObcCard } from '@oicl/openbridge-webcomponents-react/components/card/card';
 
@@ -49,13 +48,23 @@ export default function LoginPage() {
         <Suspense fallback={null}>
           <LoginError />
         </Suspense>
-        <Link href={`/api/auth/vatsim-redirect?locale=${locale}`}>
+        {/*
+          Plain anchors, not next/link. These are route handlers that 302 off
+          to the backend, not app pages. <Link> prefetches on viewport entry,
+          fetching the href with RSC headers; the fetch follows the redirect
+          cross-origin to the API host, trips a CORS preflight that no Laravel
+          route answers, and fills the console with failures before falling
+          back to a normal navigation. Prefetching an endpoint that mints OAuth
+          state is also a hazard in its own right — the preflight is all that
+          stops the prefetch from rotating the `state` the real click depends on.
+        */}
+        <a href={`/api/auth/vatsim-redirect?locale=${locale}`}>
           <ObcButton fullWidth>{t('continueWithVatsim')}</ObcButton>
-        </Link>
+        </a>
         {process.env.NODE_ENV !== 'production' && (
-          <Link href={`/api/auth/stub-redirect?locale=${locale}`} className="block mt-2">
+          <a href={`/api/auth/stub-redirect?locale=${locale}`} className="block mt-2">
             <ObcButton fullWidth>{t('continueWithStub')}</ObcButton>
-          </Link>
+          </a>
         )}
       </ObcCard>
     </main>

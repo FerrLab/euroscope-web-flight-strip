@@ -381,6 +381,45 @@ Coverage:
 whose "never returns a failed admin login to the panel" case asserts the
 invariant across the whole class of failures rather than one target URL.
 
+### Tracing a failed sign-in
+
+`?error=oauth` is deliberately vague to the browser, so the flow logs what
+it will not say out loud. Every event is a dotted name with a structured
+context, matching the CQRS middleware convention:
+
+| Event                                 | Level   | Context                            |
+| ------------------------------------- | ------- | ---------------------------------- |
+| `vatsim.oauth.redirect`               | info    | `intent`, `locale` (frontend only) |
+| `vatsim.oauth.callback`               | info    | `intent`, `locale`                 |
+| `vatsim.oauth.profile_incomplete`     | warning | `intent`, `has_cid`, `has_email`   |
+| `vatsim.oauth.admin_denied`           | warning | `cid`, `user_id`, `roles`          |
+| `vatsim.oauth.login` / `.admin_login` | info    | `intent`, `cid`, `user_id`         |
+| `vatsim.oauth.failed`                 | error   | `intent`, `exception`, `message`   |
+
+`grep vatsim.oauth` gives the whole round trip. The member's email is never
+logged; the VATSIM CID is, being a public identifier and the only key worth
+correlating on.
+
+`vatsim.oauth.failed` also calls `report()`, which is what carries the stack
+trace. Note that `report()` alone was the situation before these events
+existed, and it was not enough: the incomplete-profile branch never raised
+anything, so half the `error=oauth` responses had no corresponding log line
+at all.
+
+**Where the log goes.** `LOG_CHANNEL` defaults to `stack` and `LOG_STACK` to
+`single`, which writes only `storage/logs/laravel.log` _inside the
+container_ — so `docker logs` shows nothing and a reported exception looks
+like no exception. The compose services set `LOG_STACK=single,stderr`, which
+is additive; set it the same way on real deployments.
+
+**One caveat on `ProductionConfigGuard`.** It runs in
+`AppServiceProvider::boot()`, so it fires in every process that boots the
+app, not just the HTTP one. A worker started without `FRONTEND_URL` and the
+`VATSIM_*` values logs a production `CRITICAL` naming all four while the web
+container is perfectly configured. The compose `horizon` and `scheduler`
+services therefore carry the same values as `backend`; keep that true on any
+deployment, or the guard's loudest output is a false alarm.
+
 ### Running behind a TLS-terminating proxy
 
 Cloudflare terminates TLS and forwards to Octane over plain HTTP.

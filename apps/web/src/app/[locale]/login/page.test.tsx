@@ -38,6 +38,17 @@ describe('LoginPage', () => {
     expect(screen.getByRole('link', { name: 'Continue with VATSIM' })).toBeTruthy();
   });
 
+  it('points sign-in at the route handler without prefetching it (happy)', () => {
+    renderPage();
+    const link = screen.getByRole('link', { name: 'Continue with VATSIM' });
+
+    expect(link.getAttribute('href')).toBe('/api/auth/vatsim-redirect?locale=en');
+    // A next/link would render its own prefetch behaviour here; a bare anchor
+    // is what keeps the RSC prefetch from chasing the backend redirect
+    // cross-origin and failing CORS on every page view.
+    expect(link.tagName).toBe('A');
+  });
+
   it('shows the stub button outside production (happy — dev/test convenience)', () => {
     vi.stubEnv('NODE_ENV', 'test');
     renderPage();

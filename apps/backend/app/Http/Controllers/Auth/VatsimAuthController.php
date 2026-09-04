@@ -10,6 +10,7 @@ use App\Authorization\Roles\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -24,7 +25,10 @@ class VatsimAuthController
         // VATSIM's redirect back to callback() carries only `code` and `state`
         // (standard OAuth2 — there is no app-specific parameter to echo back),
         // so the caller's locale has to survive the round trip in the session.
-        $request->session()->put('vatsim_oauth_locale', $this->pickLocale($request->query('locale')));
+        $locale = $this->pickLocale($request->query('locale'));
+        $request->session()->put('vatsim_oauth_locale', $locale);
+
+        Log::info('vatsim.oauth.redirect', ['intent' => 'frontend', 'locale' => $locale]);
 
         /** @var VatsimProvider $provider */
         $provider = Socialite::driver('vatsim');
@@ -46,6 +50,8 @@ class VatsimAuthController
     {
         $request->session()->put('vatsim_oauth_intent', 'admin');
 
+        Log::info('vatsim.oauth.redirect', ['intent' => 'admin']);
+
         /** @var VatsimProvider $provider */
         $provider = Socialite::driver('vatsim');
 
@@ -56,6 +62,11 @@ class VatsimAuthController
     {
         $isAdminIntent = $request->session()->pull('vatsim_oauth_intent') === 'admin';
         $locale = $this->pickLocale($request->session()->pull('vatsim_oauth_locale'));
+
+        Log::info('vatsim.oauth.callback', [
+            'intent' => $isAdminIntent ? 'admin' : 'frontend',
+            'locale' => $locale,
+        ]);
 
         if ($isAdminIntent) {
             return $this->adminCallback($resolver, $locale);
@@ -81,6 +92,8 @@ class VatsimAuthController
             $name = $this->stringOrNull($vatsimUser->getName()) ?? 'VATSIM Member';
 
             if ($cid === null || $email === null) {
+                $this->logIncompleteProfile('frontend', $cid, $email);
+
                 return $this->toLoginError($locale);
             }
 
@@ -91,9 +104,15 @@ class VatsimAuthController
 
             $callback = rtrim((string) config('app.frontend_url'), '/').'/api/auth/vatsim-callback';
 
+            Log::info('vatsim.oauth.login', [
+                'intent' => 'frontend',
+                'cid' => $cid,
+                'user_id' => $user->id,
+            ]);
+
             return redirect()->away($callback.'?'.http_build_query(['code' => $code, 'locale' => $locale]));
         } catch (Throwable $e) {
-            report($e);
+            $this->logFailure('frontend', $e);
 
             return $this->toLoginError($locale);
         }
@@ -125,6 +144,8 @@ class VatsimAuthController
             $name = $this->stringOrNull($vatsimUser->getName()) ?? 'VATSIM Member';
 
             if ($cid === null || $email === null) {
+                $this->logIncompleteProfile('admin', $cid, $email);
+
                 return $this->toFrontendLogin($locale, 'oauth');
             }
 
@@ -134,17 +155,61 @@ class VatsimAuthController
             // every VATSIM member `member` and nothing grants `admin`, so this
             // is the ordinary outcome for anyone who is not already staff.
             if (! $user->hasRole(Role::Admin->value)) {
+                // The roles are the whole point of this line: the common cause
+                // is a member who has simply never been promoted, and without
+                // seeing what the check actually found that is indistinguishable
+                // from a broken role table or a guard mismatch.
+                Log::warning('vatsim.oauth.admin_denied', [
+                    'cid' => $cid,
+                    'user_id' => $user->id,
+                    'roles' => $user->getRoleNames()->all(),
+                ]);
+
                 return $this->toFrontendLogin($locale, 'forbidden');
             }
 
             Auth::guard('web')->login($user, remember: true);
 
+            Log::info('vatsim.oauth.admin_login', ['cid' => $cid, 'user_id' => $user->id]);
+
             return redirect('/admin');
         } catch (Throwable $e) {
-            report($e);
+            $this->logFailure('admin', $e);
 
             return $this->toFrontendLogin($locale, 'oauth');
         }
+    }
+
+    /**
+     * Both flows answer an incomplete profile with a bare `error=oauth`, which
+     * on its own is indistinguishable from every other failure. Recording
+     * which field was absent — rather than the values — is what separates
+     * "VATSIM returned no email" from "the token exchange died".
+     */
+    private function logIncompleteProfile(string $intent, ?string $cid, ?string $email): void
+    {
+        Log::warning('vatsim.oauth.profile_incomplete', [
+            'intent' => $intent,
+            'has_cid' => $cid !== null,
+            'has_email' => $email !== null,
+        ]);
+    }
+
+    /**
+     * report() alone routes to the configured log channel with a full stack
+     * trace, which is worth keeping, but it does not say which of the two
+     * flows was running or survive a channel that drops the trace. The
+     * summary line is what a `docker logs | grep vatsim.oauth` finds.
+     */
+    private function logFailure(string $intent, Throwable $e): void
+    {
+        Log::error('vatsim.oauth.failed', [
+            'intent' => $intent,
+            'exception' => $e::class,
+            'message' => $e->getMessage(),
+        ]);
+
+        report($e);
     }
 
     /** VATSIM's /api/user may serialise `cid` as a JSON number; accept both shapes. */
