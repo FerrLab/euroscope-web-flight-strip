@@ -406,6 +406,39 @@ existed, and it was not enough: the incomplete-profile branch never raised
 anything, so half the `error=oauth` responses had no corresponding log line
 at all.
 
+The trail continues on the Next side, where the browser lands after the
+backend redirects. These are `console` lines from the route handler, which
+go to that container's stdout — one JSON object per line, same dotted names:
+
+| Event                        | Level | Context             |
+| ---------------------------- | ----- | ------------------- |
+| `auth.exchange.missing_code` | warn  | `locale`            |
+| `auth.exchange.unreachable`  | error | `backend`, `cause`  |
+| `auth.exchange.rejected`     | warn  | `backend`, `status` |
+| `auth.exchange.malformed`    | error | `backend`, `status` |
+| `auth.exchange.no_token`     | error | `backend`, `status` |
+| `auth.exchange.ok`           | info  | `locale`            |
+
+and on the backend at
+[`AuthExchangeController`](../../apps/backend/app/Http/Controllers/Auth/AuthExchangeController.php)
+with `auth.exchange.redeemed` / `auth.exchange.redeem_failed`.
+
+Those two halves are what make a failed sign-in answerable. All four Next-side
+failures used to collapse into one `error=oauth`, and they call for opposite
+fixes:
+
+- `auth.exchange.unreachable` with **no** `auth.exchange.redeem_failed` on the
+  backend — the request never arrived. `EUROSTRIP_BACKEND_URL` is unset or
+  wrong for that container; the `backend` field says what it tried. Note this
+  variable has a `http://127.0.0.1:8000` default that is a dead end inside a
+  container, so an unset value fails quietly rather than loudly.
+- `auth.exchange.rejected` **with** `auth.exchange.redeem_failed` — it arrived
+  and the code was already spent or past its TTL.
+
+Neither side ever logs the exchange code or the access token: the code is
+bearer-equivalent for its 60-second life. The backend URL is logged as an
+origin only, so a query string cannot smuggle either into a log line.
+
 **Where the log goes.** `LOG_CHANNEL` defaults to `stack` and `LOG_STACK` to
 `single`, which writes only `storage/logs/laravel.log` _inside the
 container_ — so `docker logs` shows nothing and a reported exception looks
