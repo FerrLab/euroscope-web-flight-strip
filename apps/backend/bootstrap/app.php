@@ -27,6 +27,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->preventRequestForgery(except: [
             'auth/socialite/exchange',
         ]);
+
+        // Cloudflare terminates TLS and forwards to Octane over plain HTTP.
+        // TrustProxies ships in Laravel's default stack but its handle() calls
+        // setTrustedProxies([], ...) until told otherwise, so X-Forwarded-Proto
+        // was discarded and every generated URL came out http:// -- each
+        // redirect then cost an extra Cloudflare 301 back to https, and the
+        // browser briefly left over plaintext :80. The origin is not publicly
+        // routable; Cloudflare is the only ingress, so every proxy in front of
+        // this app is ours.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

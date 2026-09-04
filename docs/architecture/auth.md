@@ -345,6 +345,55 @@ the API side would silently fail.
 Coverage:
 [`tests/Feature/Filament/AdminPanelGateTest.php`](../../apps/backend/tests/Feature/Filament/AdminPanelGateTest.php).
 
+### Signing in: why failures must leave the panel
+
+The panel has no password form. `->login(VatsimLogin::class)` replaces
+Filament's login page with one that answers `/admin/login` by redirecting
+straight to VATSIM Connect (ADR 0010). VATSIM only ever calls back to the
+single registered `VATSIM_REDIRECT_URI`, so the admin flow flags its intent
+in the session on the way out and
+[`VatsimAuthController::callback()`](../../apps/backend/app/Http/Controllers/Auth/VatsimAuthController.php)
+branches on it coming back.
+
+That makes `/admin/login` an OAuth _trigger_, not a page. **Every failure
+exit in `adminCallback()` must therefore redirect off the panel origin** —
+to `FRONTEND_URL/{locale}/login?error=…`, never back to `/admin/login`.
+Returning a failure to the login page re-enters the round trip, and because
+nothing about the outcome changes on the second pass, it never terminates.
+Routing an _authorization_ failure back through the _authentication_ entry
+point is what produced a live `ERR_TOO_MANY_REDIRECTS`: sign-in was
+succeeding every time, and the denied user was bounced straight back to the
+provider.
+
+The two error codes the frontend login page renders:
+
+| Code        | Meaning                                                                                        |
+| ----------- | ---------------------------------------------------------------------------------------------- |
+| `forbidden` | Authenticated with VATSIM, but the user lacks the `admin` role.                                |
+| `oauth`     | The round trip itself failed — denied consent, state mismatch, a profile with no cid or email. |
+
+Note that nothing in the codebase _grants_ `admin`;
+[`ResolveSocialiteUser`](../../apps/backend/app/Authentication/ResolveSocialiteUser.php)
+assigns `member` to every VATSIM login. The first admin is promoted by hand.
+
+Coverage:
+[`tests/Feature/Auth/VatsimAdminLoginTest.php`](../../apps/backend/tests/Feature/Auth/VatsimAdminLoginTest.php),
+whose "never returns a failed admin login to the panel" case asserts the
+invariant across the whole class of failures rather than one target URL.
+
+### Running behind a TLS-terminating proxy
+
+Cloudflare terminates TLS and forwards to Octane over plain HTTP.
+`TrustProxies` ships in Laravel's default middleware stack, but its
+`handle()` calls `setTrustedProxies([], …)` until told otherwise — so
+`X-Forwarded-Proto` is discarded and every absolute URL the app generates
+comes out `http://`. [`bootstrap/app.php`](../../apps/backend/bootstrap/app.php)
+therefore calls `$middleware->trustProxies(at: '*')`; the origin is not
+publicly routable, so every proxy in front of the app is ours.
+
+Coverage:
+[`tests/Feature/Http/TrustedProxyTest.php`](../../apps/backend/tests/Feature/Http/TrustedProxyTest.php).
+
 ## 8. Horizon gate
 
 Same role gate as above — `Gate::define('viewHorizon', ...)` returns true iff

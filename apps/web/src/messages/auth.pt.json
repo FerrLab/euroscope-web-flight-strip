@@ -4,6 +4,7 @@
     "continueWithVatsim": "Continuar com VATSIM",
     "continueWithStub": "Continuar com Stub",
     "logoutLabel": "Sair",
-    "loginError": "Falha ao entrar. Tente novamente."
+    "loginError": "Falha ao entrar. Tente novamente.",
+    "loginForbidden": "Você entrou na VATSIM, mas esta conta não tem acesso de administrador."
   }
 }
