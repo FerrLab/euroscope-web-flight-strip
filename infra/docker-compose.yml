@@ -31,6 +31,12 @@ services:
       APP_ENV: local
       APP_DEBUG: 'true'
       APP_KEY: ${APP_KEY}
+      # Fan the stack channel out to stderr as well as the file. The default
+      # (LOG_STACK=single) writes only storage/logs/laravel.log *inside the
+      # container*, so `docker logs` shows nothing and a reported exception
+      # looks like no exception at all. Additive -- the file still gets
+      # everything. Set LOG_STACK this way on real deployments too.
+      LOG_STACK: single,stderr
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
@@ -252,6 +258,8 @@ services:
     environment:
       APP_ENV: local
       APP_KEY: ${APP_KEY}
+      # See the backend service for why stderr is in the stack.
+      LOG_STACK: single,stderr
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
@@ -271,6 +279,19 @@ services:
       PUSHER_PORT: 6001
       PUSHER_SCHEME: http
       PUSHER_APP_CLUSTER: mt1
+      # ProductionConfigGuard runs in AppServiceProvider::boot(), so it fires in
+      # every process that boots the app -- not just the HTTP one. Without these
+      # here, `php artisan horizon`/`schedule:work` boot with the local-dev
+      # defaults and log a production CRITICAL naming all four, while the web
+      # container is perfectly configured. A guard that cries wolf on every
+      # worker boot is worse than no guard, so the workers get the real values.
+      # FRONTEND_URL they genuinely need: a queued notification that links back
+      # to the app renders that URL.
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      VATSIM_CLIENT_ID: ${VATSIM_CLIENT_ID}
+      VATSIM_CLIENT_SECRET: ${VATSIM_CLIENT_SECRET}
+      VATSIM_REDIRECT_URI: ${VATSIM_REDIRECT_URI}
+      VATSIM_TEST: ${VATSIM_TEST:-true}
     volumes:
       - ../apps/backend:/app
       - composer-cache:/root/.composer/cache
@@ -291,12 +312,27 @@ services:
     environment:
       APP_ENV: local
       APP_KEY: ${APP_KEY}
+      # See the backend service for why stderr is in the stack.
+      LOG_STACK: single,stderr
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
       DB_DATABASE: ${POSTGRES_DB}
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # ProductionConfigGuard runs in AppServiceProvider::boot(), so it fires in
+      # every process that boots the app -- not just the HTTP one. Without these
+      # here, `php artisan horizon`/`schedule:work` boot with the local-dev
+      # defaults and log a production CRITICAL naming all four, while the web
+      # container is perfectly configured. A guard that cries wolf on every
+      # worker boot is worse than no guard, so the workers get the real values.
+      # FRONTEND_URL they genuinely need: a queued notification that links back
+      # to the app renders that URL.
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      VATSIM_CLIENT_ID: ${VATSIM_CLIENT_ID}
+      VATSIM_CLIENT_SECRET: ${VATSIM_CLIENT_SECRET}
+      VATSIM_REDIRECT_URI: ${VATSIM_REDIRECT_URI}
+      VATSIM_TEST: ${VATSIM_TEST:-true}
     volumes:
       - ../apps/backend:/app
     restart: unless-stopped
