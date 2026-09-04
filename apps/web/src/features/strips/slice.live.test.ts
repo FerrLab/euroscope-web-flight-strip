@@ -46,17 +46,121 @@ describe('flightUpserted', () => {
     expect(s.tabs.LPPT.feed[0].key).toBe('fplReceived');
   });
 
-  it('patches an existing strip without moving it, suggesting the new bay instead (happy)', () => {
+  it('moves an existing strip into the bay EuroScope reports (happy)', () => {
     let s = reduce(state(), flightUpserted({ icao: 'LPPT', patch: patch() }));
     s = reduce(
       s,
       flightUpserted({ icao: 'LPPT', patch: patch({ bay: 'TAXI', sqkS: '2450', cleared: true }) }),
     );
     const strip = stripOf(s, 'LPPT', 'BAW123');
-    expect(strip?.bay).toBe('PENDING');
-    expect(strip?.suggest).toEqual({ bay: 'TAXI' });
+    expect(strip?.bay).toBe('TAXI');
+    // The pill exists to propose a move; once the board has made it there
+    // is nothing left to propose.
+    expect(strip?.suggest).toBeNull();
     expect(strip?.sqkS).toBe('2450');
     expect(strip?.cleared).toBe(true);
+  });
+
+  it('attributes the move to EuroScope, not the controller (happy)', () => {
+    let s = reduce(state(), flightUpserted({ icao: 'LPPT', patch: patch() }));
+    s = reduce(s, flightUpserted({ icao: 'LPPT', patch: patch({ bay: 'CLEARED' }) }));
+    const moved = s.tabs.LPPT.feed.find((e) => e.key === 'moved');
+    expect(moved?.src).toBe('auto');
+    expect(moved?.kind).toBe('info');
+  });
+
+  it('leaves a strip alone when it already sits in the reported bay (invalid)', () => {
+    let s = reduce(state(), flightUpserted({ icao: 'LPPT', patch: patch() }));
+    const before = s.tabs.LPPT.feed.length;
+    s = reduce(s, flightUpserted({ icao: 'LPPT', patch: patch() }));
+    expect(stripOf(s, 'LPPT', 'BAW123')?.bay).toBe('PENDING');
+    expect(s.tabs.LPPT.feed).toHaveLength(before);
+  });
+
+  /*
+   * The board mirrors EuroScope rather than arbitrating it: a state the
+   * controller set in the client is a position report, not a request, so
+   * none of the four guard rails may veto it. Each case below would be
+   * refused outright for a user-driven drag.
+   */
+  describe('guard rails do not apply to a EuroScope-reported position', () => {
+    it('moves a DEP strip past CLEARED without a clearance (noClearance)', () => {
+      let s = reduce(state(), flightUpserted({ icao: 'LPPT', patch: patch() }));
+      s = reduce(s, flightUpserted({ icao: 'LPPT', patch: patch({ bay: 'PUSHBACK' }) }));
+      expect(stripOf(s, 'LPPT', 'BAW123')?.bay).toBe('PUSHBACK');
+    });
+
+    it('moves into a locked bay (bayLocked)', () => {
+      let s = reduce(state(), flightUpserted({ icao: 'LPPT', patch: patch({ cleared: true }) }));
+      s = reduce(s, stripsActions.bayLockToggled('TAXI'));
+      expect(s.tabs.LPPT.locks.TAXI).toBe(true);
+      s = reduce(s, flightUpserted({ icao: 'LPPT', patch: patch({ bay: 'TAXI', cleared: true }) }));
+      expect(stripOf(s, 'LPPT', 'BAW123')?.bay).toBe('TAXI');
+    });
+
+    it('moves into a bay already at capacity (occupancy)', () => {
+      // RUNWAY has cap 1 and the seeded board already parks a strip there.
+      let s = reduce(state(), flightUpserted({ icao: 'LPPT', patch: patch({ cleared: true }) }));
+      const cap = s.tabs.LPPT.bays.find((b) => b.id === 'RUNWAY')?.cap;
+      expect(cap).toBe(1);
+      expect(s.tabs.LPPT.strips.filter((x) => x.bay === 'RUNWAY').length).toBeGreaterThanOrEqual(1);
+
+      s = reduce(
+        s,
+        flightUpserted({ icao: 'LPPT', patch: patch({ bay: 'RUNWAY', cleared: true }) }),
+      );
+
+      expect(stripOf(s, 'LPPT', 'BAW123')?.bay).toBe('RUNWAY');
+      expect(s.tabs.LPPT.strips.filter((x) => x.bay === 'RUNWAY').length).toBeGreaterThan(1);
+    });
+
+    it('moves an arrival into a departure-only bay (flowGuard)', () => {
+      let s = reduce(
+        state(),
+        flightUpserted({
+          icao: 'LPPT',
+          patch: patch({ cs: 'ARR456', dir: 'ARR', bay: 'APPROACH' }),
+        }),
+      );
+      s = reduce(
+        s,
+        flightUpserted({
+          icao: 'LPPT',
+          patch: patch({ cs: 'ARR456', dir: 'ARR', bay: 'PENDING' }),
+        }),
+      );
+      expect(stripOf(s, 'LPPT', 'ARR456')?.bay).toBe('PENDING');
+    });
+  });
+
+  it('marks a DEP strip cleared when EuroScope reports it in CLEARED (happy)', () => {
+    let s = reduce(state(), flightUpserted({ icao: 'LPPT', patch: patch() }));
+    expect(stripOf(s, 'LPPT', 'BAW123')?.cleared).toBe(false);
+    s = reduce(s, flightUpserted({ icao: 'LPPT', patch: patch({ bay: 'CLEARED' }) }));
+    const strip = stripOf(s, 'LPPT', 'BAW123');
+    expect(strip?.bay).toBe('CLEARED');
+    expect(strip?.cleared).toBe(true);
+  });
+
+  it('falls back to a suggestion when the tab has no bay of that kind (garbage)', () => {
+    let s = reduce(state(), flightUpserted({ icao: 'LPPT', patch: patch({ cleared: true }) }));
+    // Built by hand rather than via bayRemoved, which refuses to delete the
+    // last bay of a kind — so this state is unreachable through the UI and
+    // the fallback is purely defensive (a restored older persisted board).
+    s = {
+      ...s,
+      tabs: {
+        ...s.tabs,
+        LPPT: { ...s.tabs.LPPT, bays: s.tabs.LPPT.bays.filter((b) => b.kind !== 'TAXI') },
+      },
+    };
+
+    s = reduce(s, flightUpserted({ icao: 'LPPT', patch: patch({ bay: 'TAXI', cleared: true }) }));
+
+    const strip = stripOf(s, 'LPPT', 'BAW123');
+    // Nothing to move into, so the pill is all that is left to say it.
+    expect(strip?.bay).toBe('PENDING');
+    expect(strip?.suggest).toEqual({ bay: 'TAXI' });
   });
 
   it('does not re-log or duplicate on repeated updates (invalid)', () => {

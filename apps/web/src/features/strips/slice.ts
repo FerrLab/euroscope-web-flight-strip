@@ -98,7 +98,14 @@ function applyMove(
     repositionStrip(tab, strip, beforeStripId);
     return true;
   }
-  const verdict = checkMove(strip, tab, bay.id);
+  // 'auto' means EuroScope reported this position. The board mirrors the
+  // client rather than arbitrating it — a ground state the controller
+  // already set over there is a position report, not a request — so the
+  // guard rails that police controller-driven moves are skipped. This is
+  // deliberate and has consequences: a bay can exceed its cap, flow order
+  // can run backwards, and a DEP strip can reach CLEARED without a
+  // clearance ever being issued here (EuroScope's CLEA is the clearance).
+  const verdict = source === 'auto' ? { ok: true as const } : checkMove(strip, tab, bay.id);
   if (!verdict.ok) {
     if (!verdict.silent && verdict.title) {
       toast(state, 'alarm', verdict.title, {
@@ -442,9 +449,14 @@ export const stripsSlice = createSlice({
 
     /**
      * Live EuroScope flight state (flight_updated / session_snapshot).
-     * Inserts land directly in the mapped bay; on an existing strip the
-     * mapped bay only becomes a suggestion — the controller moves strips,
-     * EuroScope proposes.
+     * Inserts land directly in the mapped bay, and a changed ground state
+     * on an existing strip moves it: the board mirrors the client both
+     * ways, so a state set in EuroScope shows up here the same as one set
+     * here shows up there. The move goes through applyMove with source
+     * 'auto', which skips the guard rails and emits no gateway command —
+     * this reducer is deliberately absent from the bridge's USER_ACTIONS,
+     * because echoing EuroScope's own report back at it would never
+     * settle.
      */
     flightUpserted(state, action: PayloadAction<{ icao: string; patch: StripPatch }>) {
       const { icao, patch } = action.payload;
@@ -514,7 +526,12 @@ export const stripsSlice = createSlice({
       }
       const currentBay = tab.bays.find((b) => b.id === existing.bay);
       if (currentBay && currentBay.kind !== patch.bay) {
-        existing.suggest = { bay: patch.bay };
+        // applyMove clears `suggest` on success and, for an 'auto' move,
+        // can now only fail when this tab has no bay of that kind — the
+        // one case where a pill remains the best the board can say.
+        if (!applyMove(state, existing.id, patch.bay, 'auto')) {
+          existing.suggest = { bay: patch.bay };
+        }
       } else if (existing.suggest?.bay === currentBay?.kind) {
         existing.suggest = null;
       }
