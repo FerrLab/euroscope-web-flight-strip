@@ -14,6 +14,7 @@ describe('/api/auth/stub-redirect', () => {
     vi.stubEnv('NODE_ENV', 'test');
     const res = await GET(makeReq('?identity=a@b'));
     expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('/api/auth/stub-callback?identity=a%40b&locale=en');
   });
 
   it('404s in production (invalid — must never reach real users)', async () => {

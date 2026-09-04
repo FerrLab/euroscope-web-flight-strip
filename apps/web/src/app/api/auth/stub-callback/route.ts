@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { buildSessionCookie } from '@/shared/auth/cookie';
+import { relativeRedirect } from '@/shared/http/redirect';
 import { LOCALES, type Locale } from '@eurostrip/i18n';
 
 // Default to 127.0.0.1 not localhost: Node's fetch (undici) on some Windows/IPv6
@@ -43,8 +44,7 @@ export async function GET(request: Request) {
   // so it can never reach this point there — the Secure flag never applies.
   const cookie = buildSessionCookie(body.access_token, { secure: false });
 
-  const dashboard = new URL(`/${locale}/dashboard`, url);
-  const res = NextResponse.redirect(dashboard, 302);
+  const res = relativeRedirect(`/${locale}/dashboard`);
   res.headers.set('Set-Cookie', cookie);
   return res;
 }

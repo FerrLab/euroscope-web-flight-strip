@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
 import { buildLogoutCookie } from '@/shared/auth/cookie';
+import { relativeRedirect } from '@/shared/http/redirect';
 
-export async function POST(request: Request) {
-  const url = new URL(request.url);
+export async function POST() {
   const secure = process.env.NODE_ENV === 'production';
-  const res = NextResponse.redirect(new URL('/en/login', url), 302);
+  const res = relativeRedirect('/en/login');
   res.headers.set('Set-Cookie', buildLogoutCookie({ secure }));
   return res;
 }

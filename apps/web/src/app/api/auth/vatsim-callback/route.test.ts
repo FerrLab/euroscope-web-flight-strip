@@ -27,7 +27,7 @@ describe('/api/auth/vatsim-callback', () => {
       expect.objectContaining({ method: 'POST' }),
     );
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toContain('/en/dashboard');
+    expect(res.headers.get('Location')).toBe('/en/dashboard');
     expect(res.headers.get('Set-Cookie')).toContain('eurostrip_session=tok');
   });
 
@@ -41,14 +41,14 @@ describe('/api/auth/vatsim-callback', () => {
 
     const res = await GET(makeReq('?code=abc123&locale=pt'));
 
-    expect(res.headers.get('Location')).toContain('/pt/dashboard');
+    expect(res.headers.get('Location')).toBe('/pt/dashboard');
   });
 
   it('redirects to login with an error when the code is missing (invalid)', async () => {
     const res = await GET(makeReq(''));
 
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toContain('/en/login?error=oauth');
+    expect(res.headers.get('Location')).toBe('/en/login?error=oauth');
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
@@ -58,7 +58,7 @@ describe('/api/auth/vatsim-callback', () => {
     const res = await GET(makeReq('?code=expired&locale=en'));
 
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toContain('/en/login?error=oauth');
+    expect(res.headers.get('Location')).toBe('/en/login?error=oauth');
   });
 
   it('redirects to login with an error on a malformed backend response (garbage)', async () => {
@@ -71,7 +71,7 @@ describe('/api/auth/vatsim-callback', () => {
 
     const res = await GET(makeReq('?code=abc123&locale=en'));
 
-    expect(res.headers.get('Location')).toContain('/en/login?error=oauth');
+    expect(res.headers.get('Location')).toBe('/en/login?error=oauth');
   });
 
   it('redirects to login with an error when the fetch itself throws (garbage)', async () => {
@@ -80,6 +80,6 @@ describe('/api/auth/vatsim-callback', () => {
     const res = await GET(makeReq('?code=abc123&locale=en'));
 
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toContain('/en/login?error=oauth');
+    expect(res.headers.get('Location')).toBe('/en/login?error=oauth');
   });
 });
