@@ -291,6 +291,40 @@ export type AppDispatch = AppStore['dispatch'];
   first mount and wraps `children` with `<Provider store={store}>`. It is
   mounted from `[locale]/layout.tsx`.
 
+## 6b. The strips board (`features/strips/`)
+
+The Strip Companion surface at `/[locale]/strips` (spec:
+`docs/superpowers/specs/2026-08-30-strip-companion-design.md`, plans:
+phase 1 + 2 alongside it) is the largest feature module and follows a
+strict layering:
+
+- **Pure domain:** `guards.ts` (drag-and-drop guard rails), `metar.ts`
+  (flight category + wind rose math), `fpl.ts` (FPL drafts, PDC text),
+  `euroscope.ts` (JSON Contract Protocol v1 mapping: FlightObject →
+  strip patch, ground state ↔ bay kind, controller → station).
+- **State:** `slice.ts` — tabs, strips, bays (rename/split/lock),
+  feed, toasts. Feed/toast entries store `{key, params}` and are
+  translated at render (i18n rule 6). `persistence.ts` keeps the
+  board _layout_ (open airports, active tab, bays, locks) in
+  `localStorage`; strips are ephemeral and repopulate from the
+  session.
+- **Live seam:** `useStripsGatewayBridge.ts` reuses the gateway
+  console long-poll. Inbound (`inbound.ts`): protocol events and
+  scan responses (`list_flights` / `list_controllers` /
+  `session_snapshot` / `get_flight`) become slice actions; a changed
+  EuroScope ground state on an existing strip becomes a _suggestion_,
+  never a forced move. Outbound (`outbound.ts` + an RTK dynamic
+  listener): user actions mirror to gateway commands
+  (`set_ground_state`, `send_private_message` for PDC, `transfer` /
+  `assume`, `set_scratchpad`, `set_squawk`…) — only while
+  `pluginConnected`, and only when the reducer accepted the action.
+  On connect (and on each newly opened airport tab) the bridge scans
+  the session with `list_flights` + `list_controllers` instead of
+  waiting for events.
+- **Fallback:** `demoFeed.ts` replays the design prototype's
+  simulated session while the plugin is offline and stops permanently
+  once it connects.
+
 ## 7. Adding a new feature module
 
 Use the `features/ping/` shape as the template. To add a `Aircraft` module

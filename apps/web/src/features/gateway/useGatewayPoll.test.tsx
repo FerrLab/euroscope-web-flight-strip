@@ -83,6 +83,35 @@ describe('useGatewayPoll', () => {
     await waitFor(() => expect(store.getState().gateway.pollStatus).toBe('backoff'));
   });
 
+  it('redirects to login and stops on a 401 (invalid — expired session)', async () => {
+    const assign = vi.fn();
+    const original = window.location;
+    Object.defineProperty(window, 'location', {
+      value: { ...original, pathname: '/en/strips', assign },
+      writable: true,
+      configurable: true,
+    });
+    let calls = 0;
+    vi.spyOn(global, 'fetch').mockImplementation(() => {
+      calls += 1;
+      return Promise.resolve(new Response('{}', { status: 401 }));
+    });
+
+    const store = makeStore();
+    renderHook(() => useGatewayPoll(), { wrapper: makeWrapper(store) });
+
+    await waitFor(() => expect(assign).toHaveBeenCalledWith('/en/login'));
+    // The loop must stop — no retry storm against a dead session.
+    const callsAtRedirect = calls;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(calls).toBe(callsAtRedirect);
+    Object.defineProperty(window, 'location', {
+      value: original,
+      writable: true,
+      configurable: true,
+    });
+  });
+
   it('stops polling on unmount (garbage teardown)', async () => {
     let count = 0;
     vi.spyOn(global, 'fetch').mockImplementation(() => {
