@@ -69,6 +69,22 @@
       "confirmNo": "Cancelar",
       "revealHint": "Copie agora — o segredo é exibido apenas uma vez.",
       "error": "Falha na operação do token."
+    },
+    "dashboard": {
+      "controllerBay": "Baia do controlador",
+      "plugin": "Plugin",
+      "pluginConnected": "Conectado",
+      "pluginOffline": "Offline",
+      "lastMessage": "Última mensagem",
+      "startControlling": "Começar a controlar",
+      "connectionSettings": "Configurações de conexão",
+      "tokenNone": "Não gerado",
+      "command": {
+        "title": "Comando do gateway",
+        "hint": "Cole esta linha na linha de comando do EuroScope. Ela é exibida apenas uma vez.",
+        "copy": "Copiar comando",
+        "copied": "Copiado"
+      }
     }
   }
 }

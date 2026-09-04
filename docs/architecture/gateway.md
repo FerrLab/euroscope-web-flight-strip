@@ -39,7 +39,8 @@ token cannot impersonate the plugin.
 ## `.lpc gateway config` encoding
 
 EuroScope's `.lpc` command line rejects `/` and `:` in arguments, so the
-token page never shows raw `.lpc gateway url`/`.lpc gateway token` lines.
+dashboard and the token page never show raw `.lpc gateway url`/`.lpc
+gateway token` lines.
 Instead it shows one line: `.lpc gateway config <blob>`, where `<blob>` is
 `base64url(<gateway base URL>:<token>)` — **base64url**, not standard
 base64, because standard base64's alphabet includes `+` and `/` and a
@@ -47,6 +48,12 @@ JWT-length Passport token makes hitting `/` all but certain. The plugin
 must: base64url-decode `<blob>` (`-`→`+`, `_`→`/`, restore `=` padding),
 then split the result on the **last** `:` (the URL itself contains `:`,
 e.g. `http://host:8000/api/euroscope`) to recover `<url>` and `<token>`.
+
+The encoder lives once in `apps/web/src/features/gateway/lpcConfig.ts`;
+both surfaces that mint a token import it. The dashboard's connection-
+settings card is the primary one — it reveals the finished line in a modal
+with no backdrop dismissal, because `POST /api/gateway/token` hands the
+secret over exactly once and a stray click would destroy it.
 
 ## Runtime state (Dragonfly)
 

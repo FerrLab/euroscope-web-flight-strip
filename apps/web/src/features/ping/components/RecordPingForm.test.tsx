@@ -64,7 +64,7 @@ describe('RecordPingForm', () => {
   it('submits an empty note as an empty string (invalid, no client-side blocking)', async () => {
     // Migrating off react-hook-form drops its `required`/`minLength`
     // validation-before-submit behavior (matches the pattern already used
-    // by CommandComposer, StructuredComposer, TokenPanel): a plain
+    // by CommandComposer, StructuredComposer, ConnectionSettingsCard): a
     // `useState`-backed form submits whatever it holds and lets the backend
     // validate, rather than blocking the request itself.
     const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue(

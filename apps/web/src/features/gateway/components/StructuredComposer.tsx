@@ -120,7 +120,7 @@ export function StructuredComposer() {
     <form ref={formRef} className="flex flex-col gap-3" onSubmit={handleSubmit}>
       {/* Action names are protocol identifiers, not user-facing prose —
           not translated, same precedent as the `.lpc` line and ground
-          state enum values (see TokenPanel.tsx and
+          state enum values (see lpcConfig.ts and
           docs/conventions/i18n.md "What NOT to translate"). */}
       <ObcDropdownButton
         ref={actionAriaRef}

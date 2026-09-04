@@ -36,7 +36,7 @@ describe('PingList', () => {
     render(wrap(<PingList />));
     // The loading spinner's accessible label is a light-DOM `sr-only` span,
     // not shadow content, so a plain RTL query works here — see
-    // TokenPanel.tsx for the same pattern.
+    // ConnectionSettingsCard.tsx for the same pattern.
     expect(rtlScreen.getByText('Loading…')).toBeInTheDocument();
   });
 
