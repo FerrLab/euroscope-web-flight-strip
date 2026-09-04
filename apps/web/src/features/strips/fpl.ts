@@ -229,14 +229,11 @@ export function dclTextFor(strip: Strip, metar: Metar, remark: string, utcTime: 
  * messages truncate at the first newline.
  */
 export function dclWireText(text: string): string {
-  return (
-    text
-      .replaceAll('\n', ' ')
-      .replaceAll('—', '-')
-      .replaceAll('–', '-')
-       
-      .replace(/[^\x20-\x7e]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-  );
+  return text
+    .replaceAll('\n', ' ')
+    .replaceAll('—', '-')
+    .replaceAll('–', '-')
+    .replace(/[^\x20-\x7e]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
