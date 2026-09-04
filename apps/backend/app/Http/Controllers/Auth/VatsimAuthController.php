@@ -54,11 +54,12 @@ class VatsimAuthController
 
     public function callback(Request $request, ResolveSocialiteUser $resolver, ExchangeCodeStore $codes): RedirectResponse
     {
-        if ($request->session()->pull('vatsim_oauth_intent') === 'admin') {
-            return $this->adminCallback($resolver);
-        }
-
+        $isAdminIntent = $request->session()->pull('vatsim_oauth_intent') === 'admin';
         $locale = $this->pickLocale($request->session()->pull('vatsim_oauth_locale'));
+
+        if ($isAdminIntent) {
+            return $this->adminCallback($resolver, $locale);
+        }
 
         // The whole body is guarded: the spec's contract is that ANY failure —
         // denied consent, state mismatch, a conflicting identity, a failed
@@ -104,8 +105,14 @@ class VatsimAuthController
      * bearer token and handing it to the Next.js frontend. Panel access
      * itself is still gated by User::canAccessPanel() (the `admin` role) —
      * this only decides who gets a session at all.
+     *
+     * Every failure exit here leaves the panel origin entirely. VatsimLogin
+     * answers /admin/login by redirecting straight back to the provider, so
+     * a failure returned *to that page* re-enters the OAuth round trip and
+     * never terminates — authorization failure routed back through the
+     * authentication entry point. That was the admin ERR_TOO_MANY_REDIRECTS.
      */
-    private function adminCallback(ResolveSocialiteUser $resolver): RedirectResponse
+    private function adminCallback(ResolveSocialiteUser $resolver, string $locale): RedirectResponse
     {
         try {
             /** @var VatsimProvider $provider */
@@ -118,13 +125,16 @@ class VatsimAuthController
             $name = $this->stringOrNull($vatsimUser->getName()) ?? 'VATSIM Member';
 
             if ($cid === null || $email === null) {
-                return redirect('/admin/login');
+                return $this->toFrontendLogin($locale, 'oauth');
             }
 
             $user = $resolver->resolve($cid, $email, $name);
 
+            // Authenticated but not authorised. ResolveSocialiteUser grants
+            // every VATSIM member `member` and nothing grants `admin`, so this
+            // is the ordinary outcome for anyone who is not already staff.
             if (! $user->hasRole(Role::Admin->value)) {
-                return redirect('/admin/login');
+                return $this->toFrontendLogin($locale, 'forbidden');
             }
 
             Auth::guard('web')->login($user, remember: true);
@@ -133,7 +143,7 @@ class VatsimAuthController
         } catch (Throwable $e) {
             report($e);
 
-            return redirect('/admin/login');
+            return $this->toFrontendLogin($locale, 'oauth');
         }
     }
 
@@ -153,9 +163,16 @@ class VatsimAuthController
 
     private function toLoginError(string $locale): RedirectResponse
     {
+        return $this->toFrontendLogin($locale, 'oauth');
+    }
+
+    private function toFrontendLogin(string $locale, string $error): RedirectResponse
+    {
         $frontend = rtrim((string) config('app.frontend_url'), '/');
 
-        return redirect()->away($frontend.'/'.$locale.'/login?error=oauth');
+        return redirect()->away(
+            $frontend.'/'.$locale.'/login?'.http_build_query(['error' => $error]),
+        );
     }
 
     private function pickLocale(mixed $value): string

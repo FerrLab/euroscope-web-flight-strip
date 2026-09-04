@@ -88,8 +88,56 @@ it('refuses a VATSIM user without the admin role (invalid — panel stays shut)'
     $response = $this->withSession(['vatsim_oauth_intent' => 'admin'])
         ->get('/auth/socialite/vatsim/callback');
 
-    $response->assertRedirect('/admin/login');
+    expect($response->headers->get('Location'))->toContain('/en/login?error=forbidden');
     expect(Auth::guard('web')->check())->toBeFalse();
+});
+
+it('refuses an admin login whose profile is missing an email (invalid)', function (): void {
+    $fake = Mockery::mock(Provider::class);
+    $fake->shouldReceive('user')->once()->andReturn(
+        fakeVatsimAdmin('7654321', null),
+    );
+    Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
+
+    $response = $this->withSession(['vatsim_oauth_intent' => 'admin'])
+        ->get('/auth/socialite/vatsim/callback');
+
+    expect($response->headers->get('Location'))->toContain('/en/login?error=oauth');
+    expect(Auth::guard('web')->check())->toBeFalse();
+});
+
+/**
+ * The regression this suite exists for. VatsimLogin::mount() answers
+ * /admin/login by redirecting straight back to the provider, so any admin
+ * callback that fails *back to that page* re-enters the OAuth round trip and
+ * never terminates. Asserting on the whole class of failures — rather than
+ * one target URL — is what keeps the loop from being reintroduced.
+ */
+it('never returns a failed admin login to the panel (garbage — that path loops)', function (): void {
+    $cases = [
+        'no admin role' => fakeVatsimAdmin('7654321', 'nobody@vatsim.local'),
+        'missing email' => fakeVatsimAdmin('7654321', null),
+        'missing cid' => fakeVatsimAdmin(null, 'nobody@vatsim.local'),
+    ];
+
+    // One provider mock returning the cases in sequence: re-mocking the
+    // Socialite facade inside the loop leaves the first expectation matching
+    // every call, so the per-iteration ->once() is never what runs.
+    $fake = Mockery::mock(Provider::class);
+    $fake->shouldReceive('user')->times(count($cases))->andReturn(...array_values($cases));
+    Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
+
+    foreach (array_keys($cases) as $label) {
+        $location = (string) $this->withSession(['vatsim_oauth_intent' => 'admin'])
+            ->get('/auth/socialite/vatsim/callback')
+            ->headers->get('Location');
+
+        // assertStringNotContainsString rather than expect()->not->toContain():
+        // Pest's toContain() takes further needles, not a failure message, so
+        // the case label would silently become a second assertion.
+        $this->assertStringNotContainsString('/admin', $location, "case: {$label}");
+        $this->assertFalse(Auth::guard('web')->check(), "case: {$label}");
+    }
 });
 
 it('does not mint a session for the ordinary frontend flow (invalid — intent is not admin)', function (): void {
@@ -124,12 +172,13 @@ it('forgets the admin intent after one callback (invalid — no stale intent)', 
     expect($second->headers->get('Location'))->toContain('/api/auth/vatsim-callback');
 });
 
-it('redirects to the panel login when the provider throws (garbage)', function (): void {
+it('sends an admin login off the panel when the provider throws (garbage)', function (): void {
     $fake = Mockery::mock(Provider::class);
     $fake->shouldReceive('user')->once()->andThrow(new InvalidStateException);
     Socialite::shouldReceive('driver')->with('vatsim')->andReturn($fake);
 
-    $this->withSession(['vatsim_oauth_intent' => 'admin'])
-        ->get('/auth/socialite/vatsim/callback')
-        ->assertRedirect('/admin/login');
+    $response = $this->withSession(['vatsim_oauth_intent' => 'admin'])
+        ->get('/auth/socialite/vatsim/callback');
+
+    expect($response->headers->get('Location'))->toContain('/en/login?error=oauth');
 });

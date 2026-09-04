@@ -4,6 +4,7 @@
     "continueWithVatsim": "Continue with VATSIM",
     "continueWithStub": "Continue with Stub",
     "logoutLabel": "Log out",
-    "loginError": "Sign-in failed. Please try again."
+    "loginError": "Sign-in failed. Please try again.",
+    "loginForbidden": "You are signed in to VATSIM, but this account does not have admin access."
   }
 }
