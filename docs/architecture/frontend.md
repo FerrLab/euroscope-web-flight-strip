@@ -312,8 +312,17 @@ strict layering:
   console long-poll. Inbound (`inbound.ts`): protocol events and
   scan responses (`list_flights` / `list_controllers` /
   `session_snapshot` / `get_flight`) become slice actions; a changed
-  EuroScope ground state on an existing strip becomes a _suggestion_,
-  never a forced move. Outbound (`outbound.ts` + an RTK dynamic
+  EuroScope ground state on an existing strip **moves** it, so the
+  board mirrors the client in both directions. That move runs through
+  `applyMove` with source `'auto'`, which skips the guard rails —
+  EuroScope reports a position rather than requesting one, so a bay
+  may exceed its `cap`, flow order may run backwards, and a departure
+  may reach `CLEARED` without a clearance issued here. `flightUpserted`
+  is deliberately absent from the bridge's `USER_ACTIONS`, so these
+  moves emit no gateway command; echoing EuroScope's own report back
+  at it would never settle. The suggestion pill survives only for the
+  case where the tab has no bay of the reported kind. Outbound
+  (`outbound.ts` + an RTK dynamic
   listener): user actions mirror to gateway commands
   (`set_ground_state`, `send_private_message` for PDC, `transfer` /
   `assume`, `set_scratchpad`, `set_squawk`…) — only while

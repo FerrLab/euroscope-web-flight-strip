@@ -141,4 +141,45 @@ describe('outboundEnvelopesFor', () => {
     const before = initialStripsState();
     expect(outboundEnvelopesFor(stripsActions.feedToggled(false), before, before)).toEqual([]);
   });
+
+  /*
+   * The loop guard. flightUpserted now moves strips, and a move is exactly
+   * what outbound mirrors back as set_ground_state — so if this action ever
+   * produced an envelope, EuroScope's report would be echoed straight back
+   * to EuroScope, which would report it again. Today the bridge's
+   * USER_ACTIONS matcher simply does not list flightUpserted; that is load
+   * bearing rather than incidental, and this is what says so.
+   */
+  it('sends nothing for a EuroScope-driven move (invalid — echoing it would loop)', () => {
+    const before = initialStripsState();
+    const strip = before.tabs.LPPT.strips[0];
+    const { after, envelopes } = run(
+      before,
+      stripsActions.flightUpserted({
+        icao: 'LPPT',
+        patch: {
+          cs: strip.cs,
+          dir: strip.dir,
+          type: strip.type,
+          wake: strip.wake,
+          adep: strip.adep,
+          ades: strip.ades,
+          proc: strip.proc,
+          procKind: strip.procKind,
+          rwy: strip.rwy,
+          sqkA: strip.sqkA,
+          sqkS: strip.sqkS,
+          cfl: strip.cfl,
+          freeText: strip.freeText,
+          cleared: true,
+          bay: 'TAXI',
+          handoffTo: '',
+        },
+      }),
+    );
+
+    // The move really happened — this is not passing because nothing changed.
+    expect(after.tabs.LPPT.strips.find((x) => x.cs === strip.cs)?.bay).toBe('TAXI');
+    expect(envelopes).toEqual([]);
+  });
 });
