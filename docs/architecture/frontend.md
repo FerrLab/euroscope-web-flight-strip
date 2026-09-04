@@ -135,7 +135,10 @@ apps/web/src/
 │   │   ├── layout.tsx                      # ReduxProvider + NextIntlClientProvider + ThemeProvider + Toast root
 │   │   ├── page.tsx                        # marketing landing → "Sign in" CTA
 │   │   ├── login/page.tsx                  # "Continue with Stub" button → /api/auth/stub-redirect
-│   │   ├── dashboard/page.tsx              # authed shell with theme + locale switchers
+│   │   ├── dashboard/page.tsx              # controller hub: plugin status, gateway token, way in to /strips
+│   │   ├── console/page.tsx                # gateway console: live message feed + command composers
+│   │   ├── token/page.tsx                  # standalone gateway-token panel
+│   │   ├── strips/page.tsx                 # Strip Companion board
 │   │   └── ping/page.tsx                   # PingList + RecordPingForm composition
 │   └── api/
 │       ├── auth/

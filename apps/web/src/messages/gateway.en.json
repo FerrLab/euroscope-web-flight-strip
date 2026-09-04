@@ -69,6 +69,22 @@
       "confirmNo": "Cancel",
       "revealHint": "Copy this now — the secret is shown only once.",
       "error": "Token operation failed."
+    },
+    "dashboard": {
+      "controllerBay": "Controller bay",
+      "plugin": "Plugin",
+      "pluginConnected": "Connected",
+      "pluginOffline": "Offline",
+      "lastMessage": "Last message",
+      "startControlling": "Start controlling",
+      "connectionSettings": "Connection settings",
+      "tokenNone": "Not generated",
+      "command": {
+        "title": "Gateway command",
+        "hint": "Paste this line into EuroScope's command line. It is shown only once.",
+        "copy": "Copy command",
+        "copied": "Copied"
+      }
     }
   }
 }

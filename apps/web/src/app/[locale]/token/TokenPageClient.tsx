@@ -1,17 +1,16 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ObcCard } from '@oicl/openbridge-webcomponents-react/components/card/card';
-import { TokenPanel } from '@/features/gateway/components/TokenPanel';
+import { ConnectionSettingsCard } from '@/features/gateway/components/ConnectionSettingsCard';
 
 export function TokenPageClient() {
   const t = useTranslations('gateway.token');
   return (
-    <main className="p-8 space-y-8">
+    <main className="flex flex-col gap-6 p-8">
       <h1 className="text-3xl font-semibold">{t('title')}</h1>
-      <ObcCard>
-        <TokenPanel />
-      </ObcCard>
+      {/* The same card the dashboard mounts: one token surface, so the
+          one-shot secret can only ever leave through the command modal. */}
+      <ConnectionSettingsCard />
     </main>
   );
 }

@@ -9,7 +9,8 @@ test('login → create token → plugin event in console → command reaches plu
   await page.getByRole('link', { name: /Continue with Stub/i }).click();
   await expect(page).toHaveURL(/\/en\/dashboard/, { timeout: 15_000 });
 
-  // 2. Create (or rotate) the gateway token and capture the one-time secret.
+  // 2. Create (or rotate) the gateway token and recover the one-time secret
+  //    from the command line the modal reveals.
   await page.getByRole('link', { name: 'Gateway token' }).click();
   await expect(page).toHaveURL(/\/en\/token/);
 
@@ -25,12 +26,25 @@ test('login → create token → plugin event in console → command reaches plu
   } else {
     await generate.click();
   }
-  const secret = (await page.getByTestId('gateway-token-secret').textContent())?.trim();
+  // The card reveals only the packed `.lpc` line — the raw secret is never
+  // rendered. Recover the token exactly as the plugin must (base64url-decode,
+  // then split on the LAST `:`, because the URL contains `:` too), which
+  // makes this step a live check of the encoding contract in
+  // docs/architecture/gateway.md rather than a peek at a secret.
+  const configLine = (await page.getByTestId('gateway-command-line').textContent())?.trim();
+  expect(configLine).toMatch(/^\.lpc gateway config [A-Za-z0-9_-]+$/);
+
+  const blob = configLine!.replace('.lpc gateway config ', '');
+  const decoded = Buffer.from(
+    blob.replaceAll('-', '+').replaceAll('_', '/') + '='.repeat((4 - (blob.length % 4)) % 4),
+    'base64',
+  ).toString('utf8');
+  const secret = decoded.slice(decoded.lastIndexOf(':') + 1);
   expect(secret).toBeTruthy();
 
   // 3. The fake plugin pushes a flight_updated event with that token.
   const api = await pwRequest.newContext();
-  const plugin = new FakePlugin(api, secret!);
+  const plugin = new FakePlugin(api, secret);
   const callsign = `E2E${Date.now() % 10_000}`;
   const event: ProtocolEnvelope = {
     type: 'event',
