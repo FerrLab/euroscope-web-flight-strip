@@ -28,7 +28,7 @@ describe('/api/auth/stub-callback', () => {
     );
     const res = await GET(makeReq('?identity=a@b'));
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toContain('/en/dashboard');
+    expect(res.headers.get('Location')).toBe('/en/dashboard');
   });
 
   it('honors locale=pt query param (happy)', async () => {
@@ -40,7 +40,7 @@ describe('/api/auth/stub-callback', () => {
     );
     const res = await GET(makeReq('?identity=a@b&locale=pt'));
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toContain('/pt/dashboard');
+    expect(res.headers.get('Location')).toBe('/pt/dashboard');
   });
 
   it('falls back to en for unknown locale (garbage)', async () => {
@@ -52,7 +52,7 @@ describe('/api/auth/stub-callback', () => {
     );
     const res = await GET(makeReq('?identity=a@b&locale=fr'));
     expect(res.status).toBe(302);
-    expect(res.headers.get('Location')).toContain('/en/dashboard');
+    expect(res.headers.get('Location')).toBe('/en/dashboard');
   });
 
   it('returns 502 when upstream fails (invalid)', async () => {
